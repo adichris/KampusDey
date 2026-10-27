@@ -538,6 +538,69 @@
   document.addEventListener("htmx:afterSettle", function (ev) { enhanceSelects(ev.target); });
   enhanceSelects();
 
+  // Selects that submit their form on change (e.g. "Sort").
+  document.addEventListener("change", function (ev) {
+    var sel = ev.target.closest && ev.target.closest("select[data-autosubmit]");
+    if (sel && sel.form) sel.form.requestSubmit();
+  });
+
+  // ---------------------------------------------------------------- Photo gallery
+  // Fixed-height frame with swipe (native scroll-snap), arrows, thumbnails, keys and full screen.
+  function galleryIndex(track) {
+    return Math.round(track.scrollLeft / Math.max(track.clientWidth, 1));
+  }
+  function galleryGo(gallery, i) {
+    var track = gallery.querySelector("[data-gallery-track]");
+    var n = track.children.length;
+    i = (i + n) % n;
+    track.scrollTo({ left: i * track.clientWidth });
+    gallerySync(gallery, i);
+  }
+  function gallerySync(gallery, i) {
+    var count = gallery.querySelector("[data-gallery-count]");
+    if (count) count.textContent = i + 1;
+    gallery.querySelectorAll("[data-gallery-thumb]").forEach(function (t) {
+      var on = Number(t.dataset.galleryThumb) === i;
+      t.setAttribute("aria-current", on ? "true" : "false");
+      if (on) t.scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+  }
+  function galleryFull(gallery, on) {
+    var track = gallery.querySelector("[data-gallery-track]");
+    var i = galleryIndex(track);
+    gallery.classList.toggle("kd-gallery-full", on);
+    gallery.querySelector("[data-gallery-close]").classList.toggle("hidden", !on);
+    document.documentElement.classList.toggle("kd-no-scroll", on);
+    // the frame changed width: stay on the same photo
+    track.style.scrollBehavior = "auto";
+    track.scrollLeft = i * track.clientWidth;
+    track.style.scrollBehavior = "";
+    if (on) track.focus();
+  }
+  document.querySelectorAll("[data-gallery]").forEach(function (gallery) {
+    var track = gallery.querySelector("[data-gallery-track]");
+    var timer;
+    track.addEventListener("scroll", function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () { gallerySync(gallery, galleryIndex(track)); }, 80);
+    }, { passive: true });
+    gallery.addEventListener("click", function (ev) {
+      var t = ev.target.closest("[data-gallery-prev],[data-gallery-next],[data-gallery-thumb],[data-gallery-zoom],[data-gallery-close]");
+      if (!t) return;
+      var i = galleryIndex(track);
+      if (t.hasAttribute("data-gallery-prev")) galleryGo(gallery, i - 1);
+      else if (t.hasAttribute("data-gallery-next")) galleryGo(gallery, i + 1);
+      else if (t.hasAttribute("data-gallery-thumb")) galleryGo(gallery, Number(t.dataset.galleryThumb));
+      else if (t.hasAttribute("data-gallery-close")) galleryFull(gallery, false);
+      else galleryFull(gallery, !gallery.classList.contains("kd-gallery-full"));
+    });
+    gallery.addEventListener("keydown", function (ev) {
+      if (ev.key === "ArrowLeft") { ev.preventDefault(); galleryGo(gallery, galleryIndex(track) - 1); }
+      else if (ev.key === "ArrowRight") { ev.preventDefault(); galleryGo(gallery, galleryIndex(track) + 1); }
+      else if (ev.key === "Escape" && gallery.classList.contains("kd-gallery-full")) galleryFull(gallery, false);
+    });
+  });
+
   // ---------------------------------------------------------------- Alpine (CSP build) components
   document.addEventListener("alpine:init", function () {
     window.Alpine.data("disclosure", function () {

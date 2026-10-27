@@ -392,3 +392,29 @@ def test_contact_time_range_round_trip(campus):
     assert hours.display("weekends") == "Weekends" and hours.display("after 5pm") == "after 5pm"
     legacy = ContactStepForm(base, initial={"preferred_time": "after 5pm"}, listing=listing)
     assert legacy.is_valid() and legacy.cleaned_data["preferred_time"] == "after 5pm"
+
+
+def test_card_meta_drops_price_and_age_filter():
+    from apps.core.templatetags.kd import ago
+
+    listing = f.ListingFactory(section="buy-sell", price=900)
+    f.ItemDetailsFactory(listing=listing, condition="used")
+    assert "900" not in listing.card_meta and listing.card_meta
+    assert ago(timezone.now() - timedelta(hours=3)) == "3h"
+    assert ago(timezone.now() - timedelta(days=2)) == "2d"
+
+
+def test_active_filter_chips_and_gallery_frame(client, campus):
+    listing = f.ListingFactory(section="buy-sell", price=900)
+    f.ItemDetailsFactory(listing=listing, condition="used")
+    f.ListingPhotoFactory(listing=listing)
+    f.ListingPhotoFactory(listing=listing)
+    client.post(reverse("locations:choose"), {"campus": campus.pk})
+    page = client.get(
+        reverse("listings:section", args=["buy-sell"]), {"condition": "used"}, follow=True
+    )
+    assert page.redirect_chain[0][0].endswith("?condition=used")
+    assert page.status_code == 200
+    assert page.context["active_filters"][0][2] == ""  # removing it clears the query
+    detail = client.get(listing.get_absolute_url()).content.decode()
+    assert "kd-gallery-stage" in detail and detail.count("data-gallery-thumb=") == 2

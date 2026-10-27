@@ -253,3 +253,32 @@ FILTERS = {
 
 def filter_for(section: str):
     return FILTERS.get(section, BaseListingFilter)
+
+
+def active_filters(filterset, params) -> list[tuple[str, str, str]]:
+    """[(label, shown value, query string without it)] for the 'active filter' chips."""
+    if not filterset.is_bound or not filterset.is_valid():
+        return []
+    from apps.core.templatetags.kd import ghs
+
+    out = []
+    for name, field in filterset.form.fields.items():
+        value = filterset.form.cleaned_data.get(name)
+        if value in (None, "", [], False) or name not in params:
+            continue
+        if name in ("price_min", "price_max"):
+            shown = ghs(value)
+        elif isinstance(value, (list, tuple)):
+            choices = dict(getattr(field, "choices", []))
+            shown = ", ".join(str(choices.get(v, v)) for v in value)
+        elif value is True:
+            shown = ""
+        elif getattr(field, "choices", None) and not hasattr(value, "pk"):
+            shown = str(dict(field.choices).get(value, value))
+        else:
+            shown = str(value)
+        rest = params.copy()
+        rest.pop(name, None)
+        rest.pop("page", None)
+        out.append((str(field.label), shown, rest.urlencode()))
+    return out

@@ -25,7 +25,7 @@ from apps.sitesettings.services import enabled_section_slugs, enabled_sections, 
 from apps.telemetry.services import record
 
 from . import selectors, services
-from .filters import filter_for
+from .filters import active_filters, filter_for
 from .forms import DETAILS_FORMS, CommonForm, ContactStepForm
 from .models import Listing, ListingPhoto
 from .sections import SECTIONS
@@ -158,6 +158,7 @@ def _section(request, location, section_slug):
         "page_location": location,
         "location": location,  # header/sidebar show the campus or town this page is about
         "filterset": filterset,
+        "active_filters": active_filters(filterset, request.GET),
         "page": page,
         "boosted": boosted,
         "sort": sort,
@@ -203,12 +204,14 @@ def _remote_jobs(request, location, section):
 def section_redirect(request, section):
     """/s/<section>/ → the section page for the current campus/town."""
     location = request.location
+    query = f"?{request.GET.urlencode()}" if request.GET else ""  # keep filters and sort
     if location.campus:
-        return redirect(
-            "listings:section_campus", campus_slug=location.campus.slug, section=section
-        )
+        url = reverse("listings:section_campus", args=[location.campus.slug, section])
+        return redirect(url + query)
     if location.town:
-        return redirect("listings:section_town", town_slug=location.town.slug, section=section)
+        return redirect(
+            reverse("listings:section_town", args=[location.town.slug, section]) + query
+        )
     messages.info(request, _("Choose your campus first."))
     return redirect("locations:picker_page")
 

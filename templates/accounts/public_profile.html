@@ -12,7 +12,7 @@
   {% if user.is_authenticated and user != person %}<div class="ml-auto"><c-report-button kind="user" oid="{{ person.pk }}" /></div>{% endif %}
 </div></div>
 <h2 class="font-bold text-lg mb-2">{% translate "Listings" %}</h2>
-{% if listings %}<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3">{% for item in listings %}<c-listing-card :listing="item" />{% endfor %}</div>
+{% if listings %}<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">{% for item in listings %}<c-listing-card :listing="item" />{% endfor %}</div>
 {% else %}<p class="text-sm opacity-70">{% translate "No active listings." %}</p>{% endif %}
 <h2 class="font-bold text-lg mt-6 mb-2">{% translate "Reviews" %}</h2>
 {% if can_review %}<a class="btn btn-outline btn-sm mb-2" href="{% url 'engagement:review' 'user' person.pk %}">{% translate "Write a review" %}</a>{% endif %}

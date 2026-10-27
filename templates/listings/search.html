@@ -20,7 +20,7 @@
   </nav>
   {% endif %}
   {% if page.object_list %}
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3">{% for item in page.object_list %}<c-listing-card :listing="item" />{% endfor %}</div>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">{% for item in page.object_list %}<c-listing-card :listing="item" />{% endfor %}</div>
   <div class="join mt-4">
     {% if page.has_previous %}<a class="join-item btn" href="?q={{ query|urlencode }}{% if active_section %}&section={{ active_section }}{% endif %}&page={{ page.previous_page_number }}">«</a>{% endif %}
     <span class="join-item btn btn-disabled">{{ page.number }} / {{ page.paginator.num_pages }}</span>

@@ -1,25 +1,33 @@
 {% load i18n %}
 <c-vars listing boosted="" show_distance="" />
-<article class="card card-sm bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition overflow-hidden">
-  <a href="{{ listing.get_absolute_url }}" class="block">
-    <figure class="aspect-[4/3] bg-base-200 relative">
+<article class="kd-card group card card-sm h-full bg-base-100 border border-base-300 shadow-sm hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 transition overflow-hidden">
+  <a href="{{ listing.get_absolute_url }}" class="flex h-full flex-col focus-visible:outline-none">
+    <figure class="aspect-[4/3] bg-base-200 relative overflow-hidden">
       {% with photo=listing.first_photo %}
       {% if photo %}
-      <img src="{{ photo.card.url }}" srcset="{{ photo.srcset }}" sizes="(min-width: 1024px) 300px, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="{{ listing.title }}" class="h-full w-full object-cover">
+      <img src="{{ photo.card.url }}" srcset="{{ photo.srcset }}" sizes="(min-width: 1536px) 280px, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw" width="800" height="600" loading="lazy" decoding="async" alt="{{ listing.title }}" class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
       {% else %}
-      <div class="flex h-full w-full items-center justify-center text-primary opacity-60">{% icon listing.section_obj.icon "size-12" %}</div>
+      <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 text-primary">{% icon listing.section_obj.icon "size-12 opacity-60" %}</div>
       {% endif %}
       {% endwith %}
-      {% if boosted %}<span class="badge badge-secondary absolute top-2 left-2 gap-1">{% icon "rocket" "size-3" %}{% translate "Boosted" %}</span>{% endif %}
-      {% if listing.status == "taken" %}<span class="badge badge-neutral absolute top-2 right-2">{% translate "Taken" %}</span>{% endif %}
-    </figure>
-    <div class="card-body gap-1">
-      <h3 class="font-semibold leading-snug line-clamp-2">{{ listing.title }}</h3>
-      <p class="text-sm opacity-80 truncate">{{ listing.card_info }}</p>
-      <div class="flex flex-wrap items-center gap-1 text-xs opacity-75">
-        <span class="inline-flex items-center gap-1">{% icon "map-pin" "size-3" %}{% if listing.area %}{{ listing.area.name }}, {% endif %}{{ listing.town.name }}</span>
-        {% if show_distance and listing.distance_m is not None %}<span>· {{ listing.distance_m|distance }} · {{ listing.distance_m|walk_minutes }}</span>{% endif %}
+      <div class="absolute inset-x-2 top-2 flex items-start justify-between gap-1">
+        <div class="flex flex-wrap gap-1">
+          {% if boosted %}<span class="badge badge-secondary badge-sm gap-1 shadow">{% icon "rocket" "size-3" %}{% translate "Boosted" %}</span>{% endif %}
+          {% if listing.is_free %}<span class="badge badge-success badge-sm shadow">{% translate "Free" %}</span>{% endif %}
+        </div>
+        {% if listing.status == "taken" %}<span class="badge badge-neutral badge-sm shadow">{% translate "Taken" %}</span>{% endif %}
       </div>
+      {% with n=listing.photo_count %}{% if n > 1 %}<span class="badge badge-neutral badge-sm absolute bottom-2 right-2 gap-1 opacity-90">{% icon "image" "size-3" %}{{ n }}</span>{% endif %}{% endwith %}
+    </figure>
+    <div class="card-body flex-1 gap-1.5">
+      {% if listing.price is not None and not listing.is_free %}<div class="text-base leading-none text-primary"><c-price :listing="listing" /></div>{% endif %}
+      <h3 class="font-semibold leading-snug line-clamp-2 group-hover:text-primary transition-colors">{{ listing.title }}</h3>
+      {% with meta=listing.card_meta %}{% if meta %}<p class="text-xs opacity-75 line-clamp-1">{{ meta }}</p>{% endif %}{% endwith %}
+      <div class="mt-auto pt-1 flex items-center justify-between gap-2 text-xs opacity-70">
+        <span class="inline-flex min-w-0 items-center gap-1">{% icon "map-pin" "size-3 shrink-0" %}<span class="truncate">{% if listing.area %}{{ listing.area.name }}, {% endif %}{{ listing.town.name }}</span></span>
+        {% if listing.published_at %}<time class="shrink-0" datetime="{{ listing.published_at|date:'c' }}">{{ listing.published_at|ago }}</time>{% endif %}
+      </div>
+      {% if show_distance and listing.distance_m is not None %}<p class="text-xs text-primary font-medium">{{ listing.distance_m|distance }} · {{ listing.distance_m|walk_minutes }}</p>{% endif %}
       {% if listing.seller_type %}<div><c-badge-seller-type seller_type="{{ listing.seller_type }}" /></div>{% endif %}
     </div>
   </a>

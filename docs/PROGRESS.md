@@ -79,6 +79,13 @@ import survives failed campuses and resumes; GTEC table serial numbers stripped.
 - Desktop layout uses the full window width beside the sidebar (user request; supersedes the
   "centred column max ~1200px" in §7.1).
 - Message admin is intentionally not registered: admins read conversations only through reports.
+- "Best time to contact" is a day choice + time range, stored compactly on
+  `ContactCard.preferred_time` (e.g. `weekdays 17:00-20:00`, see `apps/contacts/hours.py`) and
+  rendered in the viewer's language; older free-text values are still shown as typed.
+- Listing photo gallery uses a fixed-height frame (4:3 on phones, `min(68vh, 34rem)` on desktop);
+  photos are `object-contain` over a blurred copy, so mixed portrait/landscape photos never
+  change the page height. Tap a photo for full screen; arrows, thumbnails, swipe and keys work.
+- `/s/<section>/` keeps its query string when redirecting to the campus/town section page.
 
 ## Known gaps / next steps
 1. Admin review of the imported data: merge the remaining duplicate pairs (Catholic University

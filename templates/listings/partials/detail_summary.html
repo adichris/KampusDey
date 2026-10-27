@@ -1,0 +1,50 @@
+{% load i18n %}
+<div class="card bg-base-100 border border-base-300 shadow-sm">
+  <div class="card-body p-4 gap-3">
+    <div>
+      <a href="{% url 'listings:section' listing.section %}" class="badge badge-ghost gap-1 mb-2 hover:badge-primary">{% icon listing.section_obj.icon "size-3" %}{{ listing.section_obj.label }}</a>
+      <h1 class="text-2xl font-extrabold leading-tight break-words">{{ listing.title }}</h1>
+      {% if listing.price is not None or listing.is_free %}<div class="text-3xl mt-2 text-primary"><c-price :listing="listing" /></div>{% endif %}
+    </div>
+
+    <ul class="text-sm space-y-1.5">
+      <li class="flex items-start gap-2">{% icon "map-pin" "size-4 mt-0.5 shrink-0 opacity-70" %}<span>{% if listing.area %}{{ listing.area.name }}, {% endif %}{{ listing.town.name }}</span></li>
+      {% for link in campus_links|slice:":2" %}
+      <li class="flex items-start gap-2">{% icon "graduation-cap" "size-4 mt-0.5 shrink-0 opacity-70" %}<span>{{ link.campus.label }}{% if link.distance_m %} <span class="opacity-70">· {{ link.distance_m|distance }}, {{ link.distance_m|walk_minutes }}</span>{% endif %}</span></li>
+      {% endfor %}
+      {% if listing.published_at %}<li class="flex items-start gap-2 opacity-80">{% icon "clock" "size-4 mt-0.5 shrink-0 opacity-70" %}<span>{% blocktranslate with when=listing.published_at|timesince %}Posted {{ when }} ago{% endblocktranslate %}</span></li>{% endif %}
+      {% if listing.contact_card.preferred_time %}<li class="flex items-start gap-2">{% icon "calendar" "size-4 mt-0.5 shrink-0 opacity-70" %}<span><span class="opacity-70">{% translate "Best time to contact:" %}</span> {{ listing.contact_card.preferred_time_display }}</span></li>{% endif %}
+    </ul>
+
+    {% if listing.section == "food" %}
+    <c-alert kind="warning">{% translate "Food safety: only share food you would eat yourself, keep it covered, and say what is in it (allergies!). Collect in a public place." %}</c-alert>
+    {% endif %}
+    {% if listing.section == "rooms" or listing.section == "roommates" or listing.section == "short-stays" %}
+    <c-alert kind="warning">{% translate "Never pay before viewing the room. Visit with a friend." %} <a class="link" href="{% url 'pages:safety' %}">{% translate "Safety tips" %}</a></c-alert>
+    {% endif %}
+
+    {% if not is_owner and listing.is_visible %}
+    <div class="hidden lg:block"><c-contact-bar :contact="contact" variant="panel" /></div>
+    {% endif %}
+
+    <div class="flex items-center gap-3 rounded-box bg-base-200 p-3">
+      {% if show_alias_only %}
+      <c-avatar name="K D" /><div class="text-sm"><b>{% translate "A KampusDey student" %}</b><br><span class="opacity-70">{% translate "Name hidden for privacy" %}</span></div>
+      {% else %}
+      <c-avatar name="{{ listing.owner.public_name }}" image="{% if listing.owner.profile.avatar %}{{ listing.owner.profile.avatar.url }}{% endif %}" />
+      <div class="text-sm min-w-0 flex-1">
+        <a class="font-semibold link link-hover" href="{% url 'accounts:public_profile' listing.owner.pk %}">{{ listing.owner.public_name }}</a>
+        <div class="flex flex-wrap gap-1 mt-0.5"><c-badge-verified :profile="listing.owner.profile" /><c-badge-seller-type seller_type="{{ listing.seller_type }}" /></div>
+      </div>
+      <a class="btn btn-ghost btn-sm btn-circle" href="{% url 'accounts:public_profile' listing.owner.pk %}" aria-label="{% translate 'View profile' %}">{% icon "chevron-right" "size-4" %}</a>
+      {% endif %}
+    </div>
+
+    <div class="flex flex-wrap gap-1 border-t border-base-300 pt-2">
+      <c-like-button :listing="listing" :liked="liked" />
+      <c-share-button url="{{ listing.get_absolute_url|absolute }}" title="{{ listing.title }}" log_url="{% url 'engagement:share' listing.pk %}" />
+      {% if not is_owner %}<c-report-button kind="listing" oid="{{ listing.pk }}" />{% endif %}
+    </div>
+    <p class="text-xs opacity-60 flex items-center gap-1">{% icon "shield-check" "size-3" %}{% translate "Meet in a public place and never pay before you see the item." %} <a class="link" href="{% url 'pages:safety' %}">{% translate "Safety" %}</a></p>
+  </div>
+</div>

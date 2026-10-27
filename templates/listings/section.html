@@ -4,13 +4,17 @@
 {% block meta_description %}{{ section.label }} {% translate "near" %} {{ page_location.label }}: {{ section.blurb }}{% endblock %}
 {% block head %}{% if view_mode == "map" %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endif %}{% endblock %}
 {% block content %}
-<div class="flex items-center justify-between gap-2 mb-2">
-  <div>
-    <h1 class="text-2xl font-extrabold flex items-center gap-2">{% icon section.icon "size-6 text-primary" %} {{ section.label }}</h1>
-    <p class="text-sm opacity-70">{{ page_location.label }}{% if page_location.campus %} · {{ page_location.campus.town.name }}{% endif %}</p>
+<header class="flex items-center justify-between gap-3 mb-3">
+  <div class="flex items-center gap-3 min-w-0">
+    <span class="grid size-12 shrink-0 place-items-center rounded-box bg-primary/10 text-primary">{% icon section.icon "size-6" %}</span>
+    <div class="min-w-0">
+      <h1 class="text-2xl font-extrabold leading-tight truncate">{{ section.label }}</h1>
+      <p class="text-sm opacity-70 truncate">{% icon "map-pin" "size-3 inline -mt-0.5" %} {{ page_location.label }}{% if page_location.campus %} · {{ page_location.campus.town.name }}{% endif %}</p>
+    </div>
   </div>
-  <a href="{% url 'listings:post' %}" class="btn btn-primary btn-sm tap">{% icon "plus" "size-4" %} {% translate "Post" %}</a>
-</div>
+  <a href="{% url 'listings:post' %}" class="btn btn-primary btn-sm tap shrink-0">{% icon "plus" "size-4" %} {% translate "Post" %}</a>
+</header>
+{% if section.blurb %}<p class="text-sm opacity-75 -mt-1 mb-3 max-w-prose">{{ section.blurb }}</p>{% endif %}
 
 <nav class="chip-row flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 mb-2" aria-label="{% translate 'Sections' %}">
   {% for s in sections %}
@@ -27,19 +31,12 @@
 {% endif %}
 
 <details class="collapse collapse-arrow bg-base-100 border border-base-300 mb-3" {% if filterset.is_bound %}open{% endif %}>
-  <summary class="collapse-title font-semibold flex items-center gap-2">{% icon "sliders-horizontal" "size-4" %} {% translate "Filter & sort" %}</summary>
+  <summary class="collapse-title font-semibold flex items-center gap-2">{% icon "sliders-horizontal" "size-4" %} {% translate "Filters" %}{% if active_filters %} <span class="badge badge-primary badge-sm">{{ active_filters|length }}</span>{% endif %}</summary>
   <div class="collapse-content">
     <form method="get" class="grid grid-cols-2 md:grid-cols-4 gap-x-3 items-end">
       {% for field in filterset.form %}<div class="{% if field|is_multi %}col-span-2{% endif %}"><c-form-field :field="field" /></div>{% endfor %}
-      <div class="fieldset mb-2">
-        <label for="sort" class="fieldset-legend text-base-content">{% translate "Sort" %}</label>
-        <select id="sort" name="sort" class="select select-bordered w-full">
-          <option value="recommended" {% if sort == "recommended" %}selected{% endif %}>{% translate "Recommended" %}</option>
-          <option value="newest" {% if sort == "newest" %}selected{% endif %}>{% translate "Newest" %}</option>
-          {% if section.price_allowed %}<option value="price" {% if sort == "price" %}selected{% endif %}>{% translate "Price: low to high" %}</option>{% endif %}
-          <option value="distance" {% if sort == "distance" %}selected{% endif %}>{% translate "Distance" %}</option>
-        </select>
-      </div>
+      {% if sort != "recommended" %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+      {% if view_mode == "map" %}<input type="hidden" name="view" value="map">{% endif %}
       {% if request.GET.lat %}<input type="hidden" name="lat" value="{{ request.GET.lat }}"><input type="hidden" name="lng" value="{{ request.GET.lng }}">{% endif %}
       <div class="col-span-2 md:col-span-4 flex flex-wrap gap-2 mt-1">
         <button class="btn btn-primary tap" type="submit">{% translate "Apply" %}</button>
@@ -58,11 +55,33 @@
   </div>
 </details>
 
-<div class="flex justify-between items-center mb-2">
-  <p class="text-sm opacity-70">{% blocktranslate count n=page.paginator.count %}{{ n }} result{% plural %}{{ n }} results{% endblocktranslate %}</p>
-  <div class="join">
-    <a class="btn btn-sm join-item {% if view_mode != 'map' %}btn-active{% endif %}" href="{% qs view='list' %}" aria-label="{% translate 'List view' %}">{% icon "list" "size-4" %}</a>
-    <a class="btn btn-sm join-item {% if view_mode == 'map' %}btn-active{% endif %}" href="{% qs view='map' %}" aria-label="{% translate 'Map view' %}">{% icon "map" "size-4" %}</a>
+{% if active_filters %}
+<div class="flex flex-wrap items-center gap-2 mb-3" aria-label="{% translate 'Active filters' %}">
+  {% for label, shown, rest in active_filters %}
+  <a class="badge badge-lg badge-outline gap-1 hover:badge-error" href="?{{ rest }}" aria-label="{% blocktranslate %}Remove filter {{ label }}{% endblocktranslate %}">{{ label }}{% if shown %}: <b>{{ shown }}</b>{% endif %} {% icon "x" "size-3" %}</a>
+  {% endfor %}
+  <a class="link link-hover text-sm" href="{{ request.path }}{% if sort != 'recommended' %}?sort={{ sort }}{% endif %}">{% translate "Clear all" %}</a>
+</div>
+{% endif %}
+
+<div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+  <p class="text-sm"><b>{{ page.paginator.count }}</b> <span class="opacity-70">{% blocktranslate count n=page.paginator.count %}result{% plural %}results{% endblocktranslate %}</span></p>
+  <div class="flex items-center gap-2">
+    <form method="get" class="flex items-center gap-1">
+      {% for key, value in request.GET.items %}{% if key not in "page,sort" %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}
+      <label for="sort" class="text-sm opacity-70 hidden sm:inline-flex items-center gap-1">{% icon "arrow-up-down" "size-4" %} {% translate "Sort" %}</label>
+      <select id="sort" name="sort" class="select select-sm select-bordered w-auto" data-autosubmit>
+        <option value="recommended" {% if sort == "recommended" %}selected{% endif %}>{% translate "Recommended" %}</option>
+        <option value="newest" {% if sort == "newest" %}selected{% endif %}>{% translate "Newest" %}</option>
+        {% if section.price_allowed %}<option value="price" {% if sort == "price" %}selected{% endif %}>{% translate "Price: low to high" %}</option>{% endif %}
+        <option value="distance" {% if sort == "distance" %}selected{% endif %}>{% translate "Distance" %}</option>
+      </select>
+      <noscript><button class="btn btn-sm">{% translate "Sort" %}</button></noscript>
+    </form>
+    <div class="join">
+      <a class="btn btn-sm join-item {% if view_mode != 'map' %}btn-active{% endif %}" href="{% qs view='list' %}" aria-label="{% translate 'List view' %}">{% icon "layout-grid" "size-4" %}</a>
+      <a class="btn btn-sm join-item {% if view_mode == 'map' %}btn-active{% endif %}" href="{% qs view='map' %}" aria-label="{% translate 'Map view' %}">{% icon "map" "size-4" %}</a>
+    </div>
   </div>
 </div>
 
@@ -74,12 +93,13 @@
   <p class="text-xs opacity-70 mt-2">{% translate "Rooms, roommates, food and lost & found show an approximate area, never an exact address." %}</p>
 {% else %}
   {% if boosted %}
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+  <h2 class="text-sm font-semibold opacity-80 mb-2 flex items-center gap-1">{% icon "rocket" "size-4 text-secondary" %} {% translate "Boosted" %}</h2>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 mb-5">
     {% for item in boosted %}<c-listing-card :listing="item" boosted="1" :show_distance="point" />{% endfor %}
   </div>
   {% endif %}
   {% if page.object_list %}
-  <div id="results" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3">
+  <div id="results" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
     {% include "listings/partials/results.html" %}
   </div>
   {% else %}

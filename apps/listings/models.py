@@ -172,6 +172,19 @@ class Listing(GeoPointMixin, TimeStampedModel):
         return fn(self, self.details) if fn else ""
 
     @property
+    def card_meta(self) -> str:
+        """card_info without the price, which cards show on its own line."""
+        from .sections import _price
+
+        price = _price(self)
+        return " · ".join(p for p in self.card_info.split(" · ") if p and p != price)
+
+    @property
+    def photo_count(self) -> int:
+        photos = getattr(self, "_prefetched_objects_cache", {}).get("photos")
+        return len(photos) if photos is not None else self.photos.count()
+
+    @property
     def first_photo(self):
         photos = getattr(self, "_prefetched_objects_cache", {}).get("photos")
         if photos is not None:

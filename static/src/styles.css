@@ -119,6 +119,18 @@
   .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity: 1; }
   .skeleton-card { @apply skeleton h-56 w-full; }
   /* Loading feedback (static/js/app.js) */
+  /* Photo gallery: the frame keeps one height; photos fit inside it */
+  .kd-gallery-stage { aspect-ratio: 4 / 3; }
+  @media (min-width: 64rem) { .kd-gallery-stage { aspect-ratio: auto; height: min(68vh, 34rem); } }
+  .kd-gallery-track { scroll-behavior: smooth; }
+  .kd-gallery-track:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+  .kd-gallery-backdrop { filter: blur(24px) saturate(1.2); transform: scale(1.2); opacity: .55; }
+  .kd-gallery-full .kd-gallery-stage {
+    position: fixed; inset: 0; z-index: 90; height: 100dvh; aspect-ratio: auto;
+    border-radius: 0; background: var(--color-neutral);
+  }
+  .kd-gallery-full [data-gallery-zoom] { cursor: zoom-out; }
+  .kd-no-scroll { overflow: hidden; }
   .kd-busy { cursor: progress; }
   .kd-busy > svg { display: none; }
   .kd-progress {

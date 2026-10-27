@@ -17,7 +17,7 @@
   <p class="text-xs opacity-70 mt-2">{% if from_device %}{% translate "Centred on your device location (not stored)." %}{% else %}{% translate "Centred on your chosen campus or town." %}{% endif %} {% translate "Sensitive posts show an approximate area." %}</p>
   {% if listings %}
   <h2 class="font-bold mt-4 mb-2">{% translate "Closest first" %}</h2>
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3">{% for item in listings|slice:":24" %}<c-listing-card :listing="item" show_distance="1" />{% endfor %}</div>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">{% for item in listings|slice:":24" %}<c-listing-card :listing="item" show_distance="1" />{% endfor %}</div>
   {% else %}
   <c-empty-state icon="map-pin" title="{% translate 'Nothing within walking distance yet' %}" action_url="{% url 'listings:post' %}" />
   {% endif %}

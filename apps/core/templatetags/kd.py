@@ -73,6 +73,25 @@ def distance(distance_m):
     return f"{distance_m / 1000:.1f} km"
 
 
+@register.filter
+def ago(value):
+    """Compact age for cards: 'now', '5m', '3h', '2d', '4w', '7 Mar'."""
+    if not value:
+        return ""
+    from django.utils import timezone
+    from django.utils.formats import date_format
+
+    seconds = (timezone.now() - value).total_seconds()
+    if seconds < 60:
+        return _("now")
+    for limit, size, unit in ((3600, 60, _("m")), (86400, 3600, _("h")), (604800, 86400, _("d"))):
+        if seconds < limit:
+            return f"{int(seconds // size)}{unit}"
+    if seconds < 8 * 604800:
+        return f"{int(seconds // 604800)}{_('w')}"
+    return date_format(timezone.localtime(value), "j M")
+
+
 @register.simple_tag
 def cfg(key: str):
     from constance import config

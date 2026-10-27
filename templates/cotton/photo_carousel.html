@@ -1,18 +1,31 @@
 {% load i18n %}
 <c-vars photos title />
 {% if photos %}
-<div class="carousel w-full rounded-box bg-base-300 aspect-[4/3]" aria-label="{% translate 'Photos' %}">
-  {% for photo in photos %}
-  <div id="photo-{{ forloop.counter }}" class="carousel-item relative w-full">
-    <img src="{{ photo.full.url }}" srcset="{{ photo.srcset }}" sizes="(min-width: 1024px) 800px, 100vw" width="{{ photo.width|default:1600 }}" height="{{ photo.height|default:1200 }}" {% if not forloop.first %}loading="lazy"{% else %}fetchpriority="high"{% endif %} decoding="async" alt="{{ title }} — {% translate 'photo' %} {{ forloop.counter }}" class="w-full object-contain">
-    {% if photos|length > 1 %}
-    <div class="absolute flex justify-between -translate-y-1/2 left-2 right-2 top-1/2">
-      <a href="#photo-{% if forloop.first %}{{ photos|length }}{% else %}{{ forloop.counter0 }}{% endif %}" class="btn btn-circle btn-sm" aria-label="{% translate 'Previous photo' %}">{% icon "chevron-left" %}</a>
-      <a href="#photo-{% if forloop.last %}1{% else %}{{ forloop.counter|add:1 }}{% endif %}" class="btn btn-circle btn-sm" aria-label="{% translate 'Next photo' %}">{% icon "chevron-right" %}</a>
+<div class="kd-gallery" data-gallery>
+  <div class="kd-gallery-stage relative overflow-hidden rounded-box bg-base-300">
+    <div class="kd-gallery-track carousel h-full w-full" data-gallery-track tabindex="0" aria-roledescription="{% translate 'carousel' %}" aria-label="{% translate 'Photos' %}">
+      {% for photo in photos %}
+      <div class="carousel-item relative h-full w-full overflow-hidden" role="group" aria-roledescription="{% translate 'slide' %}" aria-label="{{ forloop.counter }} / {{ photos|length }}">
+        <img src="{{ photo.thumb.url }}" alt="" aria-hidden="true" class="kd-gallery-backdrop absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async">
+        <img src="{{ photo.full.url }}" srcset="{{ photo.srcset }}" sizes="(min-width: 1024px) 60vw, 100vw" width="{{ photo.width|default:1600 }}" height="{{ photo.height|default:1200 }}" {% if not forloop.first %}loading="lazy"{% else %}fetchpriority="high"{% endif %} decoding="async" alt="{{ title }} — {% translate 'photo' %} {{ forloop.counter }}" class="relative h-full w-full object-contain cursor-zoom-in" data-gallery-zoom>
+      </div>
+      {% endfor %}
     </div>
-    <span class="badge badge-neutral absolute bottom-2 right-2">{{ forloop.counter }}/{{ photos|length }}</span>
+    <button type="button" class="btn btn-circle btn-sm absolute top-3 right-3 z-10 hidden" data-gallery-close aria-label="{% translate 'Close' %}">{% icon "x" "size-4" %}</button>
+    {% if photos|length > 1 %}
+    <button type="button" class="btn btn-circle btn-sm absolute left-2 top-1/2 -translate-y-1/2 z-10 opacity-90 shadow" data-gallery-prev aria-label="{% translate 'Previous photo' %}">{% icon "chevron-left" "size-4" %}</button>
+    <button type="button" class="btn btn-circle btn-sm absolute right-2 top-1/2 -translate-y-1/2 z-10 opacity-90 shadow" data-gallery-next aria-label="{% translate 'Next photo' %}">{% icon "chevron-right" "size-4" %}</button>
+    <span class="badge badge-neutral absolute bottom-3 left-1/2 -translate-x-1/2 z-10 gap-1 opacity-90" aria-live="polite">{% icon "image" "size-3" %}<span data-gallery-count>1</span>/{{ photos|length }}</span>
     {% endif %}
   </div>
-  {% endfor %}
+  {% if photos|length > 1 %}
+  <div class="kd-gallery-thumbs mt-2 flex gap-2 overflow-x-auto pb-1" aria-label="{% translate 'Choose a photo' %}">
+    {% for photo in photos %}
+    <button type="button" class="shrink-0 size-16 rounded-field overflow-hidden border-2 border-transparent opacity-70 hover:opacity-100 transition aria-[current=true]:border-primary aria-[current=true]:opacity-100" data-gallery-thumb="{{ forloop.counter0 }}" aria-label="{% translate 'Photo' %} {{ forloop.counter }}" {% if forloop.first %}aria-current="true"{% endif %}>
+      <img src="{{ photo.thumb.url }}" alt="" class="h-full w-full object-cover" loading="lazy" decoding="async">
+    </button>
+    {% endfor %}
+  </div>
+  {% endif %}
 </div>
 {% endif %}
