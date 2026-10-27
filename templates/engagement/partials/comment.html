@@ -1,0 +1,28 @@
+{% load i18n %}
+<div class="rounded-box bg-base-100 border border-base-300 p-3" id="comment-{{ comment.pk }}">
+  <div class="flex items-center gap-2 text-xs opacity-75">
+    <b>{% if comment.is_owner_reply %}<span class="badge badge-primary badge-sm">{% translate "Owner" %}</span>{% else %}{{ comment.author.public_name }}{% endif %}</b>
+    <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|timesince }}</time>
+  </div>
+  <p class="text-sm mt-1 whitespace-pre-line break-words">{{ comment.body }}</p>
+  {% if user.is_authenticated %}
+  <div class="flex gap-1 mt-1">
+    {% if user.pk == comment.listing.owner_id %}<button class="btn btn-ghost btn-xs" hx-post="{% url 'engagement:hide_comment' comment.pk %}" hx-target="#comment-{{ comment.pk }}" hx-swap="outerHTML">{% translate "Hide" %}</button>{% endif %}
+    <c-report-button kind="comment" oid="{{ comment.pk }}" />
+  </div>
+  {% endif %}
+  {% for reply in comment.replies.all %}{% if not reply.is_hidden %}
+  <div class="ml-4 mt-2 border-l-2 border-base-300 pl-3">
+    <div class="text-xs opacity-75">{% if reply.is_owner_reply %}<span class="badge badge-primary badge-sm">{% translate "Owner" %}</span>{% else %}<b>{{ reply.author.public_name }}</b>{% endif %} · {{ reply.created_at|timesince }}</div>
+    <p class="text-sm whitespace-pre-line break-words">{{ reply.body }}</p>
+  </div>
+  {% endif %}{% endfor %}
+  {% if user.is_authenticated and not comment.parent_id %}
+  <form hx-post="{% url 'engagement:comment' comment.listing_id %}" hx-target="#comment-list" hx-swap="beforeend" class="flex gap-2 mt-2">
+    <input type="hidden" name="parent" value="{{ comment.pk }}">
+    <label class="sr-only" for="reply-{{ comment.pk }}">{% translate "Reply" %}</label>
+    <input id="reply-{{ comment.pk }}" name="body" required maxlength="1000" class="input input-bordered input-sm flex-1" placeholder="{% translate 'Reply…' %}">
+    <button class="btn btn-sm">{% translate "Reply" %}</button>
+  </form>
+  {% endif %}
+</div>

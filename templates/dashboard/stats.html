@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Stats" %} · {{ listing.title }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<a href="{% url 'dashboard:home' %}" class="btn btn-ghost btn-sm mb-2">{% icon "chevron-left" "size-4" %} {% translate "My listings" %}</a>
+<h1 class="text-xl font-bold mb-3">{{ listing.title }}</h1>
+<div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
+  <c-stat title="{% translate 'Views' %}" value="{{ totals.views }}" desc="+{{ last_24h.view|default:0 }} {% translate 'in 24h' %}" />
+  <c-stat title="{% translate 'Taps' %}" value="{{ totals.taps }}" desc="+{{ last_24h.tap|default:0 }} {% translate 'in 24h' %}" />
+  <c-stat title="{% translate 'Likes' %}" value="{{ totals.likes }}" />
+  <c-stat title="{% translate 'Shares' %}" value="{{ totals.shares }}" />
+  <c-stat title="{% translate 'Comments' %}" value="{{ totals.comments }}" />
+</div>
+<h2 class="font-bold mb-2">{% translate "Taps by channel" %}</h2>
+<div class="flex flex-wrap gap-2 mb-4">{% for ch, n in channels.items %}<span class="badge badge-lg">{{ ch }}: {{ n }}</span>{% empty %}<span class="text-sm opacity-70">{% translate "No taps yet." %}</span>{% endfor %}</div>
+<h2 class="font-bold mb-2">{% translate "Per week" %}</h2>
+<div class="overflow-x-auto bg-base-100 border border-base-300 rounded-box">
+  <table class="table table-sm">
+    <thead><tr><th>{% translate "Week" %}</th><th>{% translate "Views" %}</th><th>{% translate "Taps" %}</th><th>{% translate "Likes" %}</th><th>{% translate "Shares" %}</th><th>{% translate "Comments" %}</th></tr></thead>
+    <tbody>{% for w in weeks %}<tr><td>{{ w.week|date:"j M" }}</td><td>{{ w.views }}</td><td>{{ w.taps }}</td><td>{{ w.likes }}</td><td>{{ w.shares }}</td><td>{{ w.comments }}</td></tr>{% empty %}<tr><td colspan="6" class="opacity-70">{% translate "Stats appear after the nightly roll-up." %}</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% endblock %}

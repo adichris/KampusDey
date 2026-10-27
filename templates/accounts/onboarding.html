@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Welcome" %} · KampusDey{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto card bg-base-100 border border-base-300">
+  <form method="post" class="card-body gap-0">{% csrf_token %}
+    <h1 class="text-xl font-bold">{% translate "Welcome to KampusDey" %}</h1>
+    <p class="text-sm opacity-75 mb-3">{% translate "A few quick questions so we show what's near you." %}</p>
+    {% if form.non_field_errors %}<c-alert kind="error">{{ form.non_field_errors|join:" " }}</c-alert>{% endif %}
+    {% for field in form %}<c-form-field :field="field" />{% endfor %}
+    <button class="btn btn-primary mt-2 tap">{% translate "Continue" %}</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{{ hostel.name }} · {{ hostel.town.name }} · KampusDey{% endblock %}
+{% block meta_description %}{{ hostel.name }} — {% translate "hostel in" %} {{ hostel.town.name }}. {{ hostel.description|truncatechars:140 }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endblock %}
+{% block content %}
+{% if photos %}<c-photo-carousel :photos="photos" title="{{ hostel.name }}" />{% endif %}
+<div class="mt-3">
+  <h1 class="text-2xl font-extrabold">{{ hostel.name }} {% if hostel.is_verified %}<span class="badge badge-success align-middle">{% translate "Verified" %}</span>{% endif %}</h1>
+  <p class="text-sm opacity-70">{{ hostel.town.name }}, {{ hostel.town.region.name }}{% if rating %} · ★ {{ rating|floatformat:1 }}{% endif %}</p>
+</div>
+<div class="flex flex-wrap gap-1 my-3">{% for a in hostel.get_amenities_display %}<span class="badge badge-outline">{{ a }}</span>{% endfor %}</div>
+{% if hostel.description %}<p class="whitespace-pre-line text-sm">{{ hostel.description }}</p>{% endif %}
+<h2 class="font-bold text-lg mt-5 mb-2">{% translate "Rooms" %}</h2>
+<div class="overflow-x-auto bg-base-100 border border-base-300 rounded-box">
+  <table class="table">
+    <thead><tr><th>{% translate "Room" %}</th><th>{% translate "Price" %}</th><th>{% translate "Available" %}</th></tr></thead>
+    <tbody>{% for rt in room_types %}<tr>
+      <td>{% if rt.listing %}<a class="link" href="{{ rt.listing.get_absolute_url }}">{{ rt.name }}</a>{% else %}{{ rt.name }}{% endif %}<div class="text-xs opacity-70">{{ rt.get_room_type_display }} · {{ rt.get_gender_display }}</div></td>
+      <td>{{ rt.price|ghs }} <span class="text-xs opacity-70">{{ rt.get_price_period_display }}</span></td>
+      <td>{% if rt.available_rooms %}<span class="badge badge-success">{{ rt.available_rooms }}</span>{% else %}<span class="badge badge-ghost">{% translate "Full" %}</span>{% endif %}</td>
+    </tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% if hostel.rules %}<h2 class="font-bold text-lg mt-5 mb-1">{% translate "Rules" %}</h2><p class="whitespace-pre-line text-sm">{{ hostel.rules }}</p>{% endif %}
+{% if hostel.has_point %}<h2 class="font-bold text-lg mt-5 mb-2">{% translate "Location" %}</h2><c-map lat="{{ hostel.lat }}" lng="{{ hostel.lng }}" mode="approx" approx_radius="250" />{% endif %}
+<h2 class="font-bold text-lg mt-5 mb-2">{% translate "Reviews" %}</h2>
+{% if can_review %}<a class="btn btn-outline btn-sm mb-2" href="{% url 'engagement:review' 'hostel' hostel.pk %}">{% translate "Write a review" %}</a>{% endif %}
+{% for r in reviews %}<div class="border-b border-base-300 py-2"><span class="text-warning" aria-label="{{ r.rating }} / 5">{% for i in "12345"|make_list %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</span> <span class="text-sm">{{ r.body }}</span></div>
+{% empty %}<p class="text-sm opacity-70">{% translate "No reviews yet. Students who contact the hostel through KampusDey can review it." %}</p>{% endfor %}
+{% if contact.buttons or contact.login_required %}<div class="h-16 lg:h-0"></div><c-contact-bar :contact="contact" />{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/map.js' %}" defer></script>{% endblock %}

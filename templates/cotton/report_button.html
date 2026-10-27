@@ -1,0 +1,5 @@
+{% load i18n %}
+<c-vars kind oid label="" />
+<button type="button" class="btn btn-ghost btn-sm gap-1 tap" hx-get="{% url 'engagement:report' kind oid %}" hx-target="#report-slot" hx-swap="innerHTML" data-open-dialog="report-dialog">
+  {% icon "flag" %}<span class="hidden sm:inline">{% if label %}{{ label }}{% else %}{% translate "Report" %}{% endif %}</span>
+</button>

@@ -1,0 +1,10 @@
+{% extends "pages/_page.html" %}
+{% load i18n %}
+{% block title %}{% translate "Scam alerts" %} · KampusDey{% endblock %}
+{% block article %}
+<h1>{% translate "Scam alert board" %}</h1>
+<p>{% translate "Only cases confirmed by our team are shown. Phone numbers show the last 4 digits only." %}</p>
+{% for a in alerts %}
+<section><h2>{{ a.name }}{% if a.phone_last4 %} · ••• {{ a.phone_last4 }}{% endif %}</h2><p class="whitespace-pre-line">{{ a.description }}</p><p><small>{% translate "Confirmed" %} {{ a.confirmed_at|date:"j M Y" }}</small></p></section>
+{% empty %}<p>{% translate "No confirmed alerts right now. Stay careful anyway." %}</p>{% endfor %}
+{% endblock %}

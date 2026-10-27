@@ -1,0 +1,17 @@
+{% load i18n %}
+<article class="card card-sm bg-base-100 border border-base-300">
+  <div class="card-body gap-1">
+    <div class="flex items-start justify-between gap-2">
+      <a href="{{ place.get_absolute_url }}" class="font-semibold link-hover">{{ place.name }}</a>
+      {% if place.status == "claimed" %}<span class="badge badge-success badge-sm whitespace-nowrap">{% translate "Claimed by owner" %}</span>
+      {% else %}<span class="badge badge-ghost badge-sm whitespace-nowrap">{% translate "From OpenStreetMap" %}</span>{% endif %}
+    </div>
+    <p class="text-xs opacity-75">{{ place.get_kind_display }}{% if place.distance_m is not None %} · {{ place.distance_m|distance }} · {{ place.distance_m|walk_minutes }}{% endif %}</p>
+    <div class="flex flex-wrap gap-1 mt-1">
+      {% if place.website %}<a class="btn btn-xs" href="{% url 'external:place_tap' place.slug 'website' %}" target="_blank" rel="noopener nofollow">{% icon "external-link" "size-3" %} {% translate "Website" %}</a>{% endif %}
+      {% if place.has_point %}<a class="btn btn-xs" href="{% url 'external:place_tap' place.slug 'directions' %}" target="_blank" rel="noopener">{% icon "navigation" "size-3" %} {% translate "Directions" %}</a>{% endif %}
+      {% if place.status == "unclaimed" %}<a class="btn btn-xs btn-ghost" href="{% url 'external:claim' place.slug %}">{% translate "Claim this place" %}</a>{% endif %}
+    </div>
+    <p class="text-[11px] opacity-60">© OpenStreetMap contributors</p>
+  </div>
+</article>

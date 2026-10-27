@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Inquiries" %} · {{ hostel.name }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<a href="{% url 'hostels:manage' hostel.pk %}" class="btn btn-ghost btn-sm mb-2">{% icon "chevron-left" "size-4" %} {{ hostel.name }}</a>
+<h1 class="text-2xl font-extrabold mb-3">{% translate "Inquiries" %}</h1>
+<h2 class="font-bold mb-2">{% translate "Conversations" %}</h2>
+<ul class="bg-base-100 border border-base-300 rounded-box divide-y divide-base-300 mb-6">
+  {% for c in conversations %}<li><a class="block p-3 hover:bg-base-200" href="{{ c.get_absolute_url }}"><b>{{ c.starter_alias }}</b> · <span class="text-sm opacity-70">{{ c.listing.title }}</span></a></li>
+  {% empty %}<li class="p-3 text-sm opacity-70">{% translate "No conversations yet." %}</li>{% endfor %}
+</ul>
+<h2 class="font-bold mb-2">{% translate "Recent contact taps" %}</h2>
+<ul class="text-sm space-y-1">{% for t in taps %}<li>{{ t.created_at|date:"D j M H:i" }} · {{ t.meta.channel }}</li>{% empty %}<li class="opacity-70">{% translate "No taps yet." %}</li>{% endfor %}</ul>
+{% endblock %}

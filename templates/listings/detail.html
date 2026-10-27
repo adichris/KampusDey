@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{{ listing.title }} · {{ listing.town.name }} · KampusDey{% endblock %}
+{% block meta_description %}{{ listing.card_info }} — {{ listing.description|truncatechars:150 }}{% endblock %}
+{% block og %}
+<meta property="og:site_name" content="KampusDey">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ listing.title }}{% if listing.price is not None %} — {{ listing.price|ghs }}{% endif %}">
+<meta property="og:description" content="{{ listing.card_info }} · {{ listing.town.name }}">
+<meta property="og:url" content="{{ SITE_URL }}{{ listing.get_absolute_url }}">
+{% with photo=photos.0 %}{% if photo %}<meta property="og:image" content="{{ photo.card.url|absolute }}"><meta name="twitter:image" content="{{ photo.card.url|absolute }}">{% endif %}{% endwith %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ listing.title }}">
+{% endblock %}
+{% block robots %}{% if listing.is_need_food or not listing.is_visible %}<meta name="robots" content="noindex">{% endif %}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endblock %}
+{% block structured_data %}{% include "listings/partials/jsonld.html" %}{% endblock %}
+{% block content %}
+<nav class="text-sm breadcrumbs py-0 mb-2" aria-label="{% translate 'Breadcrumb' %}">
+  <ul>
+    <li><a href="/">{% translate "Home" %}</a></li>
+    <li><a href="{% url 'listings:section' listing.section %}">{{ listing.section_obj.label }}</a></li>
+    <li class="truncate max-w-[50vw]">{{ listing.title }}</li>
+  </ul>
+</nav>
+
+{% if is_owner %}
+<div class="alert {% if listing.status == 'active' %}alert-success{% elif listing.status == 'pending_review' or listing.is_hidden %}alert-warning{% else %}alert-info{% endif %} mb-3 text-sm flex-wrap">
+  <span>{% translate "Your listing" %} · <b>{{ listing.get_status_display }}</b>{% if listing.is_hidden %} · {{ listing.hidden_reason }}{% endif %}</span>
+  <div class="flex flex-wrap gap-2">
+    <a class="btn btn-sm" href="{% url 'listings:wizard' listing.pk 2 %}">{% translate "Edit" %}</a>
+    <a class="btn btn-sm" href="{% url 'dashboard:stats' listing.pk %}">{% translate "Stats" %}</a>
+    {% if listing.status == "active" %}
+    <form method="post" action="{% url 'dashboard:boost' listing.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+      <button class="btn btn-sm btn-secondary" {% if not boost_decision %}disabled title="{{ boost_decision.reason }}"{% endif %}>{% icon "rocket" "size-4" %} {% translate "Boost" %} ({{ boosts_left }})</button></form>
+    <form method="post" action="{% url 'dashboard:taken' listing.pk %}">{% csrf_token %}<button class="btn btn-sm">{% translate "Mark taken" %}</button></form>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="grid lg:grid-cols-5 gap-4">
+  <div class="lg:col-span-3 space-y-4">
+    {% if photos %}<c-photo-carousel :photos="photos" title="{{ listing.title }}" />
+    {% else %}<div class="rounded-box bg-base-100 border border-base-300 aspect-[4/3] flex items-center justify-center text-primary opacity-60">{% icon listing.section_obj.icon "size-16" %}</div>{% endif %}
+  </div>
+  <div class="lg:col-span-2 space-y-3">
+    <div>
+      <span class="badge badge-ghost gap-1 mb-1">{% icon listing.section_obj.icon "size-3" %}{{ listing.section_obj.label }}</span>
+      <h1 class="text-2xl font-extrabold leading-tight">{{ listing.title }}</h1>
+      <div class="text-xl mt-1"><c-price :listing="listing" /></div>
+      <p class="text-sm opacity-75 mt-1 flex items-center gap-1">{% icon "map-pin" "size-4" %}{% if listing.area %}{{ listing.area.name }}, {% endif %}{{ listing.town.name }}
+        {% for link in campus_links|slice:":2" %} · {{ link.campus.label }}{% if link.distance_m %} ({{ link.distance_m|distance }}, {{ link.distance_m|walk_minutes }}){% endif %}{% endfor %}</p>
+    </div>
+    <div class="flex flex-wrap gap-1">
+      {% for label, value in details|detail_facts %}<span class="badge badge-outline h-auto py-1">{% if label %}<span class="opacity-70 mr-1">{{ label }}:</span>{% endif %}{{ value }}</span>{% endfor %}
+    </div>
+    {% if listing.section == "food" %}
+    <c-alert kind="warning">{% translate "Food safety: only share food you would eat yourself, keep it covered, and say what is in it (allergies!). Collect in a public place." %}</c-alert>
+    {% endif %}
+    {% if listing.section == "rooms" or listing.section == "roommates" or listing.section == "short-stays" %}
+    <c-alert kind="warning">{% translate "Never pay before viewing the room. Visit with a friend." %} <a class="link" href="{% url 'pages:safety' %}">{% translate "Safety tips" %}</a></c-alert>
+    {% endif %}
+    <div class="flex items-center gap-3 py-1">
+      {% if show_alias_only %}
+      <c-avatar name="K D" /><div class="text-sm"><b>{% translate "A KampusDey student" %}</b><br><span class="opacity-70">{% translate "Name hidden for privacy" %}</span></div>
+      {% else %}
+      <c-avatar name="{{ listing.owner.public_name }}" image="{% if listing.owner.profile.avatar %}{{ listing.owner.profile.avatar.url }}{% endif %}" />
+      <div class="text-sm">
+        <a class="font-semibold link" href="{% url 'accounts:public_profile' listing.owner.pk %}">{{ listing.owner.public_name }}</a>
+        <div class="flex flex-wrap gap-1 mt-0.5"><c-badge-verified :profile="listing.owner.profile" /><c-badge-seller-type seller_type="{{ listing.seller_type }}" /></div>
+      </div>
+      {% endif %}
+    </div>
+    {% if listing.contact_card.preferred_time %}<p class="text-sm"><span class="opacity-70">{% translate "Best time to contact:" %}</span> {{ listing.contact_card.preferred_time }}</p>{% endif %}
+    <div class="flex flex-wrap gap-1 border-y border-base-300 py-1">
+      <c-like-button :listing="listing" :liked="liked" />
+      <c-share-button url="{{ listing.get_absolute_url|absolute }}" title="{{ listing.title }}" log_url="{% url 'engagement:share' listing.pk %}" />
+      {% if not is_owner %}<c-report-button kind="listing" oid="{{ listing.pk }}" />{% endif %}
+    </div>
+  </div>
+</div>
+
+<section class="mt-6 grid lg:grid-cols-5 gap-6">
+  <div class="lg:col-span-3 space-y-6">
+    {% if listing.description %}
+    <div>
+      <h2 class="font-bold text-lg mb-1">{% translate "Description" %}</h2>
+      <div class="prose max-w-none whitespace-pre-line text-sm">{{ listing.description }}</div>
+    </div>
+    {% endif %}
+    {% if details.file %}<a class="btn btn-outline" href="{{ details.file.url }}" download>{% icon "download" %} {% translate "Download PDF" %}</a>{% endif %}
+    {% if listing.section == "jobs" and details.apply_url %}<a class="btn btn-primary" href="{{ details.apply_url }}" target="_blank" rel="noopener nofollow">{% translate "Apply" %} {% icon "external-link" "size-4" %}</a>{% endif %}
+    <c-comment-thread :listing="listing" :comments="comments" />
+  </div>
+  <div class="lg:col-span-2 space-y-3">
+    {% if listing.has_point %}
+    <h2 class="font-bold text-lg">{% translate "Location" %}</h2>
+    <c-map lat="{{ listing.lat }}" lng="{{ listing.lng }}" zoom="15" mode="approx" approx_radius="300" label="{% translate 'Approximate location' %}" />
+    <p class="text-xs opacity-70">{% translate "Approximate area only. Ask the owner in chat for the exact address." %}</p>
+    {% endif %}
+  </div>
+</section>
+
+{% if related %}
+<section class="mt-8">
+  <h2 class="font-bold text-lg mb-2">{% translate "Similar near here" %}</h2>
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">{% for item in related %}<c-listing-card :listing="item" />{% endfor %}</div>
+</section>
+{% endif %}
+
+{% if not is_owner and listing.is_visible %}<div class="h-16 lg:h-0"></div><c-contact-bar :contact="contact" />{% endif %}
+{% endblock %}
+{% block modals %}
+<c-modal id="report-dialog" title="{% translate 'Report' %}"><div id="report-slot"><div class="skeleton h-24 w-full"></div></div></c-modal>
+{% endblock %}
+{% block scripts %}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/map.js' %}" defer></script>{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ other_alias }} · {% translate "Chat" %}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col h-[calc(100vh-11rem)] lg:h-[calc(100vh-6rem)]">
+  <header class="flex items-center gap-2 pb-2 border-b border-base-300">
+    <a href="{% url 'chat:inbox' %}" class="btn btn-ghost btn-circle btn-sm" aria-label="{% translate 'Back' %}">{% icon "chevron-left" %}</a>
+    <div class="min-w-0 flex-1">
+      <h1 class="font-bold truncate">{{ other_alias }}</h1>
+      <a class="text-xs link opacity-70 truncate block" href="{{ conversation.listing.get_absolute_url }}">{{ conversation.listing.title }}</a>
+    </div>
+    <div class="dropdown dropdown-end">
+      <button tabindex="0" class="btn btn-ghost btn-circle btn-sm" aria-label="{% translate 'More' %}">{% icon "menu" %}</button>
+      <ul tabindex="0" class="dropdown-content menu bg-base-100 border border-base-300 rounded-box w-56 z-10 shadow">
+        <li><form method="post" action="{% url 'chat:block' conversation.pk %}">{% csrf_token %}<button>{% icon "ban" "size-4" %} {% translate "Block" %}</button></form></li>
+        <li><button type="button" hx-get="{% url 'engagement:report' 'conversation' conversation.pk %}" hx-target="#report-slot" data-open-dialog="report-dialog">{% icon "flag" "size-4" %} {% translate "Report conversation" %}</button></li>
+      </ul>
+    </div>
+  </header>
+  <p class="text-xs text-center opacity-60 my-2">{% blocktranslate %}You appear as “{{ my_alias }}”. Never pay before viewing.{% endblocktranslate %}</p>
+  <div id="thread" class="flex-1 overflow-y-auto py-2" hx-get="{% url 'chat:poll' conversation.pk %}" hx-trigger="every 5s" hx-swap="innerHTML">
+    {% include "chat/partials/messages.html" %}
+  </div>
+  {% if not blocked %}
+  <form class="flex gap-2 pt-2 border-t border-base-300" hx-post="{% url 'chat:send' conversation.pk %}" hx-target="#thread" hx-swap="innerHTML">
+    <label for="msg" class="sr-only">{% translate "Message" %}</label>
+    <input id="msg" name="body" required maxlength="2000" autocomplete="off" class="input input-bordered flex-1" placeholder="{% translate 'Write a message…' %}">
+    <button class="btn btn-primary tap" aria-label="{% translate 'Send' %}">{% icon "send" %}</button>
+  </form>
+  <form class="flex gap-2 pt-2" hx-post="{% url 'chat:share' conversation.pk %}" hx-target="#thread" hx-swap="innerHTML">
+    <select name="kind" class="select select-bordered select-sm" aria-label="{% translate 'Contact to share' %}">
+      <option value="phone">{% translate "Phone" %}</option><option value="whatsapp">WhatsApp</option><option value="telegram">Telegram</option>
+    </select>
+    <button class="btn btn-sm btn-outline">{% icon "phone" "size-4" %} {% translate "Share my number" %}</button>
+  </form>
+  {% else %}
+  <p class="text-center text-sm opacity-70 py-3">{% translate "This conversation is blocked." %}</p>
+  {% endif %}
+</div>
+{% endblock %}
+{% block modals %}<c-modal id="report-dialog" title="{% translate 'Report' %}"><div id="report-slot"></div></c-modal>{% endblock %}

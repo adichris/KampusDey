@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{% translate "Details" %} · {{ section.label }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-xl font-bold mb-2">{{ section.label }}: {% translate "details" %}</h1>
+  <c-stepper step="2" />
+  <form method="post" enctype="multipart/form-data" class="card bg-base-100 border border-base-300">{% csrf_token %}
+    <div class="card-body gap-0">
+      {% if common.non_field_errors %}<c-alert kind="error">{{ common.non_field_errors|join:" " }}</c-alert>{% endif %}
+      {% for field in common %}{% if field.name != "lat" and field.name != "lng" %}<c-form-field :field="field" />{% endif %}{% endfor %}
+      <div class="divider my-2">{{ section.label }}</div>
+      {% for field in details_form %}<c-form-field :field="field" />{% endfor %}
+      {% if section.slug == "food" %}<c-alert kind="info">{% translate "Food posts can't have a price and disappear automatically when the time is up." %}</c-alert>{% endif %}
+      <div class="divider my-2">{% translate "Where?" %}</div>
+      <p class="text-sm opacity-75 mb-2">{% translate "Tap the map to drop a pin. We round it to about 200 m so your exact home is never shown." %}</p>
+      {{ common.lat }}{{ common.lng }}
+      {% with p=location.point %}
+      <c-map lat="{% if listing.lat %}{{ listing.lat }}{% else %}{{ p.0|default:7.95 }}{% endif %}" lng="{% if listing.lng %}{{ listing.lng }}{% else %}{{ p.1|default:-1.03 }}{% endif %}" zoom="15" mode="pick" lat_input="{{ common.lat.auto_id }}" lng_input="{{ common.lng.auto_id }}" label="{% translate 'Pick location' %}" />
+      {% endwith %}
+      <div class="flex justify-between mt-4">
+        <a href="{% url 'listings:wizard' listing.pk 1 %}" class="btn btn-ghost">{% icon "chevron-left" "size-4" %} {% translate "Photos" %}</a>
+        <button class="btn btn-primary tap">{% translate "Next: contact" %} {% icon "chevron-right" "size-4" %}</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/map.js' %}" defer></script>{% endblock %}

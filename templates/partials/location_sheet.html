@@ -1,0 +1,15 @@
+{% load i18n %}
+<c-bottom-sheet id="location-sheet" title="{% translate 'Where are you?' %}">
+  <div id="location-picker-body"
+       hx-get="{% url 'locations:picker' %}" hx-trigger="load once" hx-swap="innerHTML">
+    <div class="space-y-2">
+      <div class="skeleton h-12 w-full"></div>
+      <div class="skeleton h-12 w-full"></div>
+      <div class="skeleton h-12 w-full"></div>
+    </div>
+  </div>
+</c-bottom-sheet>
+{% if not location.is_set and not request.htmx and request.resolver_match.url_name != "picker_page" %}
+<span id="open-location-on-load" data-open-dialog="location-sheet" hidden></span>
+<script nonce="{{ request.csp_nonce }}">document.addEventListener("DOMContentLoaded",function(){var d=document.getElementById("location-sheet");if(d&&d.showModal&&!sessionStorage.getItem("kd-picker-dismissed")){d.showModal()}d&&d.addEventListener("close",function(){try{sessionStorage.setItem("kd-picker-dismissed","1")}catch(e){}})});</script>
+{% endif %}

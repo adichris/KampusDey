@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto card bg-base-100 border border-base-300">
+  <form method="post" enctype="multipart/form-data" class="card-body gap-0">{% csrf_token %}
+    <h1 class="text-xl font-bold mb-2">{% block form_title %}{% endblock %}</h1>
+    {% block intro %}{% endblock %}
+    {% if form.non_field_errors %}<c-alert kind="error">{{ form.non_field_errors|join:" " }}</c-alert>{% endif %}
+    {% for field in form %}<c-form-field :field="field" />{% endfor %}
+    <button class="btn {% block button_class %}btn-primary{% endblock %} mt-2 tap">{% block button %}{% translate "Save" %}{% endblock %}</button>
+  </form>
+</div>
+{% endblock %}

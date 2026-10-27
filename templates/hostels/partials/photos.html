@@ -1,0 +1,7 @@
+{% load i18n %}
+<ul class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+  {% for photo in photos %}
+  <li class="relative"><img src="{{ photo.thumb.url }}" alt="" width="400" height="300" class="rounded-box aspect-square object-cover w-full" loading="lazy">
+    <button class="btn btn-xs btn-error absolute bottom-1 right-1" hx-post="{% url 'hostels:photo_delete' hostel.pk photo.pk %}" hx-target="#hostel-photos" aria-label="{% translate 'Delete photo' %}">{% icon "trash-2" "size-3" %}</button></li>
+  {% empty %}<li class="col-span-full text-sm opacity-70">{% translate "No photos yet." %}</li>{% endfor %}
+</ul>

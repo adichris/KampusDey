@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block content %}
+<form method="post">{% csrf_token %}
+<div class="overflow-x-auto">
+<table class="text-xs">
+  <thead><tr><th class="text-left p-1">{% translate "Campus" %}</th>{% for s in sections %}<th class="p-1">{{ s.label }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for row in rows %}<tr class="border-b border-base-200"><td class="p-1 whitespace-nowrap {% if row.key == 'all' %}font-semibold{% endif %}">{{ row.label }}</td>
+    {% for slug, on in row.cells %}<td class="p-1 text-center"><input type="checkbox" name="{{ row.key }}:{{ slug }}" {% if on %}checked{% endif %} aria-label="{{ row.label }} {{ slug }}"></td>{% endfor %}</tr>{% endfor %}</tbody>
+</table>
+</div>
+<button class="mt-4 bg-primary-600 text-white px-4 py-2 rounded-default" type="submit">{% translate "Save" %}</button>
+</form>
+{% endblock %}

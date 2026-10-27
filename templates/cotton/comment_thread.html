@@ -1,0 +1,19 @@
+{% load i18n %}
+<c-vars listing comments />
+<section id="comments" class="space-y-3">
+  <h2 class="font-bold text-lg">{% translate "Questions" %}</h2>
+  <div id="comment-list" class="space-y-3">
+    {% for comment in comments %}{% include "engagement/partials/comment.html" %}{% empty %}
+    <p class="text-sm opacity-70" id="no-comments">{% translate "No questions yet. Ask the first one." %}</p>{% endfor %}
+  </div>
+  {% if user.is_authenticated %}
+  <form hx-post="{% url 'engagement:comment' listing.pk %}" hx-target="#comment-list" hx-swap="beforeend" class="flex gap-2">
+    <label for="comment-body" class="sr-only">{% translate "Your question" %}</label>
+    <input id="comment-body" name="body" required maxlength="1000" class="input input-bordered flex-1" placeholder="{% translate 'Ask a question…' %}">
+    <button class="btn btn-primary tap" type="submit" aria-label="{% translate 'Send' %}">{% icon "send" %}</button>
+  </form>
+  <p class="text-xs opacity-60">{% translate "Phone numbers, emails and links are hidden automatically. Use chat to share contacts." %}</p>
+  {% else %}
+  <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="btn btn-outline btn-sm">{% translate "Log in to ask a question" %}</a>
+  {% endif %}
+</section>

@@ -1,0 +1,156 @@
+[
+  {
+    "name": "University of Energy and Natural Resources",
+    "short_name": "UENR",
+    "kind": "university",
+    "town": "Sunyani",
+    "region": "Bono"
+  },
+  {
+    "name": "Sunyani Technical University",
+    "short_name": "STU",
+    "kind": "technical_university",
+    "town": "Sunyani",
+    "region": "Bono"
+  },
+  {
+    "name": "Catholic University of Ghana",
+    "short_name": "CUG",
+    "kind": "university",
+    "town": "Fiapre",
+    "region": "Bono"
+  },
+  {
+    "name": "Berekum College of Education",
+    "short_name": "BCoE",
+    "kind": "college_of_education",
+    "town": "Berekum",
+    "region": "Bono"
+  },
+  {
+    "name": "Nurses and Midwifery Training College, Sunyani",
+    "short_name": "NMTC Sunyani",
+    "kind": "nursing_midwifery",
+    "town": "Sunyani",
+    "region": "Bono"
+  },
+  {
+    "name": "University of Ghana",
+    "short_name": "UG",
+    "kind": "university",
+    "town": "Legon",
+    "region": "Greater Accra"
+  },
+  {
+    "name": "University of Professional Studies, Accra",
+    "short_name": "UPSA",
+    "kind": "university",
+    "town": "Accra",
+    "region": "Greater Accra"
+  },
+  {
+    "name": "Ghana Communication Technology University",
+    "short_name": "GCTU",
+    "kind": "university",
+    "town": "Accra",
+    "region": "Greater Accra"
+  },
+  {
+    "name": "Accra Technical University",
+    "short_name": "ATU",
+    "kind": "technical_university",
+    "town": "Accra",
+    "region": "Greater Accra"
+  },
+  {
+    "name": "Kwame Nkrumah University of Science and Technology",
+    "short_name": "KNUST",
+    "kind": "university",
+    "town": "Kumasi",
+    "region": "Ashanti"
+  },
+  {
+    "name": "Kumasi Technical University",
+    "short_name": "KsTU",
+    "kind": "technical_university",
+    "town": "Kumasi",
+    "region": "Ashanti"
+  },
+  {
+    "name": "University of Cape Coast",
+    "short_name": "UCC",
+    "kind": "university",
+    "town": "Cape Coast",
+    "region": "Central"
+  },
+  {
+    "name": "Cape Coast Technical University",
+    "short_name": "CCTU",
+    "kind": "technical_university",
+    "town": "Cape Coast",
+    "region": "Central"
+  },
+  {
+    "name": "University of Education, Winneba",
+    "short_name": "UEW",
+    "kind": "university",
+    "town": "Winneba",
+    "region": "Central"
+  },
+  {
+    "name": "Takoradi Technical University",
+    "short_name": "TTU",
+    "kind": "technical_university",
+    "town": "Takoradi",
+    "region": "Western"
+  },
+  {
+    "name": "University of Mines and Technology",
+    "short_name": "UMaT",
+    "kind": "university",
+    "town": "Tarkwa",
+    "region": "Western"
+  },
+  {
+    "name": "Koforidua Technical University",
+    "short_name": "KTU",
+    "kind": "technical_university",
+    "town": "Koforidua",
+    "region": "Eastern"
+  },
+  {
+    "name": "Ho Technical University",
+    "short_name": "HTU",
+    "kind": "technical_university",
+    "town": "Ho",
+    "region": "Volta"
+  },
+  {
+    "name": "University of Health and Allied Sciences",
+    "short_name": "UHAS",
+    "kind": "university",
+    "town": "Ho",
+    "region": "Volta"
+  },
+  {
+    "name": "University for Development Studies",
+    "short_name": "UDS",
+    "kind": "university",
+    "town": "Tamale",
+    "region": "Northern"
+  },
+  {
+    "name": "Tamale Technical University",
+    "short_name": "TaTU",
+    "kind": "technical_university",
+    "town": "Tamale",
+    "region": "Northern"
+  },
+  {
+    "name": "Bolgatanga Technical University",
+    "short_name": "BTU",
+    "kind": "technical_university",
+    "town": "Bolgatanga",
+    "region": "Upper East"
+  }
+]

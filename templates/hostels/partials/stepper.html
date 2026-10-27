@@ -1,0 +1,6 @@
+{% load i18n %}
+<div class="join items-center" id="stepper-{{ rt.pk }}" aria-label="{% translate 'Available rooms' %}">
+  <button class="btn join-item tap" hx-post="{% url 'hostels:step' hostel.pk rt.pk 'down' %}" hx-target="#stepper-{{ rt.pk }}" hx-swap="outerHTML" aria-label="{% translate 'One fewer available' %}" {% if rt.available_rooms <= 0 %}disabled{% endif %}>{% icon "minus" "size-4" %}</button>
+  <span class="join-item px-3 font-bold min-w-20 text-center" aria-live="polite">{{ rt.available_rooms }} / {{ rt.total_rooms }}</span>
+  <button class="btn join-item tap" hx-post="{% url 'hostels:step' hostel.pk rt.pk 'up' %}" hx-target="#stepper-{{ rt.pk }}" hx-swap="outerHTML" aria-label="{% translate 'One more available' %}" {% if rt.available_rooms >= rt.total_rooms %}disabled{% endif %}>{% icon "plus" "size-4" %}</button>
+</div>

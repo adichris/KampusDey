@@ -1,0 +1,6 @@
+{% extends "accounts/simple_form.html" %}
+{% load i18n %}
+{% block title %}{% translate "Claim" %} · {{ place.name }}{% endblock %}
+{% block form_title %}{% blocktranslate with n=place.name %}Claim {{ n }}{% endblocktranslate %}{% endblock %}
+{% block intro %}<p class="text-sm opacity-75 mb-2">{% translate "Send a photo of yourself at the premises with the signboard visible, or a business registration document. Only admins see it, and it is deleted after review." %}</p>{% endblock %}
+{% block button %}{% translate "Send claim" %}{% endblock %}

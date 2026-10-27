@@ -1,0 +1,5 @@
+{% load i18n %}
+<c-vars profile />
+{% if profile.verified_student %}<span class="badge badge-success badge-sm gap-1">{% icon "badge-check" "size-3" %}{% translate "Verified student" %}</span>{% endif %}
+{% if profile.verified_landlord %}<span class="badge badge-success badge-sm gap-1">{% icon "badge-check" "size-3" %}{% translate "Verified landlord" %}</span>{% endif %}
+{% if profile.verified_agent %}<span class="badge badge-success badge-sm gap-1">{% icon "badge-check" "size-3" %}{% translate "Verified agent" %}</span>{% endif %}

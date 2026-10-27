@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+{% load i18n unfold %}
+{% block title %}{% translate "Dashboard" %} | KampusDey admin{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6">
+  <div class="grid gap-4 md:grid-cols-3">
+    {% for k in kpis %}
+    <div class="border border-base-200 dark:border-base-800 rounded-default p-4">
+      <h3 class="font-semibold mb-2">{{ k.label }}</h3>
+      <dl class="grid grid-cols-2 gap-1 text-sm">
+        <dt>{% translate "Sign-ups" %}</dt><dd class="font-semibold">{{ k.signups }}</dd>
+        <dt>{% translate "Posts" %}</dt><dd class="font-semibold">{{ k.posts }}</dd>
+        <dt>{% translate "Views" %}</dt><dd class="font-semibold">{{ k.views }}</dd>
+        <dt>{% translate "Taps" %}</dt><dd class="font-semibold">{{ k.taps }}</dd>
+      </dl>
+    </div>
+    {% endfor %}
+  </div>
+  <p class="text-sm">{% translate "Active listings" %}: <b>{{ active_listings }}</b></p>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <div class="border border-base-200 dark:border-base-800 rounded-default p-4">
+      <h3 class="font-semibold mb-2">{% translate "Queues" %}</h3>
+      <ul class="text-sm">{% for label, count, url in queues %}<li><a class="underline" href="{% url url %}">{{ label }}</a>: <b>{{ count }}</b></li>{% endfor %}</ul>
+    </div>
+    <div class="border border-base-200 dark:border-base-800 rounded-default p-4">
+      <h3 class="font-semibold mb-2">{% translate "Locations" %} · <a class="underline" href="{% url 'admin:locations_review_queue' %}">{% translate "review queue" %}</a> · <a class="underline" href="{% url 'admin:locations_duplicates' %}">{% translate "duplicates" %}</a></h3>
+      <ul class="text-sm">{% for label, count in location_tiles %}<li>{{ label }}: <b>{{ count }}</b></li>{% endfor %}</ul>
+    </div>
+    <div class="border border-base-200 dark:border-base-800 rounded-default p-4">
+      <h3 class="font-semibold mb-2">{% translate "External content" %}</h3>
+      <ul class="text-sm">{% for label, count in external_tiles %}<li>{{ label }}: <b>{{ count }}</b></li>{% endfor %}
+        {% for s in sources %}<li>{{ s.name }}: {{ s.get_permission_status_display }} · {% translate "last run" %} {{ s.last_run_at|default:"—" }} {{ s.last_status }}</li>{% endfor %}</ul>
+    </div>
+    <div class="border border-base-200 dark:border-base-800 rounded-default p-4">
+      <h3 class="font-semibold mb-2">{% translate "Search gaps (zero results, 30 days)" %}</h3>
+      <ul class="text-sm">{% for q, n in zero_searches %}<li>{{ q }} — {{ n }}</li>{% empty %}<li>—</li>{% endfor %}</ul>
+      <h3 class="font-semibold mt-3 mb-2">{% translate "Top searches" %}</h3>
+      <ul class="text-sm">{% for q, n in top_searches %}<li>{{ q }} — {{ n }}</li>{% empty %}<li>—</li>{% endfor %}</ul>
+    </div>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-3">
+    <div class="border border-base-200 dark:border-base-800 rounded-default p-4"><h3 class="font-semibold mb-2">{% translate "By campus (30 days)" %}</h3>{% component "unfold/components/chart/bar.html" with data=chart_campus height=260 %}{% endcomponent %}</div>
+    <div class="border border-base-200 dark:border-base-800 rounded-default p-4"><h3 class="font-semibold mb-2">{% translate "By region" %}</h3>{% component "unfold/components/chart/bar.html" with data=chart_region height=260 %}{% endcomponent %}</div>
+    <div class="border border-base-200 dark:border-base-800 rounded-default p-4"><h3 class="font-semibold mb-2">{% translate "By section" %}</h3>{% component "unfold/components/chart/bar.html" with data=chart_section height=260 %}{% endcomponent %}</div>
+  </div>
+  {{ block.super }}
+</div>
+{% endblock %}

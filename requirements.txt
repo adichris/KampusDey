@@ -1,0 +1,35 @@
+# Runtime dependencies. Install into a local virtualenv:
+#   python -m venv .venv && .venv/Scripts/pip install -r requirements-dev.txt   (Windows)
+#   python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt       (Linux/macOS)
+Django>=6.0,<6.2
+django-environ>=0.14
+django-allauth[mfa,socialaccount]>=65.0
+django-phonenumber-field>=9.0
+phonenumberslite>=9.0
+django-constance>=4.4
+django-waffle>=5.0
+django-unfold>=0.100
+django-cotton>=2.8
+django-htmx>=1.29
+django-filter>=26.0
+django-taggit>=6.1
+django-imagekit>=6.1
+Pillow>=13.0
+django-cleanup>=9.0
+django-storages[s3]>=1.14
+django-webpush>=0.3.6
+django-ratelimit>=4.1
+django-axes>=8.3
+django-auditlog>=3.4
+django-csp>=4.0
+whitenoise>=6.12
+sentry-sdk>=2.70
+celery>=5.6
+django-celery-beat>=2.9
+redis>=6.0
+cryptography>=45
+pdfplumber>=0.11
+requests>=2.32
+psycopg[binary]>=3.3
+gunicorn>=23; sys_platform != "win32"
+geoip2>=4.8

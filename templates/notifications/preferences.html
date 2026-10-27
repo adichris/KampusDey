@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Notification settings" %}{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto card bg-base-100 border border-base-300">
+  <form method="post" class="card-body gap-0">{% csrf_token %}
+    <h1 class="text-xl font-bold mb-2">{% translate "Notification settings" %}</h1>
+    <p class="text-sm opacity-70 mb-2">{% translate "In-app notifications are always on. Emails are grouped and sent at most every 15 minutes." %}</p>
+    {% for field in form %}<c-form-field :field="field" />{% endfor %}
+    {% if VAPID_PUBLIC_KEY %}<button type="button" class="btn btn-outline btn-sm my-2" data-enable-push data-vapid="{{ VAPID_PUBLIC_KEY }}" data-done="{% translate 'Push notifications on' %}">{% icon "bell" "size-4" %} {% translate "Allow push on this device" %}</button>{% endif %}
+    <button class="btn btn-primary mt-2 tap">{% translate "Save" %}</button>
+  </form>
+</div>
+{% endblock %}

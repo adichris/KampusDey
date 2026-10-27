@@ -1,0 +1,7 @@
+{% load i18n %}
+<c-vars url title log_url="" />
+<div class="flex items-center gap-1">
+  <button type="button" class="btn btn-ghost btn-sm gap-1 tap" data-share="{{ url }}" data-share-title="{{ title }}" data-share-log="{{ log_url }}" data-copied-text="{% translate 'Link copied' %}">{% icon "share-2" %}<span class="hidden sm:inline">{% translate "Share" %}</span></button>
+  <a class="btn btn-ghost btn-sm tap" target="_blank" rel="noopener" data-share-log-click="{{ log_url }}" data-channel="whatsapp"
+     href="https://wa.me/?text={{ title|urlencode }}%20{{ url|urlencode }}" aria-label="{% translate 'Share to WhatsApp' %}">{% icon "message-circle" %}</a>
+</div>

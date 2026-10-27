@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="max-w-md mx-auto card bg-base-100 border border-base-300">
+  <form method="post" class="card-body">{% csrf_token %}
+    <h1 class="text-xl font-bold">{% translate "Delete this draft?" %}</h1>
+    <p class="text-sm">{{ listing.title }}</p>
+    <div class="flex gap-2 justify-end"><a href="{% url 'dashboard:home' %}" class="btn btn-ghost">{% translate "Keep" %}</a><button class="btn btn-error">{% translate "Delete" %}</button></div>
+  </form>
+</div>
+{% endblock %}

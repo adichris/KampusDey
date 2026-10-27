@@ -1,0 +1,45 @@
+{
+ "_note": "Synthetic shape-only sample for offline tests; not real-world data.",
+ "elements": [
+  {
+   "type": "node",
+   "id": 7001,
+   "lat": 7.305,
+   "lon": -2.305,
+   "tags": {
+    "place": "suburb",
+    "name": "Testville Heights"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7002,
+   "lat": 7.306,
+   "lon": -2.306,
+   "tags": {
+    "place": "neighbourhood",
+    "name": "testville heights"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7003,
+   "lat": 7.307,
+   "lon": -2.307,
+   "tags": {
+    "place": "village",
+    "name": "Fixtureton"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7004,
+   "lat": 7.308,
+   "lon": -2.308,
+   "tags": {
+    "place": "hamlet",
+    "name": "Sample Junction"
+   }
+  }
+ ]
+}

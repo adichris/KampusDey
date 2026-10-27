@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if landing %}{{ landing }} · {% endif %}KampusDey — {% translate "Whatever you need on campus, e dey." %}{% endblock %}
+{% block content %}
+<section class="mb-4">
+  <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight">
+    {% if page_location.is_set %}{% blocktranslate with place=page_location.label %}Whatever you need around {{ place }}, e dey.{% endblocktranslate %}
+    {% else %}{% translate "Whatever you need on campus, e dey." %}{% endif %}
+  </h1>
+  <form action="{% url 'listings:search' %}" method="get" class="mt-3 join w-full" role="search">
+    <label for="home-q" class="sr-only">{% translate "Search" %}</label>
+    <input id="home-q" name="q" type="search" class="input input-bordered join-item w-full" placeholder="{% translate 'Search rooms, phones, jobs…' %}">
+    <button class="btn btn-primary join-item tap" aria-label="{% translate 'Search' %}">{% icon "search" %}</button>
+  </form>
+</section>
+
+{% if not page_location.is_set %}
+<c-empty-state icon="map-pin" title="{% translate 'Choose your campus to get started' %}" text="{% translate 'We show what is near you: rooms, food, jobs and more.' %}">
+  <button type="button" class="btn btn-primary" data-open-dialog="location-sheet">{% icon "map-pin" %} {% translate "Where are you?" %}</button>
+</c-empty-state>
+{% else %}
+<nav class="chip-row flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0" aria-label="{% translate 'Sections' %}">
+  {% for section in sections %}
+    {% if page_location.campus %}{% url 'listings:section_campus' page_location.campus.slug section.slug as href %}{% else %}{% url 'listings:section_town' page_location.effective_town.slug section.slug as href %}{% endif %}
+    <c-section-chip :section="section" href="{{ href }}" />
+  {% endfor %}
+  {% if page_location.campus %}
+  <a href="{% url 'around' page_location.campus.slug %}" class="btn btn-sm rounded-full btn-ghost bg-base-100 border-base-300 whitespace-nowrap tap">{% icon "store" "size-4" %} {% translate "Around campus" %}</a>
+  <a href="{% url 'rent_check' page_location.campus.slug %}" class="btn btn-sm rounded-full btn-ghost bg-base-100 border-base-300 whitespace-nowrap tap">{% icon "chart-column" "size-4" %} {% translate "Rent check" %}</a>
+  {% endif %}
+</nav>
+
+{% if spotlight %}
+<section class="card bg-secondary text-secondary-content my-4">
+  <div class="card-body p-4">
+    <p class="text-xs font-bold uppercase tracking-wide">{{ spotlight.blurb }}</p>
+    {% if spotlight.listing %}<a class="text-lg font-bold link" href="{{ spotlight.listing.get_absolute_url }}">{{ spotlight.listing.title }}</a>
+    {% elif spotlight.user %}<a class="text-lg font-bold link" href="{% url 'accounts:public_profile' spotlight.user.pk %}">{{ spotlight.user.public_name }}</a>{% endif %}
+  </div>
+</section>
+{% endif %}
+
+{% if feeds.boosted %}
+<section class="my-5">
+  <h2 class="font-bold text-lg mb-2 flex items-center gap-2">{% icon "rocket" "size-5 text-secondary" %} {% translate "Boosted" %}</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    {% for item in feeds.boosted %}<c-listing-card :listing="item" boosted="1" />{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="my-5">
+  <h2 class="font-bold text-lg mb-2">{% translate "Near you" %}</h2>
+  {% if feeds.near %}
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+    {% for item in feeds.near %}<c-listing-card :listing="item" show_distance="1" />{% endfor %}
+  </div>
+  {% else %}
+  <c-empty-state icon="package" title="{% translate 'Nothing posted here yet' %}" text="{% translate 'Be the first: post a room, an item, a job or a question.' %}" action_url="{% url 'listings:post' %}" />
+  {% endif %}
+</section>
+
+{% if feeds.new_today %}
+<section class="my-5">
+  <h2 class="font-bold text-lg mb-2">{% translate "New today" %}</h2>
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+    {% for item in feeds.new_today %}<c-listing-card :listing="item" />{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block content %}
+<div class="border border-base-200 dark:border-base-800 rounded-default p-4 mb-6 text-sm">
+  <h3 class="font-semibold mb-2">{% translate "Email (SMTP from environment variables)" %}</h3>
+  <p>{{ smtp.backend }} · {{ smtp.host }}:{{ smtp.port }} · TLS {{ smtp.tls }} · {% translate "user set" %}: {{ smtp.user_set }} · {% translate "from" %} {{ smtp.from }}</p>
+  <div class="flex flex-wrap gap-4 mt-3">
+    <form method="post" action="{% url 'admin:sitesettings_test_email' %}">{% csrf_token %}<input name="to" type="email" placeholder="{{ request.user.email }}" class="border rounded px-2 py-1"> <button class="underline">{% translate "Send test email" %}</button></form>
+    <form method="post" action="{% url 'admin:sitesettings_test_sms' %}">{% csrf_token %}<input name="to" placeholder="+233…" class="border rounded px-2 py-1"> <button class="underline">{% translate "Send test SMS" %}</button></form>
+    <form method="post" action="{% url 'admin:sitesettings_geolite2' %}">{% csrf_token %}<button class="underline">{% translate "Update GeoLite2 now" %}</button></form>
+  </div>
+</div>
+{{ block.super }}
+{% endblock %}

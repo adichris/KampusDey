@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with n=user.public_name %}Hi {{ n }},{% endblocktranslate %}
+
+{% for note in notes %}- {{ note.title }}{% if note.body %}
+  {{ note.body }}{% endif %}
+  {% if note.url %}{{ SITE_URL }}{{ note.url }}{% endif %}{% for k, v in note.data.items %}
+  {% if k == "confirm_url" %}{% translate "Still available:" %}{% elif k == "taken_url" %}{% translate "Mark taken:" %}{% else %}{{ k }}:{% endif %} {{ v }}{% endfor %}
+
+{% endfor %}{% translate "Change which emails you get:" %} {{ SITE_URL }}/notifications/settings/
+{% endautoescape %}

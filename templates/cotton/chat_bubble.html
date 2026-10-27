@@ -1,0 +1,11 @@
+{% load i18n %}
+<c-vars message mine="" other_alias="" />
+{% if message.kind == "system" %}
+<div class="text-center text-xs opacity-60 my-2">{{ message.body }}</div>
+{% else %}
+<div class="chat {% if mine %}chat-end{% else %}chat-start{% endif %}">
+  <div class="chat-header text-xs opacity-70">{% if mine %}{% translate "You" %}{% else %}{{ other_alias }}{% endif %} · <time datetime="{{ message.created_at|date:'c' }}">{{ message.created_at|time:"H:i" }}</time></div>
+  <div class="chat-bubble {% if mine %}chat-bubble-primary{% endif %} {% if message.kind == 'shared_contact' %}chat-bubble-success{% endif %} whitespace-pre-line break-words">{{ message.body }}</div>
+  {% if message.has_scam_warning %}<div class="chat-footer"><span class="badge badge-warning badge-sm gap-1 mt-1">{% icon "triangle-alert" "size-3" %}{% translate "Never pay before viewing the room." %}</span></div>{% endif %}
+</div>
+{% endif %}

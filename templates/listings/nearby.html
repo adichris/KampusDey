@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{% translate "Nearby" %} · KampusDey{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between gap-2 mb-2">
+  <h1 class="text-2xl font-extrabold">{% translate "Nearby" %}</h1>
+  <button type="button" class="btn btn-primary btn-sm tap" data-geolocate="{% url 'listings:nearby' %}{% if active_section %}?section={{ active_section }}{% endif %}" data-denied="{% translate 'Location permission denied — showing your campus.' %}">{% icon "locate" "size-4" %} {% translate "Use my location" %}</button>
+</div>
+<nav class="chip-row flex gap-2 overflow-x-auto pb-2 mb-2" aria-label="{% translate 'Sections' %}">
+  <a href="?{% if from_device %}lat={{ point.0 }}&lng={{ point.1 }}{% endif %}" class="btn btn-sm rounded-full {% if not active_section %}btn-primary{% else %}btn-ghost bg-base-100{% endif %}">{% translate "All" %}</a>
+  {% for s in sections %}<a href="?section={{ s.slug }}{% if from_device %}&lat={{ point.0 }}&lng={{ point.1 }}{% endif %}" class="btn btn-sm rounded-full whitespace-nowrap {% if active_section == s.slug %}btn-primary{% else %}btn-ghost bg-base-100{% endif %}">{% icon s.icon "size-4" %} {{ s.label }}</a>{% endfor %}
+</nav>
+{% if point %}
+  {{ items|json_script:"nearby-items" }}
+  <c-map lat="{{ point.0 }}" lng="{{ point.1 }}" zoom="14" items_id="nearby-items" rings="{{ radii }}" mode="pin" css="kd-map-tall" label="{% translate 'Nearby map' %}" />
+  <p class="text-xs opacity-70 mt-2">{% if from_device %}{% translate "Centred on your device location (not stored)." %}{% else %}{% translate "Centred on your chosen campus or town." %}{% endif %} {% translate "Sensitive posts show an approximate area." %}</p>
+  {% if listings %}
+  <h2 class="font-bold mt-4 mb-2">{% translate "Closest first" %}</h2>
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">{% for item in listings|slice:":24" %}<c-listing-card :listing="item" show_distance="1" />{% endfor %}</div>
+  {% else %}
+  <c-empty-state icon="map-pin" title="{% translate 'Nothing within walking distance yet' %}" action_url="{% url 'listings:post' %}" />
+  {% endif %}
+{% else %}
+<c-empty-state icon="map-pin" title="{% translate 'We need a starting point' %}" text="{% translate 'Use your location, or choose a campus whose position we know.' %}">
+  <button type="button" class="btn btn-outline" data-open-dialog="location-sheet">{% translate "Choose campus" %}</button>
+</c-empty-state>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/map.js' %}" defer></script>{% endblock %}

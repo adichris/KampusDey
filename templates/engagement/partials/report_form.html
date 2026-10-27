@@ -1,0 +1,6 @@
+{% load i18n %}
+<form hx-post="{% url 'engagement:report' kind pk %}" hx-target="#report-slot" class="space-y-2">
+  <c-form-field :field="form.reason" />
+  <c-form-field :field="form.details" />
+  <button class="btn btn-error w-full tap">{% translate "Send report" %}</button>
+</form>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{% if hostel %}{{ hostel.name }}{% else %}{% translate "Add hostel" %}{% endif %}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto card bg-base-100 border border-base-300">
+  <form method="post" class="card-body gap-0">{% csrf_token %}
+    <h1 class="text-xl font-bold mb-2">{% if hostel %}{% translate "Edit hostel" %}{% else %}{% translate "Add hostel" %}{% endif %}</h1>
+    {% if form.non_field_errors %}<c-alert kind="error">{{ form.non_field_errors|join:" " }}</c-alert>{% endif %}
+    {% for field in form %}{% if field.name != "lat" and field.name != "lng" %}<c-form-field :field="field" />{% endif %}{% endfor %}
+    {{ form.lat }}{{ form.lng }}
+    <p class="text-sm opacity-75 my-2">{% translate "Tap the map where the hostel is (shown to students as an approximate area)." %}</p>
+    {% with p=location.point %}
+    <c-map lat="{% if hostel.lat %}{{ hostel.lat }}{% else %}{{ p.0|default:7.95 }}{% endif %}" lng="{% if hostel.lng %}{{ hostel.lng }}{% else %}{{ p.1|default:-1.03 }}{% endif %}" mode="pick" lat_input="{{ form.lat.auto_id }}" lng_input="{{ form.lng.auto_id }}" />
+    {% endwith %}
+    <button class="btn btn-primary mt-3 tap">{% translate "Save" %}</button>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/map.js' %}" defer></script>{% endblock %}

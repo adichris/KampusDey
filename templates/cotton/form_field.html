@@ -1,0 +1,16 @@
+<c-vars field />
+{% if field.is_hidden %}{{ field }}{% else %}
+<div class="fieldset mb-2 {% if field.errors %}text-error{% endif %}">
+  {% if field|is_checkbox %}
+  <label class="label cursor-pointer justify-start gap-3 text-base-content whitespace-normal">{% widget field %}<span>{{ field.label }}</span></label>
+  {% elif field|is_multi %}
+  <span class="fieldset-legend text-base-content">{{ field.label }}</span>
+  <div class="kd-choices flex flex-wrap gap-x-4 gap-y-2 text-base-content">{{ field }}</div>
+  {% else %}
+  <label for="{{ field.id_for_label }}" class="fieldset-legend text-base-content">{{ field.label }}{% if field.field.required %} <span aria-hidden="true">*</span>{% endif %}</label>
+  {% widget field %}
+  {% endif %}
+  {% if field.help_text %}<p id="{{ field.auto_id }}_help" class="label text-xs whitespace-normal">{{ field.help_text }}</p>{% endif %}
+  {% for error in field.errors %}<p class="label text-error text-xs whitespace-normal">{{ error }}</p>{% endfor %}
+</div>
+{% endif %}

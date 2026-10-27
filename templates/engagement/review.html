@@ -1,0 +1,5 @@
+{% extends "accounts/simple_form.html" %}
+{% load i18n %}
+{% block title %}{% translate "Review" %}{% endblock %}
+{% block form_title %}{% blocktranslate with t=target %}Review {{ t }}{% endblocktranslate %}{% endblock %}
+{% block button %}{% translate "Post review" %}{% endblock %}

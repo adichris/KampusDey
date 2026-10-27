@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block content %}
+<p class="text-sm mb-3">{% translate "Campus pairs with name similarity ≥ 0.8. Merging moves areas, listings and followers to the kept campus." %}</p>
+<table class="w-full text-sm"><tbody>
+{% for a, b, score in pairs %}
+<tr class="border-b border-base-200">
+  <td class="py-1">{{ a.name }}</td><td>{{ b.name }}</td><td>{{ score|floatformat:2 }}</td>
+  <td><form method="post" class="inline">{% csrf_token %}<input type="hidden" name="keep" value="{{ a.pk }}"><input type="hidden" name="drop" value="{{ b.pk }}"><button class="underline">{% translate "Keep left" %}</button></form>
+  · <form method="post" class="inline">{% csrf_token %}<input type="hidden" name="keep" value="{{ b.pk }}"><input type="hidden" name="drop" value="{{ a.pk }}"><button class="underline">{% translate "Keep right" %}</button></form></td>
+</tr>
+{% empty %}<tr><td>{% translate "No likely duplicates." %}</td></tr>{% endfor %}
+</tbody></table>
+{% endblock %}

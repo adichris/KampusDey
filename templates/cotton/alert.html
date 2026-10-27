@@ -1,0 +1,5 @@
+<c-vars kind="info" />
+<div role="alert" class="alert {% if kind == 'error' %}alert-error{% elif kind == 'success' %}alert-success{% elif kind == 'warning' %}alert-warning{% else %}alert-info{% endif %} text-sm">
+  {% if kind == 'error' or kind == 'warning' %}{% icon "triangle-alert" %}{% else %}{% icon "info" %}{% endif %}
+  <div>{{ slot }}</div>
+</div>

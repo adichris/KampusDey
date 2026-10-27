@@ -1,0 +1,5 @@
+{% extends "accounts/simple_form.html" %}
+{% load i18n %}
+{% block title %}{% translate "Room type" %} · {{ hostel.name }}{% endblock %}
+{% block form_title %}{% if instance %}{{ instance.name }}{% else %}{% translate "Add room type" %}{% endif %}{% endblock %}
+{% block intro %}<p class="text-sm opacity-75 mb-2">{% translate "Each room type becomes a Rooms listing. When available rooms reach 0 it is marked taken automatically." %}</p>{% endblock %}

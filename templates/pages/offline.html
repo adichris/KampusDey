@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Offline" %} · KampusDey{% endblock %}
+{% block content %}
+<c-empty-state icon="refresh-cw" title="{% translate 'You are offline' %}" text="{% translate 'Check your data connection and try again.' %}" />
+{% endblock %}

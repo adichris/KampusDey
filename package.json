@@ -1,0 +1,20 @@
+{
+  "name": "kampusdey-frontend",
+  "private": true,
+  "description": "Tailwind v4 + daisyUI 5 build and vendored front-end libraries for KampusDey (no SPA).",
+  "scripts": {
+    "build:css": "tailwindcss -i static/src/styles.css -o static/css/app.css --minify",
+    "watch:css": "tailwindcss -i static/src/styles.css -o static/css/app.css --watch",
+    "vendor": "node scripts/vendor.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0",
+    "daisyui": "^5.0.0",
+    "htmx.org": "^2.0.0",
+    "@alpinejs/csp": "^3.14.0",
+    "leaflet": "^1.9.4",
+    "lucide-static": "^0.460.0",
+    "@fontsource-variable/inter": "^5.1.0"
+  }
+}

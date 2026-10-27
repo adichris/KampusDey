@@ -1,0 +1,3 @@
+# Synthetic GTEC-style list excerpt for tests
+1. Fixture University of Testing | Fixtureton
+2. Brand New College of Education | Fixtureton

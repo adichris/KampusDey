@@ -1,0 +1,4 @@
+{% load i18n %}
+<button class="btn btn-sm {% if following %}btn-primary{% else %}btn-outline{% endif %}" hx-post="{% url 'locations:follow' campus.pk %}" hx-swap="outerHTML">
+  {% if following %}{% translate "Following" %}{% else %}{% translate "Follow" %}{% endif %}
+</button>

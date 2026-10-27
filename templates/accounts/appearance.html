@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Appearance" %} · KampusDey{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-xl font-bold mb-1">{% translate "Appearance" %}</h1>
+  <p class="text-sm opacity-75 mb-3">{% translate "Pick a theme. “System” follows your phone's light or dark mode." %}</p>
+  <c-theme-picker />
+</div>
+{% endblock %}

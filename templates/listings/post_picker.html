@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Post" %} · KampusDey{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-extrabold mb-1">{% translate "What do you want to post?" %}</h1>
+<p class="text-sm opacity-70 mb-4">{% blocktranslate with place=location.label %}Posting around {{ place }}.{% endblocktranslate %} <button type="button" class="link" data-open-dialog="location-sheet">{% translate "Change" %}</button></p>
+{% if not decision %}
+<c-alert kind="warning">{{ decision.reason }} {% if "email" in decision.reason %}<a class="link" href="{% url 'account_email' %}">{% translate "Resend verification email" %}</a>{% endif %}</c-alert>
+{% endif %}
+{% if drafts %}
+<section class="my-4">
+  <h2 class="font-semibold mb-2">{% translate "Continue a draft" %}</h2>
+  <ul class="space-y-2">{% for d in drafts %}<li><a class="btn btn-ghost bg-base-100 w-full justify-between" href="{% url 'listings:wizard' d.pk d.wizard_step %}">{{ d.section_obj.label }} · {{ d.title }} {% icon "chevron-right" "size-4" %}</a></li>{% endfor %}</ul>
+</section>
+{% endif %}
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+  {% for section in sections %}
+  <form method="post" action="{% url 'listings:post_start' section.slug %}">{% csrf_token %}
+    <button class="w-full h-full card bg-base-100 border border-base-300 hover:border-primary text-left p-4 tap" {% if not decision %}disabled{% endif %}>
+      <span class="text-primary">{% icon section.icon "size-7" %}</span>
+      <span class="block font-semibold mt-2">{{ section.label }}</span>
+      <span class="block text-xs opacity-70">{{ section.blurb }}</span>
+    </button>
+  </form>
+  {% endfor %}
+</div>
+{% endblock %}

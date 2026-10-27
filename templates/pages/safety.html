@@ -1,0 +1,15 @@
+{% extends "pages/_page.html" %}
+{% load i18n %}
+{% block title %}{% translate "Safety tips" %} · KampusDey{% endblock %}
+{% block article %}
+<h1>{% translate "Stay safe" %}</h1>
+<ul>
+  <li><b>{% translate "Never pay before viewing the room." %}</b> {% translate "No deposits by mobile money to people you haven't met." %}</li>
+  <li>{% translate "Meet in public places on or near campus, in daylight. Bring a friend." %}</li>
+  <li>{% translate "Check items carefully before paying. Test phones and laptops." %}</li>
+  <li>{% translate "Use in-app chat until you trust someone. You appear under an alias." %}</li>
+  <li>{% translate "Food: only share food you'd eat yourself; mention allergens." %}</li>
+  <li>{% translate "Report anything suspicious with the flag button." %}</li>
+</ul>
+<p><a href="{% url 'pages:scam_alerts' %}">{% translate "See confirmed scam alerts" %}</a></p>
+{% endblock %}

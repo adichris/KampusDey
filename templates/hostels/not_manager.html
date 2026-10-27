@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<c-empty-state icon="building-2" title="{% translate 'Hostel Manager is for landlords and agents' %}" text="{% translate 'Change your role in your profile to manage a hostel.' %}">
+  <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary">{% translate "Edit profile" %}</a>
+</c-empty-state>
+{% endblock %}

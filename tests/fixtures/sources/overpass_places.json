@@ -1,0 +1,48 @@
+{
+ "_note": "Synthetic shape-only sample for offline tests; not real-world data.",
+ "elements": [
+  {
+   "type": "node",
+   "id": 8001,
+   "lat": 7.302,
+   "lon": -2.302,
+   "tags": {
+    "tourism": "guest_house",
+    "name": "Fixture Guest Inn",
+    "website": "https://inn.example.test",
+    "phone": "+233 00 000 0000"
+   }
+  },
+  {
+   "type": "way",
+   "id": 8002,
+   "center": {
+    "lat": 7.303,
+    "lon": -2.303
+   },
+   "tags": {
+    "shop": "copyshop",
+    "name": "Fixture Print Shop"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8003,
+   "lat": 7.304,
+   "lon": -2.304,
+   "tags": {
+    "shop": "mobile_phone",
+    "name": "Fixture Phone Repairs"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8004,
+   "lat": 7.304,
+   "lon": -2.304,
+   "tags": {
+    "amenity": "cafe"
+   }
+  }
+ ]
+}

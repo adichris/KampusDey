@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Chats" %} · KampusDey{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-extrabold mb-3">{% translate "Chats" %}</h1>
+{% if conversations %}
+<ul class="bg-base-100 border border-base-300 rounded-box divide-y divide-base-300">
+  {% for c in conversations %}
+  <li><a href="{{ c.get_absolute_url }}" class="flex items-center gap-3 p-3 hover:bg-base-200 tap">
+    <c-avatar name="{{ c.other_alias }}" />
+    <div class="min-w-0 flex-1">
+      <div class="flex justify-between gap-2"><span class="font-semibold truncate">{{ c.other_alias }}</span><span class="text-xs opacity-60 whitespace-nowrap">{% if c.last_message_at %}{{ c.last_message_at|timesince }}{% endif %}</span></div>
+      <p class="text-sm opacity-70 truncate">{{ c.listing.title }}</p>
+    </div>
+    {% if c.unread %}<span class="badge badge-accent badge-xs" aria-label="{% translate 'Unread' %}"></span>{% endif %}
+    {% if c.is_blocked %}<span class="badge badge-ghost badge-sm">{% translate "Blocked" %}</span>{% endif %}
+  </a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<c-empty-state icon="message-circle" title="{% translate 'No chats yet' %}" text="{% translate 'Tap “Chat” on any listing to talk to the owner — your number stays private.' %}" />
+{% endif %}
+{% endblock %}

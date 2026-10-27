@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Rent check" %} · {{ campus.label }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-extrabold">{% translate "Rent check" %}</h1>
+<p class="text-sm opacity-70 mb-3">{% blocktranslate with c=campus.name %}Typical rent around {{ c }}, per year, from KampusDey listings only. A figure shows once there are at least {{ min_samples }} listings.{% endblocktranslate %}</p>
+{% if rows %}
+<div class="overflow-x-auto bg-base-100 border border-base-300 rounded-box">
+  <table class="table">
+    <thead><tr><th>{% translate "Area" %}</th><th>{% translate "Room type" %}</th><th>{% translate "Median" %}</th><th>{% translate "Range" %}</th></tr></thead>
+    <tbody>{% for r in rows %}<tr><td>{{ r.area }}</td><td>{{ r.room_type }}</td>
+      {% if r.enough %}<td class="font-bold">{{ r.median|ghs }}</td><td>{{ r.low|ghs }} – {{ r.high|ghs }}</td>
+      {% else %}<td colspan="2" class="opacity-60">{% blocktranslate count n=r.count %}{{ n }} listing — not enough yet{% plural %}{{ n }} listings — not enough yet{% endblocktranslate %}</td>{% endif %}</tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% else %}
+<c-empty-state icon="chart-column" title="{% translate 'Not enough room listings yet' %}" action_url="{% url 'listings:post' %}" />
+{% endif %}
+{% endblock %}

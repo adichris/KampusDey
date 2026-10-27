@@ -1,0 +1,6 @@
+{% extends "accounts/simple_form.html" %}
+{% load i18n %}
+{% block title %}{% translate "Verification" %}{% endblock %}
+{% block form_title %}{% translate "Get a verified badge" %}{% endblock %}
+{% block intro %}<p class="text-sm opacity-75 mb-2">{% translate "Upload proof. Only admins can see it, and we delete the file as soon as we decide." %}</p>{% endblock %}
+{% block button %}{% translate "Send for review" %}{% endblock %}

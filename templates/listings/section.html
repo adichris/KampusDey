@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{{ section.label }} · {{ page_location.label }} · KampusDey{% endblock %}
+{% block meta_description %}{{ section.label }} {% translate "near" %} {{ page_location.label }}: {{ section.blurb }}{% endblock %}
+{% block head %}{% if view_mode == "map" %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endif %}{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between gap-2 mb-2">
+  <div>
+    <h1 class="text-2xl font-extrabold flex items-center gap-2">{% icon section.icon "size-6 text-primary" %} {{ section.label }}</h1>
+    <p class="text-sm opacity-70">{{ page_location.label }}{% if page_location.campus %} · {{ page_location.campus.town.name }}{% endif %}</p>
+  </div>
+  <a href="{% url 'listings:post' %}" class="btn btn-primary btn-sm tap">{% icon "plus" "size-4" %} {% translate "Post" %}</a>
+</div>
+
+<nav class="chip-row flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 mb-2" aria-label="{% translate 'Sections' %}">
+  {% for s in sections %}
+    {% if page_location.campus %}{% url 'listings:section_campus' page_location.campus.slug s.slug as href %}{% else %}{% url 'listings:section_town' page_location.effective_town.slug s.slug as href %}{% endif %}
+    <c-section-chip :section="s" href="{{ href }}" active="{% if s.slug == section.slug %}1{% endif %}" />
+  {% endfor %}
+</nav>
+
+{% if section.slug == "jobs" %}
+<div role="tablist" class="tabs tabs-box mb-3">
+  <a role="tab" class="tab tab-active" aria-selected="true" href="?">{% translate "Local jobs" %}</a>
+  <a role="tab" class="tab" href="?tab=remote">{% translate "Remote jobs" %}</a>
+</div>
+{% endif %}
+
+<details class="collapse collapse-arrow bg-base-100 border border-base-300 mb-3" {% if filterset.is_bound %}open{% endif %}>
+  <summary class="collapse-title font-semibold flex items-center gap-2">{% icon "sliders-horizontal" "size-4" %} {% translate "Filter & sort" %}</summary>
+  <div class="collapse-content">
+    <form method="get" class="grid grid-cols-2 md:grid-cols-4 gap-x-3 items-end">
+      {% for field in filterset.form %}<div class="{% if field|is_multi %}col-span-2{% endif %}"><c-form-field :field="field" /></div>{% endfor %}
+      <div class="fieldset mb-2">
+        <label for="sort" class="fieldset-legend text-base-content">{% translate "Sort" %}</label>
+        <select id="sort" name="sort" class="select select-bordered w-full">
+          <option value="recommended" {% if sort == "recommended" %}selected{% endif %}>{% translate "Recommended" %}</option>
+          <option value="newest" {% if sort == "newest" %}selected{% endif %}>{% translate "Newest" %}</option>
+          {% if section.price_allowed %}<option value="price" {% if sort == "price" %}selected{% endif %}>{% translate "Price: low to high" %}</option>{% endif %}
+          <option value="distance" {% if sort == "distance" %}selected{% endif %}>{% translate "Distance" %}</option>
+        </select>
+      </div>
+      {% if request.GET.lat %}<input type="hidden" name="lat" value="{{ request.GET.lat }}"><input type="hidden" name="lng" value="{{ request.GET.lng }}">{% endif %}
+      <div class="col-span-2 md:col-span-4 flex flex-wrap gap-2 mt-1">
+        <button class="btn btn-primary tap" type="submit">{% translate "Apply" %}</button>
+        <button type="button" class="btn btn-ghost tap" data-geolocate="{{ request.path }}?sort=distance" data-denied="{% translate 'Location permission denied — using your campus instead.' %}">{% icon "locate" %} {% translate "Sort by distance from me" %}</button>
+        <a href="{{ request.path }}" class="btn btn-ghost tap">{% translate "Clear" %}</a>
+      </div>
+    </form>
+    {% if user.is_authenticated %}
+    <form hx-post="{% url 'engagement:save_search' %}" hx-swap="outerHTML" class="mt-2">
+      <input type="hidden" name="section" value="{{ section.slug }}">
+      {% if page_location.campus %}<input type="hidden" name="campus" value="{{ page_location.campus.pk }}">{% else %}<input type="hidden" name="town" value="{{ page_location.effective_town.pk }}">{% endif %}
+      {% for key, value in request.GET.items %}{% if key not in "page,sort,view,lat,lng" %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}
+      <button class="btn btn-outline btn-sm tap" type="submit">{% icon "bell" "size-4" %} {% translate "Alert me about new matches" %}</button>
+    </form>
+    {% endif %}
+  </div>
+</details>
+
+<div class="flex justify-between items-center mb-2">
+  <p class="text-sm opacity-70">{% blocktranslate count n=page.paginator.count %}{{ n }} result{% plural %}{{ n }} results{% endblocktranslate %}</p>
+  <div class="join">
+    <a class="btn btn-sm join-item {% if view_mode != 'map' %}btn-active{% endif %}" href="{% qs view='list' %}" aria-label="{% translate 'List view' %}">{% icon "list" "size-4" %}</a>
+    <a class="btn btn-sm join-item {% if view_mode == 'map' %}btn-active{% endif %}" href="{% qs view='map' %}" aria-label="{% translate 'Map view' %}">{% icon "map" "size-4" %}</a>
+  </div>
+</div>
+
+{% if view_mode == "map" %}
+  {{ map_items|json_script:"map-items" }}
+  {% with p=page_location.point %}
+  <c-map lat="{{ p.0|default:7.95 }}" lng="{{ p.1|default:-1.03 }}" zoom="14" items_id="map-items" css="kd-map-tall" label="{% translate 'Map of listings' %}" />
+  {% endwith %}
+  <p class="text-xs opacity-70 mt-2">{% translate "Rooms, roommates, food and lost & found show an approximate area, never an exact address." %}</p>
+{% else %}
+  {% if boosted %}
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+    {% for item in boosted %}<c-listing-card :listing="item" boosted="1" :show_distance="point" />{% endfor %}
+  </div>
+  {% endif %}
+  {% if page.object_list %}
+  <div id="results" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+    {% include "listings/partials/results.html" %}
+  </div>
+  {% else %}
+  <c-empty-state icon="{{ section.icon }}" title="{% blocktranslate with s=section.label %}No {{ s }} here yet{% endblocktranslate %}" text="{% translate 'Post the first one, or try another campus.' %}" action_url="{% url 'listings:post' %}" />
+  {% endif %}
+{% endif %}
+
+{% if other_places %}
+<section class="mt-8" aria-labelledby="other-places">
+  <h2 id="other-places" class="font-bold text-lg">{% translate "Other places nearby" %}</h2>
+  <p class="text-xs opacity-70 mb-2">{% translate "From OpenStreetMap — not verified, prices not listed." %} © <a class="link" href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a></p>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    {% for place in other_places %}{% include "external/partials/place_card.html" %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% if view_mode == "map" %}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/map.js' %}" defer></script>{% endif %}{% endblock %}

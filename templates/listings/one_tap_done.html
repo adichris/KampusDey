@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto text-center py-10">
+  <div class="text-success flex justify-center mb-3">{% icon "circle-check" "size-12" %}</div>
+  <h1 class="text-xl font-bold">{{ message }}</h1>
+  <a href="{{ listing.get_absolute_url }}" class="btn btn-ghost mt-4">{% translate "View listing" %}</a>
+</div>
+{% endblock %}

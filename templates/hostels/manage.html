@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ hostel.name }} · {% translate "Hostel Manager" %}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<a href="{% url 'hostels:manager' %}" class="btn btn-ghost btn-sm mb-2">{% icon "chevron-left" "size-4" %} {% translate "Hostel Manager" %}</a>
+<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+  <h1 class="text-2xl font-extrabold">{{ hostel.name }}</h1>
+  <div class="flex gap-1">
+    <a class="btn btn-sm" href="{{ hostel.get_absolute_url }}">{% translate "Public page" %}</a>
+    <a class="btn btn-sm" href="{% url 'hostels:edit' hostel.pk %}">{% translate "Edit" %}</a>
+    <a class="btn btn-sm" href="{% url 'hostels:inquiries' hostel.pk %}">{% icon "inbox" "size-4" %} {% translate "Inquiries" %}</a>
+  </div>
+</div>
+<div class="grid grid-cols-3 gap-2 mb-4">
+  <c-stat title="{% translate 'Rooms' %}" value="{{ occupancy.total }}" />
+  <c-stat title="{% translate 'Available' %}" value="{{ occupancy.available }}" />
+  <c-stat title="{% translate 'Occupancy' %}" value="{{ occupancy.pct }}%" />
+</div>
+<div class="flex items-center justify-between mb-2">
+  <h2 class="font-bold text-lg">{% translate "Room types" %}</h2>
+  <a class="btn btn-primary btn-sm" href="{% url 'hostels:room_type_new' hostel.pk %}">{% icon "plus" "size-4" %} {% translate "Add room type" %}</a>
+</div>
+<ul class="space-y-2 mb-6">
+  {% for row in stats %}{% with rt=row.room_type %}
+  <li class="bg-base-100 border border-base-300 rounded-box p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+    <div class="flex-1 min-w-0">
+      <a class="font-semibold link-hover" href="{% url 'hostels:room_type_edit' hostel.pk rt.pk %}">{{ rt.name }}</a>
+      <p class="text-xs opacity-70">{{ rt.get_room_type_display }} · {{ rt.price|ghs }} {{ rt.get_price_period_display }} · {{ row.views }} {% translate "views" %} · {{ row.taps }} {% translate "taps" %} · {{ row.likes }} ♥</p>
+      {% if rt.listing %}<p class="text-xs">{% translate "Listing" %}: <span class="badge badge-sm">{{ rt.listing.get_status_display }}</span></p>{% endif %}
+    </div>
+    {% include "hostels/partials/stepper.html" %}
+  </li>
+  {% endwith %}{% empty %}<li class="text-sm opacity-70">{% translate "Add your first room type to publish a listing." %}</li>{% endfor %}
+</ul>
+<h2 class="font-bold text-lg mb-2">{% translate "Photos" %}</h2>
+<div data-upload-url="{% url 'hostels:photo_upload' hostel.pk %}" data-target="hostel-photos" class="border-2 border-dashed border-base-300 rounded-box p-4 bg-base-100 text-center mb-2">
+  <label class="btn btn-primary btn-sm">{% icon "camera" "size-4" %} {% translate "Add photos" %}<input type="file" accept="image/*" multiple class="hidden" data-photo-input></label>
+  <p class="text-xs mt-1" data-upload-status aria-live="polite"></p>
+</div>
+<div id="hostel-photos">{% include "hostels/partials/photos.html" %}</div>
+{% endblock %}

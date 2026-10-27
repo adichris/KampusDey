@@ -1,0 +1,6 @@
+{% load i18n %}
+<button type="button" class="btn btn-ghost btn-sm gap-1 max-w-[50vw] tap" data-open-dialog="location-sheet" aria-haspopup="dialog" aria-label="{% translate 'Change campus' %}">
+  {% icon "map-pin" "size-4 text-primary" %}
+  <span class="truncate">{{ location.label }}</span>
+  {% icon "chevron-down" "size-4" %}
+</button>

@@ -1,0 +1,7 @@
+{% extends "accounts/simple_form.html" %}
+{% load i18n %}
+{% block title %}{% translate "Delete account" %}{% endblock %}
+{% block form_title %}{% translate "Delete my account" %}{% endblock %}
+{% block intro %}<c-alert kind="warning">{% translate "Your listings are archived and photos removed, your messages are replaced with “message removed”, and your personal details are erased. This cannot be undone." %}</c-alert><div class="h-3"></div>{% endblock %}
+{% block button_class %}btn-error{% endblock %}
+{% block button %}{% translate "Delete forever" %}{% endblock %}

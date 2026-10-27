@@ -1,0 +1,2 @@
+{% for item in page.object_list %}<c-listing-card :listing="item" :show_distance="point" />{% endfor %}
+<c-pagination-sentinel url="{{ next_url }}" />

@@ -1,0 +1,9 @@
+{% load i18n %}
+<ul class="space-y-1 max-h-60 overflow-y-auto">
+  {% for town in towns %}
+  <li><form method="post" action="{% url 'locations:choose' %}">{% csrf_token %}<input type="hidden" name="town" value="{{ town.pk }}"><input type="hidden" name="next" value="{{ next }}">
+    <button class="btn btn-ghost w-full justify-start tap">{{ town.name }}</button></form></li>
+  {% empty %}
+  <li class="text-sm opacity-70">{% translate "No towns in this region yet." %}</li>
+  {% endfor %}
+</ul>

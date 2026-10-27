@@ -1,0 +1,18 @@
+{% load i18n %}
+<c-vars photos title />
+{% if photos %}
+<div class="carousel w-full rounded-box bg-base-300 aspect-[4/3]" aria-label="{% translate 'Photos' %}">
+  {% for photo in photos %}
+  <div id="photo-{{ forloop.counter }}" class="carousel-item relative w-full">
+    <img src="{{ photo.full.url }}" srcset="{{ photo.srcset }}" sizes="(min-width: 1024px) 800px, 100vw" width="{{ photo.width|default:1600 }}" height="{{ photo.height|default:1200 }}" {% if not forloop.first %}loading="lazy"{% else %}fetchpriority="high"{% endif %} decoding="async" alt="{{ title }} — {% translate 'photo' %} {{ forloop.counter }}" class="w-full object-contain">
+    {% if photos|length > 1 %}
+    <div class="absolute flex justify-between -translate-y-1/2 left-2 right-2 top-1/2">
+      <a href="#photo-{% if forloop.first %}{{ photos|length }}{% else %}{{ forloop.counter0 }}{% endif %}" class="btn btn-circle btn-sm" aria-label="{% translate 'Previous photo' %}">{% icon "chevron-left" %}</a>
+      <a href="#photo-{% if forloop.last %}1{% else %}{{ forloop.counter|add:1 }}{% endif %}" class="btn btn-circle btn-sm" aria-label="{% translate 'Next photo' %}">{% icon "chevron-right" %}</a>
+    </div>
+    <span class="badge badge-neutral absolute bottom-2 right-2">{{ forloop.counter }}/{{ photos|length }}</span>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

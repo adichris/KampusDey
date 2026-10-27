@@ -1,0 +1,4 @@
+{% load i18n %}
+<c-vars seller_type />
+{% if seller_type == "student" %}<span class="badge badge-info badge-sm">{% translate "Student seller" %}</span>
+{% elif seller_type == "business" %}<span class="badge badge-neutral badge-sm">{% translate "Business" %}</span>{% endif %}

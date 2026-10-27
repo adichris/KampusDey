@@ -1,0 +1,76 @@
+{
+ "type": "FeatureCollection",
+ "_note": "Synthetic shape-only sample for offline tests; not real-world data.",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "ADM1_EN": "Fixtureland Region",
+    "ADM1_PCODE": "GH99"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -3.0,
+       7.0
+      ],
+      [
+       -2.0,
+       7.0
+      ],
+      [
+       -2.0,
+       8.0
+      ],
+      [
+       -3.0,
+       8.0
+      ],
+      [
+       -3.0,
+       7.0
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "ADM1_EN": "Otherland",
+    "ADM1_PCODE": "GH98"
+   },
+   "geometry": {
+    "type": "MultiPolygon",
+    "coordinates": [
+     [
+      [
+       [
+        0.0,
+        5.0
+       ],
+       [
+        1.0,
+        5.0
+       ],
+       [
+        1.0,
+        6.0
+       ],
+       [
+        0.0,
+        6.0
+       ],
+       [
+        0.0,
+        5.0
+       ]
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

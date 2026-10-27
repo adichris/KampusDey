@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if query %}{{ query }} · {% endif %}{% translate "Search" %} · KampusDey{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<form method="get" class="join w-full mb-3" role="search">
+  <label for="q" class="sr-only">{% translate "Search" %}</label>
+  <input id="q" name="q" type="search" value="{{ query }}" autofocus class="input input-bordered join-item w-full" placeholder="{% translate 'What do you need?' %}">
+  <button class="btn btn-primary join-item tap" aria-label="{% translate 'Search' %}">{% icon "search" %}</button>
+</form>
+{% if query %}
+  {% if facets %}
+  <nav class="chip-row flex gap-2 overflow-x-auto pb-2 mb-2" aria-label="{% translate 'Sections' %}">
+    <a href="?q={{ query|urlencode }}" class="btn btn-sm rounded-full {% if not active_section %}btn-primary{% else %}btn-ghost bg-base-100{% endif %}">{% translate "All" %}</a>
+    {% for f in facets %}
+    <a href="?q={{ query|urlencode }}&section={{ f.section.slug }}" class="btn btn-sm rounded-full whitespace-nowrap {% if active_section == f.section.slug %}btn-primary{% else %}btn-ghost bg-base-100{% endif %}">{% icon f.section.icon "size-4" %} {{ f.section.label }} <span class="badge badge-sm">{{ f.count }}</span></a>
+    {% endfor %}
+  </nav>
+  {% endif %}
+  {% if page.object_list %}
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">{% for item in page.object_list %}<c-listing-card :listing="item" />{% endfor %}</div>
+  <div class="join mt-4">
+    {% if page.has_previous %}<a class="join-item btn" href="?q={{ query|urlencode }}{% if active_section %}&section={{ active_section }}{% endif %}&page={{ page.previous_page_number }}">«</a>{% endif %}
+    <span class="join-item btn btn-disabled">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a class="join-item btn" href="?q={{ query|urlencode }}{% if active_section %}&section={{ active_section }}{% endif %}&page={{ page.next_page_number }}">»</a>{% endif %}
+  </div>
+  {% else %}
+  <c-empty-state icon="search-x" title="{% blocktranslate %}Nothing found for “{{ query }}”{% endblocktranslate %}" text="{% translate 'Post a Wanted request and sellers will find you.' %}" action_url="{% url 'listings:post' %}" action_label="{% translate 'Post a request' %}" />
+  {% endif %}
+{% else %}
+<p class="text-sm opacity-70">{% translate "Search everything posted around your campus." %}</p>
+{% endif %}
+{% endblock %}

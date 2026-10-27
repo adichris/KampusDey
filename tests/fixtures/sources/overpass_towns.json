@@ -1,0 +1,35 @@
+{
+ "_note": "Synthetic shape-only sample for offline tests; not real-world data.",
+ "elements": [
+  {
+   "type": "node",
+   "id": 101,
+   "lat": 7.3,
+   "lon": -2.3,
+   "tags": {
+    "place": "town",
+    "name": "Fixtureton"
+   }
+  },
+  {
+   "type": "node",
+   "id": 102,
+   "lat": 5.5,
+   "lon": 0.5,
+   "tags": {
+    "place": "city",
+    "name": "Othercity"
+   }
+  },
+  {
+   "type": "node",
+   "id": 103,
+   "lat": 20.0,
+   "lon": 20.0,
+   "tags": {
+    "place": "town",
+    "name": "Nowhere"
+   }
+  }
+ ]
+}

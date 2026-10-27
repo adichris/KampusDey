@@ -1,0 +1,14 @@
+{% load i18n %}
+<nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-base-100 border-t border-base-300 safe-bottom" aria-label="{% translate 'Main navigation' %}">
+  {% with name=request.resolver_match.url_name ns=request.resolver_match.namespace %}
+  <ul class="grid grid-cols-5 items-end text-[11px] font-medium">
+    <li><a href="/" class="flex flex-col items-center gap-0.5 py-2 tap {% if name == 'home' %}text-primary{% endif %}" {% if name == 'home' %}aria-current="page"{% endif %}>{% icon "house" %}<span>{% translate "Home" %}</span></a></li>
+    <li><a href="{% url 'listings:nearby' %}" class="flex flex-col items-center gap-0.5 py-2 tap {% if name == 'nearby' %}text-primary{% endif %}">{% icon "map" %}<span>{% translate "Nearby" %}</span></a></li>
+    <li class="flex justify-center"><a href="{% url 'listings:post' %}" class="btn btn-primary btn-circle btn-lg -mt-6 shadow-lg" aria-label="{% translate 'Post' %}">{% icon "plus" "size-7" %}</a></li>
+    <li><a href="{% url 'chat:inbox' %}" class="flex flex-col items-center gap-0.5 py-2 tap {% if ns == 'chat' %}text-primary{% endif %}">
+      <span class="indicator">{% icon "message-circle" %}{% if user.is_authenticated %}<span hx-get="{% url 'chat:unread_badge' %}" hx-trigger="load, every 30s" hx-swap="innerHTML"></span>{% endif %}</span>
+      <span>{% translate "Chats" %}</span></a></li>
+    <li><a href="{% url 'accounts:profile' %}" class="flex flex-col items-center gap-0.5 py-2 tap {% if ns == 'accounts' %}text-primary{% endif %}">{% icon "user" %}<span>{% translate "Profile" %}</span></a></li>
+  </ul>
+  {% endwith %}
+</nav>

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Where are you?" %} · KampusDey{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto card bg-base-100 border border-base-300">
+  <div class="card-body">
+    <h1 class="text-xl font-bold">{% translate "Where are you?" %}</h1>
+    {% include "locations/partials/picker.html" %}
+  </div>
+</div>
+{% endblock %}

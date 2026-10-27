@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Phone number" %} · KampusDey{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto card bg-base-100 border border-base-300">
+  <div class="card-body gap-2">
+    <h1 class="text-xl font-bold">{% translate "Verify your phone" %}</h1>
+    {% if required %}<p class="text-sm">{% translate "KampusDey now asks for a verified phone before you chat or boost. This keeps scammers out." %}</p>{% endif %}
+    {% if user.phone_verified %}<c-alert kind="success">{% blocktranslate with p=user.phone %}Verified: {{ p }}{% endblocktranslate %}</c-alert>{% endif %}
+    <form method="post" class="gap-0">{% csrf_token %}
+      <c-form-field :field="phone_form.phone" />
+      <button class="btn btn-outline w-full tap" name="send" value="1">{% translate "Send code by SMS" %}</button>
+    </form>
+    {% if pending %}
+    <form method="post">{% csrf_token %}
+      <c-form-field :field="otp_form.code" />
+      <button class="btn btn-primary w-full tap" name="verify" value="1">{% translate "Verify" %}</button>
+    </form>
+    <p class="text-xs opacity-70">{% translate "Codes expire after 10 minutes. You have 3 tries. You can ask for a new code after a minute." %}</p>
+    {% endif %}
+    {% if required and not user.phone_verified %}<form method="post">{% csrf_token %}<button class="btn btn-ghost btn-sm w-full" name="skip" value="1">{% translate "Skip for now" %}</button></form>{% endif %}
+  </div>
+</div>
+{% endblock %}

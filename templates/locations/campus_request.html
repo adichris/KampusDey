@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Add my school" %} · KampusDey{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto card bg-base-100 border border-base-300">
+  <form method="post" class="card-body gap-0">{% csrf_token %}
+    <h1 class="text-xl font-bold mb-2">{% translate "My school isn't listed" %}</h1>
+    <p class="text-sm opacity-75 mb-2">{% translate "Tell us the name and town. An admin checks it and adds it." %}</p>
+    {% for field in form %}<c-form-field :field="field" />{% endfor %}
+    <button class="btn btn-primary mt-2 tap">{% translate "Send request" %}</button>
+  </form>
+</div>
+{% endblock %}

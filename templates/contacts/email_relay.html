@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto card bg-base-100 border border-base-300">
+  <form method="post" class="card-body gap-0">{% csrf_token %}
+    <h1 class="text-xl font-bold mb-1">{% translate "Email the owner" %}</h1>
+    <p class="text-sm mb-2">{{ listing.title }}</p>
+    <c-alert kind="info">{% blocktranslate with e=user.email %}We send your message from KampusDey. Your email address ({{ e }}) is shared as “Reply-To” so the owner can answer you directly.{% endblocktranslate %}</c-alert>
+    <div class="h-2"></div>
+    {% for field in form %}<c-form-field :field="field" />{% endfor %}
+    <button class="btn btn-primary mt-2 tap">{% translate "Send" %}</button>
+  </form>
+</div>
+{% endblock %}

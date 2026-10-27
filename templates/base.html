@@ -1,0 +1,58 @@
+{% load static i18n %}<!doctype html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}"{% if user_theme %} data-user-theme="{{ user_theme }}"{% if user_theme != "system" %} data-theme="{{ user_theme }}"{% endif %}{% endif %}>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script nonce="{{ request.csp_nonce }}">(function(){var d=document.documentElement,t=d.getAttribute("data-user-theme");if(!t){try{t=localStorage.getItem("kd-theme")}catch(e){}}t=t||"system";d.setAttribute("data-chosen-theme",t);if(t==="system"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"kampusdey-dark":"kampusdey"}d.setAttribute("data-theme",t)})();</script>
+  <title>{% block title %}KampusDey — {% translate "Whatever you need on campus, e dey." %}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{% translate 'Find hostels, rooms, roommates, jobs, food, events and things to buy near your campus in Ghana.' %}{% endblock %}">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <meta name="htmx-config" content='{"includeIndicatorStyles":false,"allowEval":false,"allowScriptTags":false,"historyCacheSize":0}'>
+  <meta name="theme-color" content="#0E7C66">
+  <link rel="canonical" href="{% block canonical %}{{ SITE_URL }}{{ request.path }}{% endblock %}">
+  {% block robots %}{% endblock %}
+  {% block og %}
+  <meta property="og:site_name" content="KampusDey">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{% block og_title %}KampusDey{% endblock %}">
+  <meta property="og:url" content="{{ SITE_URL }}{{ request.path }}">
+  <meta name="twitter:card" content="summary">
+  {% endblock %}
+  <link rel="icon" href="{% static 'img/icon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="preload" href="{% static 'vendor/fonts/inter-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block head %}{% endblock %}
+  <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+  <script src="{% static 'vendor/alpine-csp.min.js' %}" defer></script>
+  {% if umami_script_url and umami_website_id %}<script defer src="{{ umami_script_url }}" data-website-id="{{ umami_website_id }}" nonce="{{ request.csp_nonce }}"></script>{% endif %}
+  {% block structured_data %}{% endblock %}
+</head>
+<body class="min-h-screen bg-base-200 text-base-content font-sans antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-3 focus:bg-base-100">{% translate "Skip to content" %}</a>
+  <div class="lg:flex lg:max-w-7xl lg:mx-auto">
+    <c-sidebar-nav />
+    <div class="flex-1 min-w-0">
+      {% include "partials/header.html" %}
+      <main id="main" class="mx-auto w-full max-w-5xl px-3 sm:px-4 pt-3 pb-28 lg:pb-10">
+        {% if messages %}
+        <div class="space-y-2 mb-3">
+          {% for message in messages %}
+          <c-alert kind="{{ message.tags|default:'info' }}">{{ message }}</c-alert>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% block main %}{% block content %}{% endblock content %}{% endblock main %}
+      </main>
+    </div>
+  </div>
+  <c-bottom-nav />
+  <div id="toasts" class="toast toast-top toast-center z-50" aria-live="polite"></div>
+  {% include "partials/location_sheet.html" %}
+  {% block modals %}{% endblock %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

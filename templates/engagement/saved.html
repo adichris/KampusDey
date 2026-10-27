@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Saved" %} · KampusDey{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-extrabold mb-3">{% translate "Saved" %}</h1>
+{% if listings %}<div class="grid grid-cols-2 md:grid-cols-3 gap-3">{% for item in listings %}<c-listing-card :listing="item" />{% endfor %}</div>
+{% else %}<c-empty-state icon="heart" title="{% translate 'Nothing saved yet' %}" text="{% translate 'Tap the heart on any listing to keep it here.' %}" />{% endif %}
+<h2 class="font-bold text-lg mt-6 mb-2">{% translate "Search alerts" %}</h2>
+<ul class="space-y-2">
+  {% for s in searches %}
+  <li class="flex items-center justify-between bg-base-100 border border-base-300 rounded-box p-3">
+    <span class="text-sm">{{ s.section }}{% if s.campus %} · {{ s.campus }}{% elif s.town %} · {{ s.town.name }}{% endif %}{% for k, v in s.params.items %} · {{ k }}={{ v }}{% endfor %}</span>
+    <button class="btn btn-ghost btn-xs" hx-post="{% url 'engagement:delete_saved_search' s.pk %}" hx-target="closest li" hx-swap="outerHTML">{% translate "Remove" %}</button>
+  </li>
+  {% empty %}<li class="text-sm opacity-70">{% translate "Use “Alert me” on any section page to get daily alerts." %}</li>{% endfor %}
+</ul>
+{% endblock %}

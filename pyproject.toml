@@ -1,0 +1,33 @@
+[project]
+name = "kampusdey"
+version = "1.0.0"
+description = "KampusDey — Whatever you need on campus, e dey."
+requires-python = ">=3.12"
+readme = "README.md"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["node_modules", "static", "media", ".venv", "data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "C4", "SIM"]
+ignore = ["DJ001", "B904", "SIM108", "DJ012"]
+
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*" = ["E501", "I001"]
+"config/settings/*" = ["F405", "F403"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps", "config"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py", "tests.py"]
+testpaths = ["apps", "tests"]
+addopts = "-q --reuse-db -p no:cacheprovider"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::PendingDeprecationWarning", "ignore:No directory at"]
+
+[tool.coverage.run]
+source = ["apps"]
+omit = ["*/migrations/*", "*/tests/*"]

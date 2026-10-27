@@ -1,0 +1,20 @@
+{% load i18n %}
+{% if photos %}
+<ul class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+  {% for photo in photos %}
+  <li class="relative rounded-box overflow-hidden border border-base-300 bg-base-200">
+    <img src="{{ photo.thumb.url }}" width="400" height="300" alt="{% translate 'Photo' %} {{ forloop.counter }}" class="aspect-square object-cover w-full" loading="lazy">
+    {% if forloop.first %}<span class="badge badge-primary badge-sm absolute top-1 left-1">{% translate "Cover" %}</span>{% endif %}
+    <div class="absolute bottom-1 inset-x-1 flex justify-between">
+      <div class="join">
+        {% if not forloop.first %}<button type="button" class="btn btn-xs join-item" hx-post="{% url 'listings:photo_move' listing.pk photo.pk 'up' %}" hx-target="#photo-list" aria-label="{% translate 'Move earlier' %}">{% icon "chevron-left" "size-3" %}</button>{% endif %}
+        {% if not forloop.last %}<button type="button" class="btn btn-xs join-item" hx-post="{% url 'listings:photo_move' listing.pk photo.pk 'down' %}" hx-target="#photo-list" aria-label="{% translate 'Move later' %}">{% icon "chevron-right" "size-3" %}</button>{% endif %}
+      </div>
+      <button type="button" class="btn btn-xs btn-error" hx-post="{% url 'listings:photo_delete' listing.pk photo.pk %}" hx-target="#photo-list" aria-label="{% translate 'Delete photo' %}">{% icon "trash-2" "size-3" %}</button>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-sm opacity-60 text-center">{% translate "No photos yet (optional for some sections)." %}</p>
+{% endif %}

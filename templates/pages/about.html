@@ -1,0 +1,9 @@
+{% extends "pages/_page.html" %}
+{% load i18n %}
+{% block title %}{% translate "About" %} · KampusDey{% endblock %}
+{% block article %}
+<h1>{% translate "About KampusDey" %}</h1>
+<p>{% translate "KampusDey helps students at universities and colleges across Ghana find hostels, rooms and roommates, buy and sell, and discover jobs, services, food, events and study materials near their campus." %}</p>
+<p>{% translate "It is free. People contact each other directly — by WhatsApp, phone, Telegram, email relay or in-app chat." %}</p>
+<p><a href="{% url 'pages:data_sources' %}">{% translate "Where our location data comes from" %}</a> · <a href="{% url 'pages:safety' %}">{% translate "Safety tips" %}</a></p>
+{% endblock %}

@@ -1,0 +1,40 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "ADM2_EN": "Fixture Municipal",
+    "ADM2_PCODE": "GH9901",
+    "ADM1_PCODE": "GH99"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -3.0,
+       7.0
+      ],
+      [
+       -2.5,
+       7.0
+      ],
+      [
+       -2.5,
+       7.5
+      ],
+      [
+       -3.0,
+       7.5
+      ],
+      [
+       -3.0,
+       7.0
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

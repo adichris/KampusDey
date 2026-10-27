@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "My listings" %} · KampusDey{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-3">
+  <h1 class="text-2xl font-extrabold">{% translate "My listings" %}</h1>
+  <a href="{% url 'listings:post' %}" class="btn btn-primary btn-sm">{% icon "plus" "size-4" %} {% translate "Post" %}</a>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
+  <c-stat title="{% translate 'Views (7d)' %}" value="{{ week.views }}" />
+  <c-stat title="{% translate 'Contact taps' %}" value="{{ week.taps }}" />
+  <c-stat title="{% translate 'Likes' %}" value="{{ week.likes }}" />
+  <c-stat title="{% translate 'Shares' %}" value="{{ week.shares }}" />
+  <c-stat title="{% translate 'Boosts left' %}" value="{{ boosts_left }}" desc="{% translate 'this week' %}" />
+</div>
+<nav class="chip-row flex gap-2 overflow-x-auto pb-2 mb-2">
+  <a class="btn btn-sm rounded-full {% if not active_status %}btn-primary{% else %}btn-ghost bg-base-100{% endif %}" href="?">{% translate "All" %}</a>
+  {% for value, label in statuses %}<a class="btn btn-sm rounded-full whitespace-nowrap {% if active_status == value %}btn-primary{% else %}btn-ghost bg-base-100{% endif %}" href="?status={{ value }}">{{ label }}</a>{% endfor %}
+</nav>
+{% if listings %}
+<ul class="space-y-2">
+  {% for item in listings %}
+  <li class="bg-base-100 border border-base-300 rounded-box p-3 flex flex-col sm:flex-row sm:items-center gap-2">
+    <div class="min-w-0 flex-1">
+      <a href="{% if item.status == 'draft' %}{% url 'listings:wizard' item.pk item.wizard_step %}{% else %}{{ item.get_absolute_url }}{% endif %}" class="font-semibold link-hover truncate block">{{ item.title }}</a>
+      <div class="text-xs opacity-70 flex flex-wrap gap-2 items-center">
+        <span class="badge badge-sm {% if item.status == 'active' %}badge-success{% elif item.status == 'needs_check' or item.status == 'pending_review' %}badge-warning{% else %}badge-ghost{% endif %}">{{ item.get_status_display }}</span>
+        {% if item.is_hidden %}<span class="badge badge-error badge-sm">{% translate "Hidden" %}</span>{% endif %}
+        {% if item.active_boost %}<span class="badge badge-secondary badge-sm">{% translate "Boosted until" %} {{ item.active_boost.ends_at|date:"D j M" }}</span>{% endif %}
+        <span>{{ item.section_obj.label }}</span><span>· {{ item.views_7d }} {% translate "views" %} · {{ item.taps_7d }} {% translate "taps" %} · {{ item.likes_count }} ♥</span>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-1">
+      {% if item.status == "draft" %}
+        <a class="btn btn-sm" href="{% url 'listings:wizard' item.pk item.wizard_step %}">{% translate "Continue" %}</a>
+      {% else %}
+        <a class="btn btn-sm btn-ghost" href="{% url 'dashboard:stats' item.pk %}">{% translate "Stats" %}</a>
+        {% if item.status == "active" and not item.active_boost %}<form method="post" action="{% url 'dashboard:boost' item.pk %}">{% csrf_token %}<button class="btn btn-sm btn-secondary">{% icon "rocket" "size-4" %} {% translate "Boost" %}</button></form>{% endif %}
+        {% if item.status == "needs_check" or item.status == "expired" or item.status == "taken" %}<form method="post" action="{% url 'dashboard:renew' item.pk %}">{% csrf_token %}<button class="btn btn-sm btn-primary">{% translate "Renew" %}</button></form>{% endif %}
+        {% if item.status == "active" or item.status == "needs_check" %}<form method="post" action="{% url 'dashboard:taken' item.pk %}">{% csrf_token %}<button class="btn btn-sm">{% translate "Mark taken" %}</button></form>{% endif %}
+      {% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<c-empty-state icon="package" title="{% translate 'You have no listings yet' %}" action_url="{% url 'listings:post' %}" action_label="{% translate 'Post something' %}" />
+{% endif %}
+{% endblock %}

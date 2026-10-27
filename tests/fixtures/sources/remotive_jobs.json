@@ -1,0 +1,60 @@
+{
+ "_note": "Synthetic shape-only sample for offline tests; not real-world data.",
+ "job-count": 4,
+ "jobs": [
+  {
+   "id": 1,
+   "url": "https://remotive.com/remote-jobs/test-1",
+   "title": "Fixture Support Agent",
+   "company_name": "Example Co",
+   "category": "Customer Service",
+   "tags": [
+    "support"
+   ],
+   "job_type": "full_time",
+   "publication_date": "2026-10-20T10:00:00",
+   "candidate_required_location": "Worldwide",
+   "salary": "",
+   "description": "<p>LONG DESCRIPTION NOT STORED</p>"
+  },
+  {
+   "id": 2,
+   "url": "https://remotive.com/remote-jobs/test-2",
+   "title": "Fixture Writer",
+   "company_name": "Example Media",
+   "category": "Writing",
+   "tags": [],
+   "job_type": "contract",
+   "publication_date": "2026-10-21T10:00:00",
+   "candidate_required_location": "Africa, Europe",
+   "salary": "$20/hr",
+   "description": "x"
+  },
+  {
+   "id": 3,
+   "url": "https://remotive.com/remote-jobs/test-3",
+   "title": "US Only Dev",
+   "company_name": "Example US",
+   "category": "Software Development",
+   "tags": [],
+   "job_type": "full_time",
+   "publication_date": "2026-10-21T10:00:00",
+   "candidate_required_location": "USA Only",
+   "salary": "",
+   "description": "x"
+  },
+  {
+   "id": 4,
+   "url": "https://remotive.com/remote-jobs/test-4",
+   "title": "Fixture Accountant",
+   "company_name": "Example",
+   "category": "Finance / Legal",
+   "tags": [],
+   "job_type": "full_time",
+   "publication_date": "2026-10-21T10:00:00",
+   "candidate_required_location": "Worldwide",
+   "salary": "",
+   "description": "x"
+  }
+ ]
+}

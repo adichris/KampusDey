@@ -1,0 +1,7 @@
+{% load i18n %}
+<c-vars lat lng zoom="15" mode="" items_id="" rings="" approx_radius="300" css="kd-map" lat_input="" lng_input="" label="" />
+<div class="{{ css }} w-full" data-kd-map data-tiles="{% cfg 'MAP_TILE_URL' %}" data-attribution="{% cfg 'MAP_ATTRIBUTION' %}"
+     data-lat="{{ lat|stringformat:'s' }}" data-lng="{{ lng|stringformat:'s' }}" data-zoom="{{ zoom }}" data-mode="{{ mode }}"
+     data-items="{{ items_id }}" data-rings="{{ rings }}" data-approx-radius="{{ approx_radius }}"
+     data-lat-input="{{ lat_input }}" data-lng-input="{{ lng_input }}" role="region" aria-label="{% if label %}{{ label }}{% else %}{% translate 'Map' %}{% endif %}"></div>
+<p class="text-[11px] opacity-70 mt-1">{% translate "Map data" %} {% cfg 'MAP_ATTRIBUTION' as attribution %}{{ attribution|safe }}</p>

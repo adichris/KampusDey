@@ -1,0 +1,12 @@
+{% load i18n %}
+{% if campuses %}
+<h3 class="text-xs font-bold uppercase opacity-60 mb-1">{% translate "Nearest campuses" %}</h3>
+<ul class="space-y-1">
+  {% for campus in campuses %}
+  <li><form method="post" action="{% url 'locations:choose' %}">{% csrf_token %}<input type="hidden" name="campus" value="{{ campus.pk }}"><input type="hidden" name="next" value="{{ next }}">
+    <button class="btn btn-outline w-full justify-between tap"><span>{{ campus.label }} <span class="text-xs opacity-70">{{ campus.town.name }}</span></span><span class="text-xs">{{ campus.distance_m|distance }}</span></button></form></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-sm opacity-70">{% translate "We don't know the position of campuses near you yet. Search by name instead." %}</p>
+{% endif %}

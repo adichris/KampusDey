@@ -1,0 +1,5 @@
+{% load i18n %}
+<c-vars listing />
+{% if listing.is_free %}<span class="font-bold text-success">{% translate "Free" %}</span>
+{% elif listing.price is not None %}<span class="font-bold">{{ listing.price|ghs }}{% if listing.price_period and listing.price_period != "total" %}<span class="text-xs font-normal opacity-70"> / {{ listing.get_price_period_short }}</span>{% endif %}</span>{% if listing.negotiable %} <span class="badge badge-ghost badge-sm">{% translate "negotiable" %}</span>{% endif %}
+{% endif %}

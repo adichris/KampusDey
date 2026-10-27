@@ -1,0 +1,28 @@
+{
+ "_note": "Synthetic shape-only sample for offline tests; not real-world data.",
+ "elements": [
+  {
+   "type": "way",
+   "id": 5001,
+   "center": {
+    "lat": 7.3011,
+    "lon": -2.3011
+   },
+   "tags": {
+    "amenity": "university",
+    "name": "FUT Main",
+    "wikidata": "Q900001"
+   }
+  },
+  {
+   "type": "node",
+   "id": 5002,
+   "lat": 7.33,
+   "lon": -2.33,
+   "tags": {
+    "amenity": "college",
+    "name": "Fixtureton Nursing and Midwifery Training College"
+   }
+  }
+ ]
+}

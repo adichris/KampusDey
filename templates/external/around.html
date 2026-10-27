@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% block title %}{% translate "Around campus" %} · {{ campus.label }} · KampusDey{% endblock %}
+{% block head %}{% if view_mode == "map" %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endif %}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-extrabold">{% translate "Around campus" %}</h1>
+<p class="text-sm opacity-70 mb-2">{{ campus.name }} · {% translate "Places from OpenStreetMap — not verified, prices not listed." %}</p>
+<nav class="chip-row flex gap-2 overflow-x-auto pb-2 mb-2" aria-label="{% translate 'Categories' %}">
+  {% for key, label, kinds in tabs %}<a class="btn btn-sm rounded-full whitespace-nowrap {% if key == tab %}btn-primary{% else %}btn-ghost bg-base-100{% endif %}" href="?tab={{ key }}&view={{ view_mode }}">{{ label }}</a>{% endfor %}
+</nav>
+<div class="flex justify-end mb-2"><div class="join">
+  <a class="btn btn-sm join-item {% if view_mode != 'map' %}btn-active{% endif %}" href="?tab={{ tab }}&view=list" aria-label="{% translate 'List view' %}">{% icon "list" "size-4" %}</a>
+  <a class="btn btn-sm join-item {% if view_mode == 'map' %}btn-active{% endif %}" href="?tab={{ tab }}&view=map" aria-label="{% translate 'Map view' %}">{% icon "map" "size-4" %}</a>
+</div></div>
+{% if view_mode == "map" and campus.has_point %}
+  {{ items|json_script:"place-items" }}
+  <c-map lat="{{ campus.lat }}" lng="{{ campus.lng }}" zoom="15" items_id="place-items" mode="pin" css="kd-map-tall" />
+{% elif page.object_list %}
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">{% for place in page.object_list %}{% include "external/partials/place_card.html" %}{% endfor %}</div>
+  {% if page.has_next %}<a class="btn btn-ghost w-full mt-3" href="?tab={{ tab }}&page={{ page.next_page_number }}">{% translate "More" %}</a>{% endif %}
+{% else %}
+  <c-empty-state icon="store" title="{% translate 'No places imported here yet' %}" text="{% translate 'Places appear once an admin approves the OpenStreetMap source and the campus has a location.' %}" />
+{% endif %}
+<p class="text-xs opacity-70 mt-4">{% translate "Place data" %} © <a class="link" href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a> (ODbL).</p>
+{% endblock %}
+{% block scripts %}{% if view_mode == "map" %}<script src="{% static 'vendor/leaflet/leaflet.js' %}" defer></script><script src="{% static 'js/map.js' %}" defer></script>{% endif %}{% endblock %}

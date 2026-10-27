@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Contact" %} · {{ section.label }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-xl font-bold mb-2">{{ section.label }}: {% translate "how should people reach you?" %}</h1>
+  <c-stepper step="3" />
+  <form method="post" class="card bg-base-100 border border-base-300">{% csrf_token %}
+    <div class="card-body gap-0">
+      {% if form.non_field_errors %}<c-alert kind="error">{{ form.non_field_errors|join:" " }}</c-alert>{% endif %}
+      <p class="text-sm opacity-75 mb-2">{% translate "Phone numbers are never shown until someone taps “Show number”." %}</p>
+      <c-form-field :field="form.whatsapp" />
+      <c-form-field :field="form.phone" />
+      <c-form-field :field="form.hide_number" />
+      <c-form-field :field="form.telegram" />
+      <c-form-field :field="form.chat" />
+      <c-form-field :field="form.email_relay" />
+      <c-form-field :field="form.preferred_time" />
+      <c-form-field :field="form.contact_visibility" />
+      <div class="divider my-2">{% translate "Campuses" %}</div>
+      {% if form.keep_campuses.field.choices %}<c-form-field :field="form.keep_campuses" />{% else %}<p class="text-sm opacity-70">{% translate "No campus linked yet — add one below." %}</p>{% endif %}
+      <c-form-field :field="form.add_campus" />
+      <div class="flex flex-wrap justify-between gap-2 mt-4">
+        <a href="{% url 'listings:wizard' listing.pk 2 %}" class="btn btn-ghost">{% icon "chevron-left" "size-4" %} {% translate "Details" %}</a>
+        <div class="flex gap-2">
+          {% if not is_edit %}<button class="btn btn-ghost" name="save_draft" value="1">{% translate "Save draft" %}</button>{% endif %}
+          <button class="btn btn-primary tap">{% if is_edit %}{% translate "Save changes" %}{% else %}{% translate "Publish" %}{% endif %}</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

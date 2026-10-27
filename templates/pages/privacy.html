@@ -1,0 +1,15 @@
+{% extends "pages/_page.html" %}
+{% load i18n %}
+{% block title %}{% translate "Privacy" %} · KampusDey{% endblock %}
+{% block article %}
+<h1>{% translate "Privacy" %}</h1>
+<ul>
+  <li>{% translate "We do not store IP addresses with your activity. Visit statistics use a daily hashed session ID." %}</li>
+  <li>{% translate "Photo location data (EXIF/GPS) is removed when you upload." %}</li>
+  <li>{% translate "Rooms, roommates, food and lost & found show only an approximate area. Map pins are rounded to about 200 m." %}</li>
+  <li>{% translate "Phone numbers are never in the page until someone taps “Show number”." %}</li>
+  <li>{% translate "Verification documents are stored privately and deleted after a decision." %}</li>
+  <li>{% translate "Your device location is used once to find nearby campuses and is not stored." %}</li>
+  <li>{% translate "You can download your data or delete your account at any time from your profile." %}</li>
+</ul>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% load i18n %}
+<c-vars step="1" />
+<ul class="steps w-full text-xs mb-4" aria-label="{% translate 'Progress' %}">
+  <li class="step {% if step|add:0 >= 1 %}step-primary{% endif %}">{% translate "Photos" %}</li>
+  <li class="step {% if step|add:0 >= 2 %}step-primary{% endif %}">{% translate "Details" %}</li>
+  <li class="step {% if step|add:0 >= 3 %}step-primary{% endif %}">{% translate "Contact" %}</li>
+</ul>

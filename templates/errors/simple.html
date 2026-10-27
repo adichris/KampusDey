@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ title }} · KampusDey{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<c-empty-state icon="circle-help" title="{{ title }}" text="{{ message|default:'' }}">
+  <a href="/" class="btn btn-primary">{% translate "Go home" %}</a>
+</c-empty-state>
+{% endblock %}

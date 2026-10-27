@@ -1,0 +1,10 @@
+{% load i18n %}
+<c-vars id title />
+<dialog id="{{ id }}" class="modal" aria-labelledby="{{ id }}-title">
+  <div class="modal-box">
+    <h3 id="{{ id }}-title" class="font-bold text-lg mb-2">{{ title }}</h3>
+    {{ slot }}
+    <div class="modal-action"><button type="button" class="btn btn-ghost" data-close-dialog>{% translate "Close" %}</button></div>
+  </div>
+  <form method="dialog" class="modal-backdrop"><button>{% translate "Close" %}</button></form>
+</dialog>

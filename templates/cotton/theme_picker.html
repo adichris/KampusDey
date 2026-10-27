@@ -1,0 +1,11 @@
+{% load i18n %}
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-3" role="group" aria-label="{% translate 'Theme' %}">
+  {% for theme in THEMES_OFFERED %}
+  <button type="button" class="rounded-box border border-base-300 overflow-hidden text-left tap" data-theme-choice="{{ theme }}" data-theme-url="{% url 'accounts:theme' %}" data-saved-text="{% translate 'Theme saved' %}" aria-pressed="false">
+    <div {% if theme != "system" %}data-theme="{{ theme }}"{% endif %} class="bg-base-100 text-base-content p-3">
+      <div class="flex gap-1 mb-2" aria-hidden="true"><span class="size-4 rounded-full bg-primary"></span><span class="size-4 rounded-full bg-secondary"></span><span class="size-4 rounded-full bg-accent"></span><span class="size-4 rounded-full bg-neutral"></span></div>
+      <div class="text-sm font-semibold capitalize">{% if theme == "system" %}{% translate "System (light/dark)" %}{% else %}{{ theme }}{% endif %}</div>
+    </div>
+  </button>
+  {% endfor %}
+</div>

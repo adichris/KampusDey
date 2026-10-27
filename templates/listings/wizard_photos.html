@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Photos" %} · {{ section.label }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-xl font-bold mb-2">{{ section.label }}: {% translate "add photos" %}</h1>
+  <c-stepper step="1" />
+  <c-photo-uploader :listing="listing" :photos="photos" max="{{ max_photos }}" />
+  <p class="text-sm opacity-70 mt-3">{% translate "Clear, bright photos get more taps. 3 or more photos rank higher." %}</p>
+  <form method="post" class="flex justify-between mt-4">{% csrf_token %}
+    {% if not is_edit %}<a href="{% url 'listings:delete_draft' listing.pk %}" class="btn btn-ghost">{% translate "Discard" %}</a>{% else %}<a href="{{ listing.get_absolute_url }}" class="btn btn-ghost">{% translate "Cancel" %}</a>{% endif %}
+    <button class="btn btn-primary tap">{% translate "Next: details" %} {% icon "chevron-right" "size-4" %}</button>
+  </form>
+</div>
+{% endblock %}

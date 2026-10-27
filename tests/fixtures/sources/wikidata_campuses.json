@@ -1,0 +1,20 @@
+{
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "value": "http://www.wikidata.org/entity/Q900010"
+    },
+    "itemLabel": {
+     "value": "Fixture University of Testing, North Campus"
+    },
+    "parent": {
+     "value": "http://www.wikidata.org/entity/Q900001"
+    },
+    "coords": {
+     "value": "Point(-2.35 7.35)"
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,6 @@
+<c-vars name="" image="" size="size-10" />
+<div class="avatar {% if not image %}avatar-placeholder{% endif %}">
+  <div class="{{ size }} rounded-full {% if not image %}bg-primary text-primary-content{% endif %}">
+    {% if image %}<img src="{{ image }}" alt="" width="40" height="40" loading="lazy">{% else %}<span class="text-sm font-bold">{{ name|initials }}</span>{% endif %}
+  </div>
+</div>

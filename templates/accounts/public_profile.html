@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ person.public_name }} · KampusDey{% endblock %}
+{% block content %}
+<div class="card bg-base-100 border border-base-300 mb-4"><div class="card-body flex-row items-center gap-4">
+  <c-avatar name="{{ person.public_name }}" image="{% if profile.avatar %}{{ profile.avatar.url }}{% endif %}" size="size-16" />
+  <div>
+    <h1 class="text-xl font-bold">{{ person.public_name }}</h1>
+    <div class="flex flex-wrap gap-1"><c-badge-verified :profile="profile" /></div>
+    {% if profile.bio %}<p class="text-sm mt-1 whitespace-pre-line">{{ profile.bio }}</p>{% endif %}
+  </div>
+  {% if user.is_authenticated and user != person %}<div class="ml-auto"><c-report-button kind="user" oid="{{ person.pk }}" /></div>{% endif %}
+</div></div>
+<h2 class="font-bold text-lg mb-2">{% translate "Listings" %}</h2>
+{% if listings %}<div class="grid grid-cols-2 md:grid-cols-3 gap-3">{% for item in listings %}<c-listing-card :listing="item" />{% endfor %}</div>
+{% else %}<p class="text-sm opacity-70">{% translate "No active listings." %}</p>{% endif %}
+<h2 class="font-bold text-lg mt-6 mb-2">{% translate "Reviews" %}</h2>
+{% if can_review %}<a class="btn btn-outline btn-sm mb-2" href="{% url 'engagement:review' 'user' person.pk %}">{% translate "Write a review" %}</a>{% endif %}
+{% for r in reviews %}<div class="border-b border-base-300 py-2"><span class="text-warning">{% for i in "12345"|make_list %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</span> <span class="text-sm">{{ r.body }}</span></div>{% empty %}<p class="text-sm opacity-70">{% translate "No reviews yet." %}</p>{% endfor %}
+{% endblock %}
+{% block modals %}<c-modal id="report-dialog" title="{% translate 'Report' %}"><div id="report-slot"></div></c-modal>{% endblock %}

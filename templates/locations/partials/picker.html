@@ -1,0 +1,31 @@
+{% load i18n %}
+<div class="space-y-4">
+  {% if hint_region %}<p class="text-sm"><span class="badge badge-info badge-sm">{% translate "Hint" %}</span> {% blocktranslate with r=hint_region.name %}Looks like you're in {{ r }}.{% endblocktranslate %}</p>{% endif %}
+  <button type="button" class="btn btn-primary w-full tap" data-geolocate="{% url 'locations:nearest' %}?next={{ next|urlencode }}" data-target="#nearest-campuses"
+          data-denied="{% translate 'We could not get your location. Search below instead.' %}" data-unsupported="{% translate 'Your browser does not share location.' %}">
+    {% icon "locate" %} {% translate "Use my current location" %}
+  </button>
+  <div id="nearest-campuses" aria-live="polite"></div>
+
+  <div>
+    <label for="campus-q" class="fieldset-legend">{% translate "Search campuses" %}</label>
+    <input id="campus-q" name="q" type="search" class="input input-bordered w-full" placeholder="{% translate 'e.g. UENR, Sunyani, KNUST' %}"
+           hx-get="{% url 'locations:search' %}" hx-trigger="input changed delay:300ms, search" hx-target="#campus-results" hx-vals='{"next": "{{ next|escapejs }}"}' autocomplete="off">
+  </div>
+  <div id="campus-results" class="max-h-72 overflow-y-auto">{% include "locations/partials/campus_list.html" %}</div>
+
+  <details class="collapse collapse-arrow bg-base-200">
+    <summary class="collapse-title font-semibold">{% translate "Other (not on a campus)" %}</summary>
+    <div class="collapse-content space-y-2">
+      <label for="region-select" class="fieldset-legend">{% translate "Region" %}</label>
+      <select id="region-select" name="region" class="select select-bordered w-full" hx-get="{% url 'locations:towns' %}" hx-target="#town-list" hx-trigger="change" hx-vals='{"next": "{{ next|escapejs }}"}'>
+        <option value="">{% translate "Choose region" %}</option>
+        {% for region in regions %}<option value="{{ region.pk }}" {% if hint_region and hint_region.pk == region.pk %}selected{% endif %}>{{ region.name }}</option>{% endfor %}
+      </select>
+      <div id="town-list"></div>
+    </div>
+  </details>
+
+  <a href="{% url 'locations:request' %}" class="btn btn-ghost btn-sm w-full">{% icon "plus" "size-4" %} {% translate "My school isn't listed" %}</a>
+  <p class="text-[11px] opacity-60">{% translate "Location data © OpenStreetMap contributors, Wikidata (CC0) and official lists." %} <a class="link" href="{% url 'pages:data_sources' %}">{% translate "Data sources" %}</a></p>
+</div>

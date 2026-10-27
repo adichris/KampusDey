@@ -1,0 +1,9 @@
+{% load i18n %}<div style="font-family:Arial,sans-serif;max-width:560px">
+<p>{% blocktranslate with n=user.public_name %}Hi {{ n }},{% endblocktranslate %}</p>
+{% for note in notes %}<div style="border-top:1px solid #ddd;padding:8px 0">
+<p><b>{% if note.url %}<a href="{{ SITE_URL }}{{ note.url }}">{{ note.title }}</a>{% else %}{{ note.title }}{% endif %}</b></p>
+{% if note.body %}<p>{{ note.body }}</p>{% endif %}
+{% if note.data.confirm_url %}<p><a href="{{ note.data.confirm_url }}">{% translate "Yes, still available" %}</a> · <a href="{{ note.data.taken_url }}">{% translate "Mark as taken" %}</a></p>{% endif %}
+</div>{% endfor %}
+<p style="font-size:12px;color:#666"><a href="{{ SITE_URL }}/notifications/settings/">{% translate "Email settings" %}</a></p>
+</div>

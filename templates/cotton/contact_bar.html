@@ -1,0 +1,13 @@
+{% load i18n %}
+<c-vars contact />
+<div class="fixed lg:sticky bottom-16 lg:bottom-4 inset-x-0 z-30 px-3 lg:px-0" id="contact-bar">
+  <div class="mx-auto max-w-5xl bg-base-100 border border-base-300 shadow-lg rounded-box p-2 flex gap-2">
+    {% if contact.login_required %}
+    <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="btn btn-primary flex-1 tap">{% icon "lock" %} {% translate "Log in to contact this person" %}</a>
+    {% elif contact.buttons %}
+      {% for button in contact.buttons %}<c-contact-button :button="button" />{% endfor %}
+    {% else %}
+    <p class="text-sm opacity-70 p-2">{% translate "No contact options." %}</p>
+    {% endif %}
+  </div>
+</div>

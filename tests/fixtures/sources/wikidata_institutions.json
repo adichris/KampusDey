@@ -1,0 +1,58 @@
+{
+ "_note": "Synthetic shape-only sample for offline tests; not real-world data.",
+ "head": {
+  "vars": []
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q900001"
+    },
+    "itemLabel": {
+     "value": "Fixture University of Testing"
+    },
+    "shortName": {
+     "value": "FUT"
+    },
+    "coords": {
+     "value": "Point(-2.301 7.301)"
+    },
+    "adm": {
+     "value": "Fixtureton Municipal District"
+    },
+    "site": {
+     "value": "https://fut.example.test/"
+    },
+    "types": {
+     "value": "public university"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q900002"
+    },
+    "itemLabel": {
+     "value": "Fixtureton Technical University"
+    },
+    "coords": {
+     "value": "Point(-2.32 7.32)"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q900003"
+    },
+    "itemLabel": {
+     "value": "Old Closed College"
+    },
+    "diss": {
+     "value": "2001-01-01T00:00:00Z"
+    }
+   }
+  ]
+ }
+}

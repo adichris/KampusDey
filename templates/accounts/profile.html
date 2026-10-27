@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Profile" %} · KampusDey{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-4">
+  <div class="card bg-base-100 border border-base-300"><div class="card-body flex-row items-center gap-4">
+    <c-avatar name="{{ user.public_name }}" image="{% if profile.avatar %}{{ profile.avatar.url }}{% endif %}" size="size-16" />
+    <div class="min-w-0">
+      <h1 class="text-xl font-bold truncate">{{ user.public_name }}</h1>
+      <p class="text-sm opacity-70 truncate">{{ user.email }} · {{ profile.get_role_display }}</p>
+      <div class="flex flex-wrap gap-1 mt-1"><c-badge-verified :profile="profile" />{% if user.phone_verified %}<span class="badge badge-success badge-sm">{% translate "Phone verified" %}</span>{% endif %}</div>
+    </div>
+    <a href="{% url 'accounts:edit_profile' %}" class="btn btn-ghost btn-sm ml-auto">{% translate "Edit" %}</a>
+  </div></div>
+
+  {% if phone_required and not user.phone_verified %}<c-alert kind="warning">{% translate "Verify your phone number to chat and boost." %} <a class="link" href="{% url 'accounts:phone' %}">{% translate "Verify now" %}</a></c-alert>{% endif %}
+
+  <ul class="menu bg-base-100 border border-base-300 rounded-box w-full">
+    <li><a href="{% url 'dashboard:home' %}">{% icon "chart-column" %} {% translate "My listings & stats" %} <span class="badge badge-secondary">{% blocktranslate %}{{ boosts_left }} boosts left{% endblocktranslate %}</span></a></li>
+    <li><a href="{% url 'engagement:saved' %}">{% icon "heart" %} {% translate "Saved" %}</a></li>
+    <li><a href="{% url 'hostels:manager' %}">{% icon "building-2" %} {% translate "Hostel Manager" %}</a></li>
+    <li><a href="{% url 'accounts:appearance' %}">{% icon "palette" %} {% translate "Appearance" %}</a></li>
+    <li><a href="{% url 'notifications:preferences' %}">{% icon "bell" %} {% translate "Notifications" %}</a></li>
+    <li><a href="{% url 'accounts:phone' %}">{% icon "phone" %} {% translate "Phone number" %}</a></li>
+    <li><a href="{% url 'accounts:verification' %}">{% icon "shield-check" %} {% translate "Get a verified badge" %}</a></li>
+    <li><a href="{% url 'account_email' %}">{% icon "mail" %} {% translate "Email & password" %}</a></li>
+    <li><a href="{% url 'pages:safety' %}">{% icon "info" %} {% translate "Safety tips" %}</a></li>
+  </ul>
+
+  {% if profile.is_ambassador %}
+  <div class="card bg-base-100 border border-base-300"><div class="card-body">
+    <h2 class="font-bold">{% translate "Campus ambassador" %}</h2>
+    <p class="text-sm">{% translate "Share your link. When a friend verifies their email and posts, you get extra free boosts." %}</p>
+    <div class="join w-full"><input class="input input-bordered join-item w-full" readonly value="{{ SITE_URL }}/r/{{ profile.referral_code }}/" aria-label="{% translate 'Referral link' %}"><button class="btn join-item" data-share="{{ SITE_URL }}/r/{{ profile.referral_code }}/">{% icon "copy" "size-4" %}</button></div>
+  </div></div>
+  {% endif %}
+
+  <ul class="menu bg-base-100 border border-base-300 rounded-box w-full">
+    <li><a href="{% url 'accounts:export' %}">{% icon "download" %} {% translate "Download my data (JSON)" %}</a></li>
+    <li><a href="{% url 'accounts:delete' %}" class="text-error">{% icon "trash-2" %} {% translate "Delete my account" %}</a></li>
+    <li><a href="{% url 'account_logout' %}">{% icon "log-out" %} {% translate "Sign out" %}</a></li>
+  </ul>
+</div>
+{% endblock %}

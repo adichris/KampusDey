@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with p=place %}New near {{ p }} this week:{% endblocktranslate %}
+
+{% for item in items %}- {{ item.title }} — {{ item.card_info }}
+  {{ SITE_URL }}{{ item.get_absolute_url }}
+{% endfor %}
+{% translate "Turn off the weekly digest:" %} {{ SITE_URL }}/notifications/settings/
+{% endautoescape %}

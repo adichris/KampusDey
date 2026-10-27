@@ -1,0 +1,8 @@
+{% load i18n %}
+<c-vars listing liked="" />
+<button type="button" id="like-{{ listing.pk }}" class="btn btn-ghost btn-sm gap-1 tap {% if liked %}text-accent{% endif %}"
+        hx-post="{% url 'engagement:like' listing.pk %}" hx-target="this" hx-swap="outerHTML"
+        aria-pressed="{% if liked %}true{% else %}false{% endif %}" aria-label="{% if liked %}{% translate 'Remove from saved' %}{% else %}{% translate 'Save' %}{% endif %}">
+  {% if liked %}{% icon "heart" "size-5 fill-current" %}{% else %}{% icon "heart" %}{% endif %}
+  <span>{{ listing.likes_count }}</span>
+</button>

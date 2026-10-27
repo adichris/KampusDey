@@ -1,0 +1,21 @@
+{% extends "pages/_page.html" %}
+{% load i18n %}
+{% block title %}{% translate "Data sources" %} · KampusDey{% endblock %}
+{% block article %}
+<h1>{% translate "Data sources" %}</h1>
+<p>{% translate "Campus, town and neighbourhood data come from public sources. Every record keeps its source, licence and retrieval date, and admins review it." %}</p>
+<table>
+  <thead><tr><th>{% translate "Source" %}</th><th>{% translate "Used for" %}</th><th>{% translate "Licence" %}</th><th>{% translate "Last import" %}</th></tr></thead>
+  <tbody>
+    <tr><td><a href="https://www.wikidata.org/">Wikidata</a></td><td>{% translate "Institutions, websites, coordinates" %}</td><td>CC0</td><td>{{ last.wikidata|date:"j M Y"|default:"—" }}</td></tr>
+    <tr><td><a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a></td><td>{% translate "Campus points, towns, neighbourhoods, places around campus" %}</td><td>ODbL — © OpenStreetMap contributors</td><td>{{ last.osm|date:"j M Y"|default:"—" }}</td></tr>
+    <tr><td><a href="https://data.humdata.org/m/dataset/cod-ab-gha">HDX COD-AB (OCHA)</a></td><td>{% translate "Region and district boundaries" %}</td><td>{% translate "As stated on the dataset page" %}</td><td>{{ last.hdx|date:"j M Y"|default:"—" }}</td></tr>
+    <tr><td><a href="https://gtec.edu.gh">GTEC</a></td><td>{% translate "Accreditation status" %}</td><td>{% translate "Public regulator information" %}</td><td>{{ last.gtec|date:"j M Y"|default:"—" }}</td></tr>
+    <tr><td>{% translate "Ministry of Health (KNUST affiliation list)" %}</td><td>{% translate "Nursing and health training colleges" %}</td><td>{% translate "Public document" %}</td><td>{{ last.moh|date:"j M Y"|default:"—" }}</td></tr>
+    <tr><td>Wikipedia</td><td>{% translate "Cross-checking names only" %}</td><td>{% translate "Facts only" %}</td><td>—</td></tr>
+  </tbody>
+</table>
+<h2>{% translate "External content" %}</h2>
+<ul>{% for s in external_sources %}<li><b>{{ s.name }}</b> — {{ s.attribution_text }} ({{ s.licence }}). <a href="{{ s.terms_url }}" rel="noopener">{% translate "Terms" %}</a>{% if s.permission_status != "approved" %} · {% translate "not active yet" %}{% endif %}</li>{% endfor %}</ul>
+<p>{% translate "We never copy listings, prices or personal details from other platforms." %}</p>
+{% endblock %}
