@@ -19,6 +19,12 @@ class ContactCard(TimeStampedModel):
     def __str__(self):
         return f"{self.label} ({self.owner})"
 
+    @property
+    def preferred_time_display(self):
+        from .hours import display
+
+        return display(self.preferred_time)
+
     def channel(self, kind):
         return next((c for c in self.channels.all() if c.kind == kind), None)
 

@@ -16,7 +16,16 @@
       <c-form-field :field="form.telegram" />
       <c-form-field :field="form.chat" />
       <c-form-field :field="form.email_relay" />
-      <c-form-field :field="form.preferred_time" />
+      <fieldset class="fieldset mb-2">
+        <legend class="fieldset-legend text-base-content">{% translate "Best time to contact" %}</legend>
+        {% if form.legacy_time %}<p class="label text-xs whitespace-normal">{% translate "You wrote:" %} “{{ form.legacy_time }}”. {% translate "Pick a range to replace it." %}</p>{% endif %}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <label class="flex flex-col gap-1 text-sm"><span class="opacity-70">{% translate "Days" %}</span>{% widget form.contact_days %}</label>
+          <label class="flex flex-col gap-1 text-sm"><span class="opacity-70">{% translate "From" %}</span>{% widget form.contact_from %}</label>
+          <label class="flex flex-col gap-1 text-sm"><span class="opacity-70">{% translate "To" %}</span>{% widget form.contact_to %}</label>
+        </div>
+        {% for error in form.contact_to.errors %}<p class="label text-error text-xs whitespace-normal">{{ error }}</p>{% endfor %}
+      </fieldset>
       <c-form-field :field="form.contact_visibility" />
       <div class="divider my-2">{% translate "Campuses" %}</div>
       {% if form.keep_campuses.field.choices %}<c-form-field :field="form.keep_campuses" />{% else %}<p class="text-sm opacity-70">{% translate "No campus linked yet — add one below." %}</p>{% endif %}

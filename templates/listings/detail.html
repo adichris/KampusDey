@@ -72,7 +72,7 @@
       </div>
       {% endif %}
     </div>
-    {% if listing.contact_card.preferred_time %}<p class="text-sm"><span class="opacity-70">{% translate "Best time to contact:" %}</span> {{ listing.contact_card.preferred_time }}</p>{% endif %}
+    {% if listing.contact_card.preferred_time %}<p class="text-sm"><span class="opacity-70">{% translate "Best time to contact:" %}</span> {{ listing.contact_card.preferred_time_display }}</p>{% endif %}
     <div class="flex flex-wrap gap-1 border-y border-base-300 py-1">
       <c-like-button :listing="listing" :liked="liked" />
       <c-share-button url="{{ listing.get_absolute_url|absolute }}" title="{{ listing.title }}" log_url="{% url 'engagement:share' listing.pk %}" />

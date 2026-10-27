@@ -365,3 +365,30 @@ def test_service_worker_never_caches_tiles(client, db):
     assert (
         "if (url.origin !== self.location.origin) return;" in js
     )  # cross-origin (tiles) never handled
+
+
+def test_contact_time_range_round_trip(campus):
+    from apps.contacts import hours
+    from apps.listings.forms import ContactStepForm
+
+    listing = f.ListingFactory()
+    base = {"chat": "on", "contact_visibility": "public"}
+    form = ContactStepForm(
+        base | {"contact_days": "weekdays", "contact_from": "17:00", "contact_to": "20:30"},
+        listing=listing,
+    )
+    assert form.is_valid(), form.errors
+    stored = form.cleaned_data["preferred_time"]
+    assert stored == "weekdays 17:00-20:30"
+    assert hours.display(stored) == "Weekdays, 5:00 PM – 8:30 PM"
+    again = ContactStepForm(initial={"preferred_time": stored}, listing=listing)
+    assert again.initial["contact_from"] == "17:00" and not again.legacy_time
+    bad = ContactStepForm(base | {"contact_from": "18:00", "contact_to": "09:00"}, listing=listing)
+    assert not bad.is_valid() and "contact_to" in bad.errors
+    half = ContactStepForm(base | {"contact_from": "18:00"}, listing=listing)
+    assert not half.is_valid()
+    days_only = ContactStepForm(base | {"contact_days": "weekends"}, listing=listing)
+    assert days_only.is_valid() and days_only.cleaned_data["preferred_time"] == "weekends"
+    assert hours.display("weekends") == "Weekends" and hours.display("after 5pm") == "after 5pm"
+    legacy = ContactStepForm(base, initial={"preferred_time": "after 5pm"}, listing=listing)
+    assert legacy.is_valid() and legacy.cleaned_data["preferred_time"] == "after 5pm"

@@ -2,6 +2,7 @@ from django import forms
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.contacts import hours
 from apps.locations.models import Area, Campus, Town
 
 from . import models as m
@@ -309,7 +310,14 @@ class ContactStepForm(forms.Form):
         label=_("Allow email messages (relayed, your address stays hidden)"), required=False
     )
     chat = forms.BooleanField(label=_("Allow in-app chat"), required=False, initial=True)
-    preferred_time = forms.CharField(label=_("Best time to contact"), required=False, max_length=80)
+    contact_days = forms.ChoiceField(
+        label=_("Days"),
+        choices=hours.DAY_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"data-no-search": ""}),
+    )
+    contact_from = forms.ChoiceField(label=_("From"), required=False)
+    contact_to = forms.ChoiceField(label=_("To"), required=False)
     contact_visibility = forms.ChoiceField(
         label=_("Who can see contact buttons"),
         choices=m.Listing.Visibility.choices,
@@ -334,6 +342,15 @@ class ContactStepForm(forms.Form):
             self.initial["keep_campuses"] = [
                 str(link.campus_id) for link in links if not link.is_excluded
             ]
+        times = [("", _("Any time"))] + hours.time_choices()
+        for name in ("contact_from", "contact_to"):
+            self.fields[name].choices = times
+            self.fields[name].widget.attrs["data-no-search"] = ""
+        stored = self.initial.get("preferred_time", "")
+        parts = hours.parse(stored)
+        self.legacy_time = stored if parts is None else ""
+        if parts and not self.is_bound:
+            self.initial.update(parts)
         self.fields["add_campus"].queryset = Campus.objects.visible().select_related("town")
         self.fields["add_campus"].label_from_instance = lambda c: c.choice_label
         if listing and listing.is_need_food:
@@ -353,6 +370,14 @@ class ContactStepForm(forms.Form):
                     self.add_error(name, _("Enter a valid phone number."))
                 else:
                     data[name] = number.as_e164
+        start, end = data.get("contact_from"), data.get("contact_to")
+        if bool(start) != bool(end):
+            self.add_error("contact_to", _("Choose both a start and an end time."))
+        elif start and end <= start:
+            self.add_error("contact_to", _("The end time must be after the start time."))
+        new_time = hours.compose(data.get("contact_days") or "any", start, end)
+        # an older free-text answer stays until a day or range is picked
+        data["preferred_time"] = new_time or self.legacy_time
         tg = (data.get("telegram") or "").strip().lstrip("@")
         if tg and not tg.replace("_", "").isalnum():
             self.add_error("telegram", _("Telegram usernames use letters, numbers and _."))
