@@ -27,7 +27,7 @@
 </div>
 {% if place.has_point %}<c-map lat="{{ place.lat }}" lng="{{ place.lng }}" zoom="16" mode="pin" />{% endif %}
 {% if services_listings %}<h2 class="font-bold text-lg mt-5 mb-2">{% translate "Services from this business" %}</h2>
-<div class="grid grid-cols-2 md:grid-cols-3 gap-3">{% for item in services_listings %}<c-listing-card :listing="item" />{% endfor %}</div>{% endif %}
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3">{% for item in services_listings %}<c-listing-card :listing="item" />{% endfor %}</div>{% endif %}
 <p class="text-xs opacity-70 mt-4">{% translate "Source" %}: <a class="link" href="{{ place.source_url }}" target="_blank" rel="noopener">OpenStreetMap {{ place.source_id }}</a> · © OpenStreetMap contributors (ODbL)</p>
 {% endblock %}
 {% block modals %}<c-modal id="report-dialog" title="{% translate 'Report' %}"><div id="report-slot"></div></c-modal>{% endblock %}

@@ -156,6 +156,7 @@ def _section(request, location, section_slug):
     context = {
         "section": section,
         "page_location": location,
+        "location": location,  # header/sidebar show the campus or town this page is about
         "filterset": filterset,
         "page": page,
         "boosted": boosted,
@@ -189,6 +190,7 @@ def _remote_jobs(request, location, section):
         {
             "section": section,
             "page_location": location,
+            "location": location,
             "page": page,
             "source": source,
             "categories": categories,

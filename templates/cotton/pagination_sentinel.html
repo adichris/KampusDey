@@ -1,6 +1,6 @@
 <c-vars url="" />
 {% if url %}
-<div hx-get="{{ url }}" hx-trigger="revealed" hx-swap="outerHTML" hx-select="#results > *" class="col-span-full grid grid-cols-2 md:grid-cols-3 gap-3">
+<div hx-get="{{ url }}" hx-trigger="revealed" hx-swap="outerHTML" hx-select="#results > *" class="col-span-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3">
   <c-listing-card-skeleton /><c-listing-card-skeleton />
 </div>
 {% endif %}

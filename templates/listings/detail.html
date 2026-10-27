@@ -105,7 +105,7 @@
 {% if related %}
 <section class="mt-8">
   <h2 class="font-bold text-lg mb-2">{% translate "Similar near here" %}</h2>
-  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">{% for item in related %}<c-listing-card :listing="item" />{% endfor %}</div>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3">{% for item in related %}<c-listing-card :listing="item" />{% endfor %}</div>
 </section>
 {% endif %}
 
