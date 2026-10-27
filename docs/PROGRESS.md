@@ -85,6 +85,10 @@ import survives failed campuses and resumes; GTEC table serial numbers stripped.
 - Listing photo gallery uses a fixed-height frame (4:3 on phones, `min(68vh, 34rem)` on desktop);
   photos are `object-contain` over a blurred copy, so mixed portrait/landscape photos never
   change the page height. Tap a photo for full screen; arrows, thumbnails, swipe and keys work.
+- Sellers pick a main contact button (`ContactCard.preferred_channel`); it is shown first and
+  filled, the others outlined (icon-only in the phone bar). In-app chat is the default. The chat
+  button posts straight to `chat:start` (the old tap-redirect hit a POST-only view).
+- Owners can't save (like) their own listings; they see a read-only saves count instead.
 - CSP stays strict site-wide; only `/admin/` adds `'unsafe-eval'` (scripts) and `'unsafe-inline'`
   (styles), because django-unfold ships the standard Alpine build (`apps/core/csp.py`, user approved).
 - `/s/<section>/` keeps its query string when redirecting to the campus/town section page.

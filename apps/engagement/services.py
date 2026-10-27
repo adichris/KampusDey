@@ -24,10 +24,12 @@ def toggle_like(user, listing: Listing, request=None) -> bool:
     from apps.accounts.services import can_like
     from apps.telemetry.services import record
 
+    if user.pk == listing.owner_id:
+        raise EngagementError(_("You can't save your own listing."))
     decision = can_like(user)
     if not decision:
         raise EngagementError(decision.reason)
-    deleted, _ = Like.objects.filter(user=user, listing=listing).delete()
+    deleted, _counts = Like.objects.filter(user=user, listing=listing).delete()
     if deleted:
         Listing.objects.filter(pk=listing.pk, likes_count__gt=0).update(
             likes_count=F("likes_count") - 1

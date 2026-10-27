@@ -48,6 +48,7 @@ class ChannelHandler:
             "btn_class": self.btn_class,
             "url": self.action_url(listing, viewer),
             "reveal": self.reveal,
+            "link": False,  # True: a plain link (GET) instead of a POST form
         }
 
     def target(self, listing, viewer) -> str:
@@ -117,9 +118,20 @@ class EmailRelayHandler(ChannelHandler):
 @register
 class ChatHandler(ChannelHandler):
     kind = ContactChannel.Kind.CHAT
-    label = _("Chat")
-    icon = "message-circle"
-    btn_class = "btn-secondary"
+    label = _("Chat on KampusDey")
+    icon = "messages-square"
+    btn_class = "btn-primary"
+
+    def action_url(self, listing, viewer):
+        # chat:start is POST-only and logs the tap itself; guests log in first.
+        if viewer is None or not viewer.is_authenticated:
+            return f"{reverse('account_login')}?next={quote(listing.get_absolute_url())}"
+        return reverse("chat:start", args=[listing.pk])
+
+    def render_button(self, listing, viewer):
+        data = super().render_button(listing, viewer)
+        data["link"] = viewer is None or not viewer.is_authenticated
+        return data
 
     def is_available(self, listing, viewer):
         if viewer is not None and viewer.is_authenticated and viewer.pk == listing.owner_id:
@@ -136,10 +148,16 @@ def buttons_for(listing, viewer) -> dict:
         viewer is None or not viewer.is_authenticated
     ):
         return {"login_required": True, "buttons": []}
-    order = [c.kind for c in listing.contact_card.channels.all()] if listing.contact_card else []
+    card = listing.contact_card
+    order = [c.kind for c in card.channels.all()] if card else []
     buttons = []
     for kind in order:
         handler = REGISTRY.get(kind)
         if handler and handler.is_available(listing, viewer):
             buttons.append(handler.render_button(listing, viewer))
+    # The seller's main button goes first and stands out; in-app chat is the default.
+    main = (card.preferred_channel if card else "") or ContactChannel.Kind.CHAT
+    buttons.sort(key=lambda b: b["kind"] != main)
+    for i, button in enumerate(buttons):
+        button["primary"] = i == 0
     return {"login_required": False, "buttons": buttons}

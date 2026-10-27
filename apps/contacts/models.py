@@ -11,6 +11,8 @@ class ContactCard(TimeStampedModel):
     )
     label = models.CharField(_("label"), max_length=60, default=_("Personal"))
     preferred_time = models.CharField(_("best time to contact"), max_length=80, blank=True)
+    # The channel shown as the big main button; the others become smaller buttons.
+    preferred_channel = models.CharField(_("main contact button"), max_length=10, blank=True)
     is_default = models.BooleanField(default=False)
 
     class Meta:

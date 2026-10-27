@@ -41,7 +41,8 @@
     </div>
 
     <div class="flex flex-wrap gap-1 border-t border-base-300 pt-2">
-      <c-like-button :listing="listing" :liked="liked" />
+      {% if is_owner %}<span class="btn btn-ghost btn-sm gap-1 pointer-events-none" title="{% translate 'Saved by' %}">{% icon "heart" %}<span>{{ listing.likes_count }}</span><span class="opacity-70 font-normal">{% translate "saves" %}</span></span>
+      {% else %}<c-like-button :listing="listing" :liked="liked" />{% endif %}
       <c-share-button url="{{ listing.get_absolute_url|absolute }}" title="{{ listing.title }}" log_url="{% url 'engagement:share' listing.pk %}" />
       {% if not is_owner %}<c-report-button kind="listing" oid="{{ listing.pk }}" />{% endif %}
     </div>

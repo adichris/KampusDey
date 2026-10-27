@@ -16,7 +16,7 @@
     {% if contact.login_required %}
     <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}" class="btn btn-primary flex-1 tap">{% icon "lock" %} {% translate "Log in to contact this person" %}</a>
     {% elif contact.buttons %}
-      {% for button in contact.buttons %}<c-contact-button :button="button" />{% endfor %}
+      {% for button in contact.buttons %}<c-contact-button :button="button" compact="1" />{% endfor %}
     {% else %}
     <p class="text-sm opacity-70 p-2">{% translate "No contact options." %}</p>
     {% endif %}

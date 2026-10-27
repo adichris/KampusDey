@@ -16,6 +16,7 @@
       <c-form-field :field="form.telegram" />
       <c-form-field :field="form.chat" />
       <c-form-field :field="form.email_relay" />
+      <c-form-field :field="form.preferred_channel" />
       <fieldset class="fieldset mb-2">
         <legend class="fieldset-legend text-base-content">{% translate "Best time to contact" %}</legend>
         {% if form.legacy_time %}<p class="label text-xs whitespace-normal">{% translate "You wrote:" %} “{{ form.legacy_time }}”. {% translate "Pick a range to replace it." %}</p>{% endif %}

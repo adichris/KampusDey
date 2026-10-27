@@ -310,6 +310,20 @@ class ContactStepForm(forms.Form):
         label=_("Allow email messages (relayed, your address stays hidden)"), required=False
     )
     chat = forms.BooleanField(label=_("Allow in-app chat"), required=False, initial=True)
+    preferred_channel = forms.ChoiceField(
+        label=_("Main contact button"),
+        help_text=_("Shown first and largest on your listing. The others stay available."),
+        choices=[
+            ("chat", _("In-app chat (your number stays private)")),
+            ("whatsapp", "WhatsApp"),
+            ("phone", _("Phone call")),
+            ("telegram", "Telegram"),
+            ("email", _("Email")),
+        ],
+        initial="chat",
+        required=False,
+        widget=forms.RadioSelect,
+    )
     contact_days = forms.ChoiceField(
         label=_("Days"),
         choices=hours.DAY_CHOICES,
@@ -392,4 +406,17 @@ class ContactStepForm(forms.Form):
             ]
         ):
             raise forms.ValidationError(_("Choose at least one way to be contacted."))
+        enabled = {
+            "chat": data.get("chat"),
+            "whatsapp": data.get("whatsapp"),
+            "phone": data.get("phone") and not data.get("hide_number"),
+            "telegram": tg,
+            "email": data.get("email_relay"),
+        }
+        if not data.get("preferred_channel"):
+            data["preferred_channel"] = next((k for k, on in enabled.items() if on), "")
+        elif not enabled.get(data["preferred_channel"]):
+            self.add_error(
+                "preferred_channel", _("Turn this way of contact on, or pick another one.")
+            )
         return data

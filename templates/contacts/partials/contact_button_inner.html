@@ -1,0 +1,12 @@
+{% load i18n %}{% if button.reveal %}{% translate "Show number" as text %}{% else %}{% firstof button.label as text %}{% endif %}
+{% if button.reveal %}
+<button type="button" class="{{ cls }}" hx-post="{{ button.url }}" hx-target="this" hx-swap="outerHTML" aria-label="{{ text }}" title="{{ text }}">
+  {% icon button.icon %}{% if not icon_only %} {{ text }}{% endif %}
+</button>
+{% elif button.link or button.kind == "email" %}
+<a href="{{ button.url }}" class="{{ cls }}" aria-label="{{ text }}" title="{{ text }}">{% icon button.icon %}{% if not icon_only %} {{ text }}{% endif %}</a>
+{% else %}
+<form method="post" action="{{ button.url }}" class="{% if icon_only %}flex{% else %}flex-1 flex{% endif %}" {% if button.kind == "whatsapp" or button.kind == "telegram" %}target="_blank"{% endif %}>{% csrf_token %}
+  <button type="submit" class="{{ cls }} {% if not icon_only %}w-full{% endif %}" aria-label="{{ text }}" title="{{ text }}">{% icon button.icon %}{% if not icon_only %} {{ text }}{% endif %}</button>
+</form>
+{% endif %}

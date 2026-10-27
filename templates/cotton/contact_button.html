@@ -1,13 +1,7 @@
 {% load i18n %}
-<c-vars button />
-{% if button.reveal %}
-<button type="button" class="btn {{ button.btn_class }} flex-1 tap" hx-post="{{ button.url }}" hx-target="this" hx-swap="outerHTML">
-  {% icon button.icon %} {% translate "Show number" %}
-</button>
-{% elif button.kind == "email" %}
-<a href="{{ button.url }}" class="btn {{ button.btn_class }} flex-1 tap">{% icon button.icon %} {{ button.label }}</a>
-{% else %}
-<form method="post" action="{{ button.url }}" class="flex-1 flex" {% if button.kind == "whatsapp" or button.kind == "telegram" %}target="_blank"{% endif %}>{% csrf_token %}
-  <button type="submit" class="btn {{ button.btn_class }} w-full tap">{% icon button.icon %} {{ button.label }}</button>
-</form>
+<c-vars button compact="" />
+{# compact: secondary buttons in the phone bar show only their icon #}
+{% if button.primary %}{% with cls="btn "|add:button.btn_class|add:" flex-1 tap" %}{% include "contacts/partials/contact_button_inner.html" %}{% endwith %}
+{% elif compact %}{% with cls="btn btn-outline btn-square tap" icon_only=True %}{% include "contacts/partials/contact_button_inner.html" %}{% endwith %}
+{% else %}{% with cls="btn btn-outline flex-1 tap" %}{% include "contacts/partials/contact_button_inner.html" %}{% endwith %}
 {% endif %}
