@@ -1,4 +1,19 @@
+from pathlib import Path
+
 from django.conf import settings
+
+_ASSETS = [
+    Path(settings.BASE_DIR) / "static" / "css" / "app.css",
+    Path(settings.BASE_DIR) / "static" / "js" / "app.js",
+]
+
+
+def asset_version() -> str:
+    """Cache-busting stamp for our own CSS/JS (newest modification time)."""
+    try:
+        return str(int(max(p.stat().st_mtime for p in _ASSETS)))
+    except OSError:
+        return "0"
 
 
 def site(request):
@@ -20,6 +35,7 @@ def site(request):
         unread = unread_count(user)
     return {
         "SITE_URL": settings.SITE_URL,
+        "ASSET_VERSION": asset_version(),
         "THEMES_OFFERED": themes,
         "user_theme": theme,
         "umami_script_url": integ.umami_script_url,

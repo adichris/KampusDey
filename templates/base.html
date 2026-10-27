@@ -23,34 +23,30 @@
   <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="preload" href="{% static 'vendor/fonts/inter-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}?v={{ ASSET_VERSION }}">
   {% block head %}{% endblock %}
   <script src="{% static 'vendor/htmx.min.js' %}" defer></script>
-  <script src="{% static 'js/app.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}?v={{ ASSET_VERSION }}" defer></script>
   <script src="{% static 'vendor/alpine-csp.min.js' %}" defer></script>
   {% if umami_script_url and umami_website_id %}<script defer src="{{ umami_script_url }}" data-website-id="{{ umami_website_id }}" nonce="{{ request.csp_nonce }}"></script>{% endif %}
   {% block structured_data %}{% endblock %}
 </head>
 <body class="min-h-screen bg-base-200 text-base-content font-sans antialiased" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <div id="kd-progress" class="kd-progress" aria-hidden="true"></div>
   <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-3 focus:bg-base-100">{% translate "Skip to content" %}</a>
   <div class="lg:flex">
     <c-sidebar-nav />
     <div class="flex-1 min-w-0">
       {% include "partials/header.html" %}
       <main id="main" class="mx-auto w-full max-w-5xl lg:max-w-none px-3 sm:px-4 lg:px-8 pt-3 lg:pt-6 pb-28 lg:pb-10">
-        {% if messages %}
-        <div class="space-y-2 mb-3">
-          {% for message in messages %}
-          <c-alert kind="{{ message.tags|default:'info' }}">{{ message }}</c-alert>
-          {% endfor %}
-        </div>
-        {% endif %}
         {% block main %}{% block content %}{% endblock content %}{% endblock main %}
       </main>
     </div>
   </div>
   <c-bottom-nav />
-  <div id="toasts" class="toast toast-top toast-center z-50" aria-live="polite"></div>
+  <div id="toasts" class="toast toast-top toast-center lg:toast-end z-[70] mt-14 w-full max-w-sm px-3 sm:px-0" aria-live="polite">
+    {% for message in messages %}<c-toast kind="{{ message.level_tag|default:'info' }}">{{ message }}</c-toast>{% endfor %}
+  </div>
   {% include "partials/location_sheet.html" %}
   {% block modals %}{% endblock %}
   {% block scripts %}{% endblock %}

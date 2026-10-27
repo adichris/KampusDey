@@ -1,2 +1,8 @@
+{% load i18n %}
 <c-vars kind="success" />
-<div class="alert {% if kind == 'error' %}alert-error{% else %}alert-success{% endif %} shadow-lg text-sm" role="status">{{ slot }}</div>
+<div class="alert {% if kind == 'error' %}alert-error{% elif kind == 'warning' %}alert-warning{% elif kind == 'info' or kind == 'debug' %}alert-info{% else %}alert-success{% endif %} shadow-lg text-sm kd-toast"
+     role="{% if kind == 'error' %}alert{% else %}status{% endif %}" data-toast="{% if kind == 'debug' %}info{% else %}{{ kind|default:'success' }}{% endif %}">
+  {% if kind == 'error' or kind == 'warning' %}{% icon "triangle-alert" "size-5 shrink-0" %}{% elif kind == 'info' or kind == 'debug' %}{% icon "info" "size-5 shrink-0" %}{% else %}{% icon "circle-check" "size-5 shrink-0" %}{% endif %}
+  <span>{{ slot }}</span>
+  <button type="button" class="btn btn-ghost btn-xs btn-circle" data-toast-close aria-label="{% translate 'Close' %}">✕</button>
+</div>

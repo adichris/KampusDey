@@ -118,6 +118,20 @@
   .htmx-indicator { opacity: 0; transition: opacity 150ms; }
   .htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity: 1; }
   .skeleton-card { @apply skeleton h-56 w-full; }
+  /* Loading feedback (static/js/app.js) */
+  .kd-busy { cursor: progress; }
+  .kd-busy > svg { display: none; }
+  .kd-progress {
+    position: fixed; inset-inline: 0; top: 0; z-index: 80; height: 3px;
+    background: var(--color-primary); transform-origin: left; transform: scaleX(0);
+    opacity: 0; pointer-events: none;
+  }
+  .kd-progress.kd-progress-active { opacity: 1; animation: kd-progress 8s cubic-bezier(.1,.7,.2,1) forwards; }
+  @keyframes kd-progress { from { transform: scaleX(0); } to { transform: scaleX(.92); } }
+  /* Toasts */
+  .kd-toast { animation: kd-toast-in 180ms ease-out; white-space: normal; text-align: left; }
+  .kd-toast-leave { opacity: 0; transform: translateY(-6px); transition: opacity 180ms, transform 180ms; }
+  @keyframes kd-toast-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
   .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 }
 

@@ -36,6 +36,7 @@ class HostelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["campuses"].queryset = Campus.objects.visible().select_related("town")
+        self.fields["campuses"].label_from_instance = lambda c: c.choice_label
         self.fields["campuses"].required = False
         if self.instance.pk and self.instance.has_point and not self.is_bound:
             self.initial.update(lat=self.instance.lat, lng=self.instance.lng)

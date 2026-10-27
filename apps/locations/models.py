@@ -179,6 +179,12 @@ class Campus(ProvenanceMixin, GeoPointMixin, TimeStampedModel):
         return self.short_name or self.name
 
     @property
+    def choice_label(self):
+        """Full, searchable label for dropdowns: name, short name and town."""
+        short = f" ({self.short_name})" if self.short_name and self.short_name != self.name else ""
+        return f"{self.name}{short} · {self.town.name}"
+
+    @property
     def region(self):
         return self.town.region
 

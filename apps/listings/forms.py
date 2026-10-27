@@ -335,6 +335,7 @@ class ContactStepForm(forms.Form):
                 str(link.campus_id) for link in links if not link.is_excluded
             ]
         self.fields["add_campus"].queryset = Campus.objects.visible().select_related("town")
+        self.fields["add_campus"].label_from_instance = lambda c: c.choice_label
         if listing and listing.is_need_food:
             self.fields["contact_visibility"].choices = [
                 ("members", m.Listing.Visibility.MEMBERS.label)

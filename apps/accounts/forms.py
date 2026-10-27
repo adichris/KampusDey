@@ -51,6 +51,7 @@ class OnboardingForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["home_campus"].queryset = Campus.objects.visible().select_related("town")
+        self.fields["home_campus"].label_from_instance = lambda c: c.choice_label
         self.fields["home_town"].queryset = Town.objects.select_related("region")
 
     def clean(self):
