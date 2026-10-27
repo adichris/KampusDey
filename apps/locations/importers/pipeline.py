@@ -876,10 +876,11 @@ def merge_campuses(keep: Campus, drop: Campus) -> Campus:
     if not keep.osm_id and drop.osm_id:
         keep.osm_id = drop.osm_id
         keep.save(update_fields=["osm_id"])
+    drop.osm_id = ""  # an OSM object maps to one campus only; imports look campuses up by it
     drop.review_status = ReviewStatus.REJECTED
     drop.is_active = False
     drop.admin_locked = True
-    drop.save(update_fields=["review_status", "is_active", "admin_locked", "updated_at"])
+    drop.save(update_fields=["osm_id", "review_status", "is_active", "admin_locked", "updated_at"])
     return keep
 
 

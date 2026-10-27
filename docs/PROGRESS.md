@@ -2,7 +2,7 @@
 
 ## Status (2026-10-27)
 
-All milestones M0–M14 are implemented in code and covered by tests. **267 tests pass** (offline,
+All milestones M0–M14 are implemented in code and covered by tests. **268 tests pass** (offline,
 recorded sample responses only); `ruff check` and `ruff format --check` are clean;
 `makemigrations --check` reports no changes; `manage.py check --deploy` (prod settings) is clean.
 Coverage: 84% overall; services/selectors ≈ 85% combined (contacts 76%, locations 77%,
@@ -44,8 +44,8 @@ and unrecognized lists (saved under `data/raw/`, gitignored).
 | Duplicates flagged | ✓ 28 pairs in the Duplicates view |
 | GTEC flags applied | ✓ 106 institutions flagged unaccredited (hidden from users). GTEC's *accredited* page is currently broken (unrendered shortcode), so no institution is marked accredited yet |
 | Sunyani: UENR, STU, Berekum CoE | ✓ matched to seeded records, Wikidata point, OSM id, town and region |
-| Sunyani: Catholic University of Ghana | ⚠ three records (seeded, Wikidata "Catholic University College of Ghana", OSM "…-Fiapre"); flagged as duplicates — an admin should merge them |
-| Sunyani: NMTC Sunyani | ⚠ exists, but its Wikidata point is ~49 km from Sunyani; listed under `points_far_from_town` for admin correction |
+| Sunyani: Catholic University of Ghana | ✓ (after admin merge) three records merged into `cug`: Wikidata Q1051100 + point, OSM way/171357580, Fiapre/Bono; verified and locked |
+| Sunyani: NMTC Sunyani | ✓ town and region; **no point**: Wikidata's coordinate is near Wenchi (and says Bono East) while also saying "located in Sunyani", and OSM has no feature for it, so the wrong point was cleared and locked rather than guessed. Fix upstream in Wikidata/OSM, then unlock `lat`/`lng` |
 | Provenance on every imported record | ✓ 0 non-manual records missing source/licence/date/status |
 | Re-run changes nothing | ✓ towns, Wikidata, OSM campuses and GTEC re-run with zero field changes |
 | No third-party listings/people | ✓ by design (only the listed sources) |
@@ -81,8 +81,8 @@ import survives failed campuses and resumes; GTEC table serial numbers stripped.
 - Message admin is intentionally not registered: admins read conversations only through reports.
 
 ## Known gaps / next steps
-1. Admin review of the imported data: merge the 28 duplicate pairs (incl. Catholic University),
-   fix the NMTC Sunyani point, verify campuses and areas; re-run areas for the 7 failed campuses;
+1. Admin review of the imported data: merge the remaining duplicate pairs (Catholic University
+   is done), add a sourced point for NMTC Sunyani once Wikidata/OSM are corrected, verify campuses and areas; re-run areas for the 7 failed campuses;
    save the Ministry of Health PDF and (when GTEC fixes it) the accredited list into `data/raw/`.
 2. Approve the OSM and Remotive sources in the admin after reading the terms, then `make import-external`.
 3. Playwright smoke tests (M14) not written — `playwright` wheels for Python 3.15 were not checked.

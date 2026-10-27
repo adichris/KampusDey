@@ -378,3 +378,13 @@ def test_reference_html_table_with_serial_numbers(tmp_path):
         ("Sample Institute of Technology", "Kasoa"),
         ("Example College of Health", "Kumasi"),
     ]
+
+
+def test_merge_moves_osm_id_to_kept_campus(regions):
+    keep = f.CampusFactory(name="Keep U", osm_id="")
+    drop = f.CampusFactory(name="Drop U", osm_id="way/42")
+    pipeline.merge_campuses(keep, drop)
+    keep.refresh_from_db()
+    drop.refresh_from_db()
+    assert keep.osm_id == "way/42" and drop.osm_id == ""
+    assert Campus.objects.filter(osm_id="way/42").count() == 1
