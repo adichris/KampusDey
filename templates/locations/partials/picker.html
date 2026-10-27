@@ -9,7 +9,7 @@
 
   <div>
     <label for="campus-q" class="fieldset-legend">{% translate "Search campuses" %}</label>
-    <input id="campus-q" name="q" type="search" class="input input-bordered w-full" placeholder="{% translate 'e.g. UENR, Sunyani, KNUST' %}"
+    <input id="campus-q" name="q" type="search" class="input input-bordered rounded-full px-4 w-full" placeholder="{% translate 'e.g. UENR, Sunyani, KNUST' %}"
            hx-get="{% url 'locations:search' %}" hx-trigger="input changed delay:300ms, search" hx-target="#campus-results" hx-vals='{"next": "{{ next|escapejs }}"}' autocomplete="off">
   </div>
   <div id="campus-results" class="max-h-72 overflow-y-auto">{% include "locations/partials/campus_list.html" %}</div>

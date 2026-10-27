@@ -3,10 +3,12 @@
 {% block title %}{% if query %}{{ query }} · {% endif %}{% translate "Search" %} · KampusDey{% endblock %}
 {% block robots %}<meta name="robots" content="noindex">{% endblock %}
 {% block content %}
-<form method="get" class="join w-full mb-3" role="search">
+<form method="get" role="search"
+      class="mb-3 flex items-center gap-2 w-full rounded-full bg-base-100 border border-base-300 pl-4 pr-1.5 py-1.5 focus-within:ring-2 focus-within:ring-primary">
+  {% icon "search" "size-5 opacity-50 shrink-0" %}
   <label for="q" class="sr-only">{% translate "Search" %}</label>
-  <input id="q" name="q" type="search" value="{{ query }}" autofocus class="input input-bordered join-item w-full" placeholder="{% translate 'What do you need?' %}">
-  <button class="btn btn-primary join-item tap" aria-label="{% translate 'Search' %}">{% icon "search" %}</button>
+  <input id="q" name="q" type="search" value="{{ query }}" autofocus class="grow min-w-0 bg-transparent outline-none h-10" placeholder="{% translate 'What do you need?' %}">
+  <button class="btn btn-primary rounded-full px-4 sm:px-6 tap" aria-label="{% translate 'Search' %}">{% icon "search" "size-4 sm:hidden" %}<span class="hidden sm:inline">{% translate "Search" %}</span></button>
 </form>
 {% if query %}
   {% if facets %}

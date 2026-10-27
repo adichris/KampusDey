@@ -35,10 +35,12 @@
       <button type="button" class="btn btn-sm btn-ghost bg-primary-content/15 text-primary-content border-0 tap" data-open-dialog="location-sheet">{% icon "refresh-cw" "size-4" %} {% translate "Change" %}</button>
     </div>
   </div>
-  <form action="{% url 'listings:search' %}" method="get" class="mt-4 join w-full" role="search">
+  <form action="{% url 'listings:search' %}" method="get" role="search"
+        class="mt-4 flex items-center gap-2 w-full rounded-full bg-base-100 text-base-content pl-4 pr-1.5 py-1.5 shadow-sm focus-within:ring-2 focus-within:ring-secondary">
+    {% icon "search" "size-5 opacity-50 shrink-0" %}
     <label for="home-q" class="sr-only">{% translate "Search" %}</label>
-    <input id="home-q" name="q" type="search" class="input join-item w-full text-base-content bg-base-100 border-0" placeholder="{% translate 'Search rooms, phones, jobs…' %}">
-    <button class="btn btn-secondary join-item tap" aria-label="{% translate 'Search' %}">{% icon "search" %}<span class="hidden sm:inline">{% translate "Search" %}</span></button>
+    <input id="home-q" name="q" type="search" class="grow min-w-0 bg-transparent outline-none h-10" placeholder="{% translate 'Search rooms, phones, jobs…' %}">
+    <button class="btn btn-secondary rounded-full px-4 sm:px-6 tap" aria-label="{% translate 'Search' %}">{% icon "search" "size-4 sm:hidden" %}<span class="hidden sm:inline">{% translate "Search" %}</span></button>
   </form>
   <div class="flex flex-wrap gap-x-5 gap-y-1 mt-3 text-sm opacity-90">
     <span class="flex items-center gap-1">{% icon "package" "size-4" %} {% if total_live %}{% blocktranslate count n=total_live %}{{ n }} live post{% plural %}{{ n }} live posts{% endblocktranslate %}{% else %}{% translate "New here — be the first to post" %}{% endif %}</span>
