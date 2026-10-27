@@ -6,51 +6,78 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('contacts', '0001_initial'),
-        ('hostels', '0001_initial'),
-        ('listings', '0001_initial'),
-        ('locations', '0001_initial'),
+        ("contacts", "0001_initial"),
+        ("hostels", "0001_initial"),
+        ("listings", "0001_initial"),
+        ("locations", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='hostel',
-            name='campuses',
-            field=models.ManyToManyField(blank=True, related_name='hostels', to='locations.campus'),
+            model_name="hostel",
+            name="campuses",
+            field=models.ManyToManyField(blank=True, related_name="hostels", to="locations.campus"),
         ),
         migrations.AddField(
-            model_name='hostel',
-            name='contact_card',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='contacts.contactcard'),
+            model_name="hostel",
+            name="contact_card",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="contacts.contactcard",
+            ),
         ),
         migrations.AddField(
-            model_name='hostel',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='hostels', to=settings.AUTH_USER_MODEL),
+            model_name="hostel",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="hostels",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='hostel',
-            name='town',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='hostels', to='locations.town'),
+            model_name="hostel",
+            name="town",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="hostels",
+                to="locations.town",
+            ),
         ),
         migrations.AddField(
-            model_name='hostelphoto',
-            name='hostel',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='photos', to='hostels.hostel'),
+            model_name="hostelphoto",
+            name="hostel",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="photos",
+                to="hostels.hostel",
+            ),
         ),
         migrations.AddField(
-            model_name='hostelroomtype',
-            name='hostel',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='room_types', to='hostels.hostel'),
+            model_name="hostelroomtype",
+            name="hostel",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="room_types",
+                to="hostels.hostel",
+            ),
         ),
         migrations.AddField(
-            model_name='hostelroomtype',
-            name='listing',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='hostel_room_type_link', to='listings.listing'),
+            model_name="hostelroomtype",
+            name="listing",
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="hostel_room_type_link",
+                to="listings.listing",
+            ),
         ),
     ]

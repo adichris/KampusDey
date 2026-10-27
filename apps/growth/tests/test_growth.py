@@ -21,15 +21,27 @@ def test_jobposting_structured_data_validates(client):
     job = f.JobDetailsFactory(job_type="internship").listing
     data = _jsonld(client.get(job.get_absolute_url()).content.decode())[0]
     assert data["@type"] == "JobPosting"
-    for key in ("title", "description", "datePosted", "hiringOrganization", "jobLocation", "employmentType"):
+    for key in (
+        "title",
+        "description",
+        "datePosted",
+        "hiringOrganization",
+        "jobLocation",
+        "employmentType",
+    ):
         assert data[key]
-    assert data["employmentType"] == "INTERN" and data["jobLocation"]["address"]["addressCountry"] == "GH"
+    assert (
+        data["employmentType"] == "INTERN"
+        and data["jobLocation"]["address"]["addressCountry"] == "GH"
+    )
 
 
 def test_event_structured_data_validates(client):
     event = f.EventDetailsFactory().listing
     data = _jsonld(client.get(event.get_absolute_url()).content.decode())[0]
-    assert data["@type"] == "Event" and data["startDate"] and data["location"]["name"] == "Great Hall"
+    assert (
+        data["@type"] == "Event" and data["startDate"] and data["location"]["name"] == "Great Hall"
+    )
 
 
 def test_share_preview_has_title_price_photo(client):
@@ -54,7 +66,10 @@ def test_referral_rewarded_after_verified_email_and_first_post(client):
     ambassador.profile.save()
     code = services.ensure_referral_code(ambassador.profile)
     client.get(reverse("referral", args=[code]))
-    client.post(reverse("account_signup"), {"email": "ref@example.test", "password1": "Long-pass-9876", "password2": "Long-pass-9876"})
+    client.post(
+        reverse("account_signup"),
+        {"email": "ref@example.test", "password1": "Long-pass-9876", "password2": "Long-pass-9876"},
+    )
     referral = Referral.objects.get()
     new_user = referral.referred_user
     assert not services.maybe_reward_referral(new_user)  # email not verified, no post
@@ -70,7 +85,9 @@ def test_referral_rewarded_after_verified_email_and_first_post(client):
 
 def test_rent_check_needs_five_samples(client, campus):
     for price in (1000, 1200, 1400, 1600):
-        listing = f.RoomDetailsFactory(listing__price=price, listing__price_period="per_year").listing
+        listing = f.RoomDetailsFactory(
+            listing__price=price, listing__price_period="per_year"
+        ).listing
         f.ListingCampusFactory(listing=listing, campus=campus)
     rows = services.rent_check(campus)["rows"]
     assert rows and not rows[0]["enough"]

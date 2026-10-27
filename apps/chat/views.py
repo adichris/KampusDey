@@ -13,7 +13,9 @@ from .models import Conversation
 
 
 def _conversation(request, pk) -> Conversation:
-    conv = get_object_or_404(Conversation.objects.select_related("listing", "starter", "owner"), pk=pk)
+    conv = get_object_or_404(
+        Conversation.objects.select_related("listing", "starter", "owner"), pk=pk
+    )
     if not conv.has_participant(request.user):
         raise Http404  # admins read conversations only through a report
     return conv
@@ -23,8 +25,12 @@ def _conversation(request, pk) -> Conversation:
 def inbox(request):
     conversations = list(services.inbox(request.user)[:100])
     for conv in conversations:
-        conv.other_alias = conv.owner_alias if conv.starter_id == request.user.pk else conv.starter_alias
-        conv.unread = conv.messages.exclude(sender=request.user).filter(read_at__isnull=True).exists()
+        conv.other_alias = (
+            conv.owner_alias if conv.starter_id == request.user.pk else conv.starter_alias
+        )
+        conv.unread = (
+            conv.messages.exclude(sender=request.user).filter(read_at__isnull=True).exists()
+        )
     return render(request, "chat/inbox.html", {"conversations": conversations})
 
 
@@ -59,7 +65,9 @@ def _thread_context(request, conv):
         "conversation": conv,
         "chat_messages": conv.messages.select_related("sender").order_by("created_at")[:300],
         "me": request.user,
-        "other_alias": conv.owner_alias if conv.starter_id == request.user.pk else conv.starter_alias,
+        "other_alias": conv.owner_alias
+        if conv.starter_id == request.user.pk
+        else conv.starter_alias,
         "my_alias": conv.alias_for(request.user),
         "blocked": conv.is_blocked or services.is_blocked(request.user, conv.other(request.user)),
     }

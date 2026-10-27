@@ -132,7 +132,9 @@ class ChatHandler(ChannelHandler):
 
 def buttons_for(listing, viewer) -> dict:
     """Context for the contact bar. Members-only listings show a login prompt to guests."""
-    if listing.effective_visibility == "members" and (viewer is None or not viewer.is_authenticated):
+    if listing.effective_visibility == "members" and (
+        viewer is None or not viewer.is_authenticated
+    ):
         return {"login_required": True, "buttons": []}
     order = [c.kind for c in listing.contact_card.channels.all()] if listing.contact_card else []
     buttons = []

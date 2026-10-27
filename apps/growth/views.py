@@ -15,4 +15,6 @@ def referral(request, code):
 
 def rent_check(request, campus_slug):
     campus = get_object_or_404(Campus.objects.visible(), slug=campus_slug)
-    return render(request, "growth/rent_check.html", {"campus": campus, **services.rent_check(campus)})
+    return render(
+        request, "growth/rent_check.html", {"campus": campus, **services.rent_check(campus)}
+    )

@@ -17,9 +17,7 @@ ABBREVIATIONS = [
 
 
 def strip_accents(value: str) -> str:
-    return "".join(
-        c for c in unicodedata.normalize("NFKD", value) if not unicodedata.combining(c)
-    )
+    return "".join(c for c in unicodedata.normalize("NFKD", value) if not unicodedata.combining(c))
 
 
 def normalise_name(value: str | None) -> str:
@@ -62,7 +60,9 @@ PHONE_RE = re.compile(
     r"(?:(?:\+|00)\s*233" + _SEP + r"\(?0?\)?" + _SEP + r"\d" + r"(?:" + _SEP + r"\d){8}"
     r"|\b0" + _SEP + r"\d(?:" + _SEP + r"\d){8}\b)"
 )
-EMAIL_RE = re.compile(r"[\w.+-]+\s*(?:@|\(at\)|\[at\])\s*[\w-]+(?:\s*(?:\.|\(dot\))\s*[\w-]+)+", re.I)
+EMAIL_RE = re.compile(
+    r"[\w.+-]+\s*(?:@|\(at\)|\[at\])\s*[\w-]+(?:\s*(?:\.|\(dot\))\s*[\w-]+)+", re.I
+)
 URL_RE = re.compile(
     r"(?:https?://|www\.)\S+|\b[\w-]+\.(?:com|net|org|gh|io|co|me|ly|info|biz|xyz|app|link)(?:/\S*)?\b",
     re.I,

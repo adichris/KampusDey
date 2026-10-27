@@ -29,7 +29,9 @@ def enabled_sections(campus=None) -> list:
     scope = Q(campus__isnull=True) | (Q(campus=campus) if campus else Q(pk__in=[]))
     rows = list(SectionAvailability.objects.filter(scope))
     global_rows = {r.section: r.enabled for r in rows if r.campus_id is None}
-    campus_rows = {r.section: r.enabled for r in rows if campus is not None and r.campus_id == campus.pk}
+    campus_rows = {
+        r.section: r.enabled for r in rows if campus is not None and r.campus_id == campus.pk
+    }
     result = []
     for slug, section in SECTIONS.items():
         if slug in campus_rows:

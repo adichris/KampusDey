@@ -191,14 +191,29 @@ def test_alias_for_student_uses_campus(campus):
 
 
 def test_signup_requires_email_verification(client, db):
-    client.post(reverse("account_signup"), {"email": "new@example.test", "password1": "Very-long-pass-123", "password2": "Very-long-pass-123"})
+    client.post(
+        reverse("account_signup"),
+        {
+            "email": "new@example.test",
+            "password1": "Very-long-pass-123",
+            "password2": "Very-long-pass-123",
+        },
+    )
     user = User.objects.get(email="new@example.test")
     assert not user.email_verified
     assert hasattr(user, "profile")
 
 
 def test_profile_pages_render(client_user):
-    for name in ("accounts:profile", "accounts:edit_profile", "accounts:appearance", "accounts:phone",
-                 "accounts:verification", "accounts:delete"):
+    for name in (
+        "accounts:profile",
+        "accounts:edit_profile",
+        "accounts:appearance",
+        "accounts:phone",
+        "accounts:verification",
+        "accounts:delete",
+    ):
         assert client_user.get(reverse(name)).status_code == 200
-    assert client_user.get(reverse("accounts:export"))["Content-Type"].startswith("application/json")
+    assert client_user.get(reverse("accounts:export"))["Content-Type"].startswith(
+        "application/json"
+    )

@@ -71,7 +71,9 @@ def distance_expression(lat: float, lng: float, lat_field="lat", lng_field="lng"
     return ACos(clamped, output_field=FloatField()) * Value(EARTH_RADIUS_M)
 
 
-def annotate_distance(qs, lat: float, lng: float, lat_field="lat", lng_field="lng", name="distance_m"):
+def annotate_distance(
+    qs, lat: float, lng: float, lat_field="lat", lng_field="lng", name="distance_m"
+):
     return qs.annotate(**{name: distance_expression(lat, lng, lat_field, lng_field)})
 
 
@@ -131,7 +133,9 @@ def geometry_bbox(geometry: dict | None):
     if not geometry:
         return None
     xs, ys = [], []
-    polys = geometry["coordinates"] if geometry["type"] == "MultiPolygon" else [geometry["coordinates"]]
+    polys = (
+        geometry["coordinates"] if geometry["type"] == "MultiPolygon" else [geometry["coordinates"]]
+    )
     for poly in polys:
         for ring in poly:
             for x, y, *_ in ring:

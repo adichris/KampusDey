@@ -4,7 +4,7 @@ from ._importcmd import ImportCommand
 
 
 class Command(ImportCommand):
-    help = "Import neighbourhoods near each campus with a point from OpenStreetMap (2 s between calls)."
+    help = "Import neighbourhoods near each campus with a point from OpenStreetMap (2 s apart)."
 
     def handle(self, *args, **opts):
         fetcher = None

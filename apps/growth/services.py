@@ -36,7 +36,11 @@ def attach_referral(request, user) -> Referral | None:
     code = request.session.pop(REF_SESSION_KEY, None) if request is not None else None
     if not code:
         return None
-    ambassador_profile = Profile.objects.filter(referral_code=code, is_ambassador=True).select_related("user").first()
+    ambassador_profile = (
+        Profile.objects.filter(referral_code=code, is_ambassador=True)
+        .select_related("user")
+        .first()
+    )
     if ambassador_profile is None or ambassador_profile.user_id == user.pk:
         return None
     referral, _created = Referral.objects.get_or_create(
@@ -51,7 +55,9 @@ def maybe_reward_referral(user) -> bool:
     from apps.listings.models import Listing
     from apps.notifications.services import notify
 
-    referral = Referral.objects.select_for_update().filter(referred_user=user, rewarded=False).first()
+    referral = (
+        Referral.objects.select_for_update().filter(referred_user=user, rewarded=False).first()
+    )
     if referral is None:
         return False
     if not user.email_verified:
@@ -78,17 +84,21 @@ def rent_check(campus) -> dict:
     from apps.listings.models import Listing
 
     since = timezone.now() - timedelta(days=180)
-    qs = Listing.objects.filter(
-        section="rooms",
-        campus_links__campus=campus,
-        campus_links__is_excluded=False,
-        price__isnull=False,
-        price__gt=0,
-        price_period="per_year",
-    ).filter(
-        status__in=[Listing.Status.ACTIVE, Listing.Status.NEEDS_CHECK, Listing.Status.TAKEN],
-        updated_at__gte=since,
-    ).select_related("area", "roomdetails")
+    qs = (
+        Listing.objects.filter(
+            section="rooms",
+            campus_links__campus=campus,
+            campus_links__is_excluded=False,
+            price__isnull=False,
+            price__gt=0,
+            price_period="per_year",
+        )
+        .filter(
+            status__in=[Listing.Status.ACTIVE, Listing.Status.NEEDS_CHECK, Listing.Status.TAKEN],
+            updated_at__gte=since,
+        )
+        .select_related("area", "roomdetails")
+    )
     groups: dict[tuple, list] = {}
     for listing in qs.distinct():
         details = listing.details
@@ -114,7 +124,9 @@ def rent_check(campus) -> dict:
 
 def current_spotlight(campus=None):
     week_start = timezone.localdate() - timedelta(days=timezone.localdate().weekday())
-    qs = Spotlight.objects.filter(week_start__lte=week_start, week_start__gt=week_start - timedelta(days=7))
+    qs = Spotlight.objects.filter(
+        week_start__lte=week_start, week_start__gt=week_start - timedelta(days=7)
+    )
     if campus is not None:
         item = qs.filter(campus=campus).select_related("listing", "user").first()
         if item:
@@ -141,11 +153,20 @@ def send_weekly_digest(now=None) -> int:
         if not profile or not (profile.home_campus_id or profile.home_town_id):
             continue
         qs = visible_listings(user).filter(published_at__gte=since).exclude(owner=user)
-        qs = for_campus(qs, profile.home_campus) if profile.home_campus_id else for_town(qs, profile.home_town)
+        qs = (
+            for_campus(qs, profile.home_campus)
+            if profile.home_campus_id
+            else for_town(qs, profile.home_town)
+        )
         items = list(qs.order_by("-score")[:8])
         if not items:
             continue
-        ctx = {"user": user, "items": items, "SITE_URL": settings.SITE_URL, "place": profile.home_campus or profile.home_town}
+        ctx = {
+            "user": user,
+            "items": items,
+            "SITE_URL": settings.SITE_URL,
+            "place": profile.home_campus or profile.home_town,
+        }
         msg = EmailMultiAlternatives(
             _("[KampusDey] New near you this week"),
             render_to_string("emails/digest.txt", ctx),

@@ -14,8 +14,10 @@ pytestmark = pytest.mark.django_db
 
 def test_masked_contacts_never_reach_database(client_user, user):
     listing = f.ListingFactory()
-    client_user.post(reverse("engagement:comment", args=[listing.pk]),
-                     {"body": "call me on 024 123 4567 or kofi@example.com or www.deal.com"})
+    client_user.post(
+        reverse("engagement:comment", args=[listing.pk]),
+        {"body": "call me on 024 123 4567 or kofi@example.com or www.deal.com"},
+    )
     comment = Comment.objects.get()
     with connection.cursor() as cur:
         cur.execute("SELECT body FROM engagement_comment WHERE id = %s", [comment.pk])
@@ -87,9 +89,13 @@ def test_reports_auto_hide_listing():
 def test_report_endpoint_for_conversation_requires_participant(client):
     conv = f.ConversationFactory()
     client.force_login(f.UserFactory())
-    assert client.get(reverse("engagement:report", args=["conversation", conv.pk])).status_code == 404
+    assert (
+        client.get(reverse("engagement:report", args=["conversation", conv.pk])).status_code == 404
+    )
     client.force_login(conv.starter)
-    r = client.post(reverse("engagement:report", args=["conversation", conv.pk]), {"reason": "scam"})
+    r = client.post(
+        reverse("engagement:report", args=["conversation", conv.pk]), {"reason": "scam"}
+    )
     assert r.status_code == 200 and Report.objects.count() == 1
 
 
@@ -111,7 +117,10 @@ def test_saved_search_alerts_only_new_matches(campus):
 
 
 def test_saved_search_endpoint(client_user, campus):
-    client_user.post(reverse("engagement:save_search"), {"section": "rooms", "campus": campus.pk, "gender": "female"})
+    client_user.post(
+        reverse("engagement:save_search"),
+        {"section": "rooms", "campus": campus.pk, "gender": "female"},
+    )
     assert SavedSearch.objects.get().params == {"gender": "female"}
 
 

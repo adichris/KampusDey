@@ -9,341 +9,783 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('taggit', '0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx'),
+        ("taggit", "0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AlertDetails',
+            name="AlertDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('alert_type', models.CharField(choices=[('water', 'Water'), ('power', 'Power'), ('security', 'Security'), ('venue_change', 'Venue change'), ('other', 'Other')], default='other', max_length=14)),
-                ('valid_until', models.DateTimeField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "alert_type",
+                    models.CharField(
+                        choices=[
+                            ("water", "Water"),
+                            ("power", "Power"),
+                            ("security", "Security"),
+                            ("venue_change", "Venue change"),
+                            ("other", "Other"),
+                        ],
+                        default="other",
+                        max_length=14,
+                    ),
+                ),
+                ("valid_until", models.DateTimeField()),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ErrandDetails',
+            name="ErrandDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('deadline', models.DateTimeField(blank=True, null=True)),
-                ('pickup_area', models.CharField(blank=True, max_length=120)),
-                ('dropoff_area', models.CharField(blank=True, max_length=120)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("deadline", models.DateTimeField(blank=True, null=True)),
+                ("pickup_area", models.CharField(blank=True, max_length=120)),
+                ("dropoff_area", models.CharField(blank=True, max_length=120)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='EventDetails',
+            name="EventDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('starts_at', models.DateTimeField()),
-                ('ends_at', models.DateTimeField(blank=True, null=True)),
-                ('venue', models.CharField(max_length=160)),
-                ('organiser', models.CharField(blank=True, max_length=120)),
-                ('ticket_info', models.CharField(blank=True, max_length=160)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("starts_at", models.DateTimeField()),
+                ("ends_at", models.DateTimeField(blank=True, null=True)),
+                ("venue", models.CharField(max_length=160)),
+                ("organiser", models.CharField(blank=True, max_length=120)),
+                ("ticket_info", models.CharField(blank=True, max_length=160)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='FoodDetails',
+            name="FoodDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('post_kind', models.CharField(choices=[('extra_food', 'I have extra food'), ('need_food', 'I need food')], default='extra_food', max_length=10)),
-                ('pickup_from', models.CharField(blank=True, max_length=120)),
-                ('available_until', models.DateTimeField()),
-                ('food_note', models.CharField(blank=True, max_length=200)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "post_kind",
+                    models.CharField(
+                        choices=[("extra_food", "I have extra food"), ("need_food", "I need food")],
+                        default="extra_food",
+                        max_length=10,
+                    ),
+                ),
+                ("pickup_from", models.CharField(blank=True, max_length=120)),
+                ("available_until", models.DateTimeField()),
+                ("food_note", models.CharField(blank=True, max_length=200)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ItemCategory',
+            name="ItemCategory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('name', models.CharField(max_length=80)),
-                ('slug', models.SlugField(max_length=80, unique=True)),
-                ('icon', models.CharField(default='package', help_text='Lucide icon name', max_length=40)),
-                ('min_price', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('max_price', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('order', models.PositiveSmallIntegerField(default=0)),
-                ('is_active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("name", models.CharField(max_length=80)),
+                ("slug", models.SlugField(max_length=80, unique=True)),
+                (
+                    "icon",
+                    models.CharField(
+                        default="package", help_text="Lucide icon name", max_length=40
+                    ),
+                ),
+                (
+                    "min_price",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True),
+                ),
+                (
+                    "max_price",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True),
+                ),
+                ("order", models.PositiveSmallIntegerField(default=0)),
+                ("is_active", models.BooleanField(default=True)),
             ],
             options={
-                'verbose_name_plural': 'item categories',
-                'ordering': ['order', 'name'],
-                'abstract': False,
+                "verbose_name_plural": "item categories",
+                "ordering": ["order", "name"],
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='JobDetails',
+            name="JobDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('job_type', models.CharField(choices=[('part_time', 'Part-time'), ('internship', 'Internship'), ('attachment', 'Attachment'), ('gig', 'Gig'), ('full_time', 'Full-time')], default='part_time', max_length=12)),
-                ('pay_text', models.CharField(blank=True, max_length=80, verbose_name='pay')),
-                ('hours_text', models.CharField(blank=True, max_length=80, verbose_name='hours')),
-                ('deadline', models.DateField(blank=True, null=True)),
-                ('how_to_apply', models.TextField(blank=True, max_length=1000)),
-                ('apply_url', models.URLField(blank=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "job_type",
+                    models.CharField(
+                        choices=[
+                            ("part_time", "Part-time"),
+                            ("internship", "Internship"),
+                            ("attachment", "Attachment"),
+                            ("gig", "Gig"),
+                            ("full_time", "Full-time"),
+                        ],
+                        default="part_time",
+                        max_length=12,
+                    ),
+                ),
+                ("pay_text", models.CharField(blank=True, max_length=80, verbose_name="pay")),
+                ("hours_text", models.CharField(blank=True, max_length=80, verbose_name="hours")),
+                ("deadline", models.DateField(blank=True, null=True)),
+                ("how_to_apply", models.TextField(blank=True, max_length=1000)),
+                ("apply_url", models.URLField(blank=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Listing',
+            name="Listing",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('lat', models.FloatField(blank=True, null=True, verbose_name='latitude')),
-                ('lng', models.FloatField(blank=True, null=True, verbose_name='longitude')),
-                ('section', models.CharField(choices=[('rooms', 'Rooms & Hostels'), ('roommates', 'Roommates'), ('short-stays', 'Short stays'), ('buy-sell', 'Buy & Sell'), ('wanted', 'Wanted'), ('free-leaving', 'Free & Leaving'), ('services', 'Services'), ('jobs', 'Jobs'), ('job-requests', 'Job requests'), ('errands', 'Errands'), ('food', 'Food'), ('events', 'Events'), ('notes', 'Notes'), ('study', 'Study'), ('lost-found', 'Lost & Found'), ('trips', 'Trips'), ('alerts', 'Alerts'), ('ask', 'Ask')], db_index=True, max_length=20)),
-                ('title', models.CharField(max_length=120, verbose_name='title')),
-                ('slug', models.SlugField(max_length=140, unique=True)),
-                ('description', models.TextField(blank=True, max_length=5000, verbose_name='description')),
-                ('price', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True, verbose_name='price')),
-                ('price_period', models.CharField(blank=True, choices=[('total', 'total'), ('per_year', 'per year'), ('per_semester', 'per semester'), ('per_month', 'per month'), ('per_night', 'per night'), ('per_hour', 'per hour')], default='total', max_length=14)),
-                ('negotiable', models.BooleanField(default=False, verbose_name='negotiable')),
-                ('is_free', models.BooleanField(default=False, verbose_name='free')),
-                ('contact_visibility', models.CharField(choices=[('public', 'Anyone can see my contact buttons'), ('members', 'Only logged-in members')], default='public', max_length=8)),
-                ('hide_number', models.BooleanField(default=False, verbose_name='hide my phone number (chat only)')),
-                ('seller_type', models.CharField(blank=True, db_index=True, max_length=10)),
-                ('status', models.CharField(choices=[('draft', 'Draft'), ('pending_review', 'Pending review'), ('active', 'Active'), ('needs_check', 'Needs check'), ('expired', 'Expired'), ('archived', 'Archived'), ('taken', 'Taken')], db_index=True, default='draft', max_length=16)),
-                ('is_hidden', models.BooleanField(default=False, help_text='Hidden pending moderator review')),
-                ('hidden_reason', models.CharField(blank=True, max_length=200)),
-                ('wizard_step', models.PositiveSmallIntegerField(default=1)),
-                ('published_at', models.DateTimeField(blank=True, db_index=True, null=True)),
-                ('approved_at', models.DateTimeField(blank=True, null=True)),
-                ('confirmed_at', models.DateTimeField(blank=True, null=True)),
-                ('expires_at', models.DateTimeField(blank=True, null=True)),
-                ('status_changed_at', models.DateTimeField(blank=True, null=True)),
-                ('needs_check_sent_at', models.DateTimeField(blank=True, null=True)),
-                ('score', models.FloatField(db_index=True, default=0)),
-                ('views_7d', models.PositiveIntegerField(default=0)),
-                ('taps_7d', models.PositiveIntegerField(default=0)),
-                ('likes_7d', models.PositiveIntegerField(default=0)),
-                ('likes_count', models.PositiveIntegerField(default=0)),
-                ('comments_count', models.PositiveIntegerField(default=0)),
-                ('reports_count', models.PositiveIntegerField(default=0)),
-                ('search_vector', django.contrib.postgres.search.SearchVectorField(editable=False, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("lat", models.FloatField(blank=True, null=True, verbose_name="latitude")),
+                ("lng", models.FloatField(blank=True, null=True, verbose_name="longitude")),
+                (
+                    "section",
+                    models.CharField(
+                        choices=[
+                            ("rooms", "Rooms & Hostels"),
+                            ("roommates", "Roommates"),
+                            ("short-stays", "Short stays"),
+                            ("buy-sell", "Buy & Sell"),
+                            ("wanted", "Wanted"),
+                            ("free-leaving", "Free & Leaving"),
+                            ("services", "Services"),
+                            ("jobs", "Jobs"),
+                            ("job-requests", "Job requests"),
+                            ("errands", "Errands"),
+                            ("food", "Food"),
+                            ("events", "Events"),
+                            ("notes", "Notes"),
+                            ("study", "Study"),
+                            ("lost-found", "Lost & Found"),
+                            ("trips", "Trips"),
+                            ("alerts", "Alerts"),
+                            ("ask", "Ask"),
+                        ],
+                        db_index=True,
+                        max_length=20,
+                    ),
+                ),
+                ("title", models.CharField(max_length=120, verbose_name="title")),
+                ("slug", models.SlugField(max_length=140, unique=True)),
+                (
+                    "description",
+                    models.TextField(blank=True, max_length=5000, verbose_name="description"),
+                ),
+                (
+                    "price",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=12, null=True, verbose_name="price"
+                    ),
+                ),
+                (
+                    "price_period",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("total", "total"),
+                            ("per_year", "per year"),
+                            ("per_semester", "per semester"),
+                            ("per_month", "per month"),
+                            ("per_night", "per night"),
+                            ("per_hour", "per hour"),
+                        ],
+                        default="total",
+                        max_length=14,
+                    ),
+                ),
+                ("negotiable", models.BooleanField(default=False, verbose_name="negotiable")),
+                ("is_free", models.BooleanField(default=False, verbose_name="free")),
+                (
+                    "contact_visibility",
+                    models.CharField(
+                        choices=[
+                            ("public", "Anyone can see my contact buttons"),
+                            ("members", "Only logged-in members"),
+                        ],
+                        default="public",
+                        max_length=8,
+                    ),
+                ),
+                (
+                    "hide_number",
+                    models.BooleanField(
+                        default=False, verbose_name="hide my phone number (chat only)"
+                    ),
+                ),
+                ("seller_type", models.CharField(blank=True, db_index=True, max_length=10)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Draft"),
+                            ("pending_review", "Pending review"),
+                            ("active", "Active"),
+                            ("needs_check", "Needs check"),
+                            ("expired", "Expired"),
+                            ("archived", "Archived"),
+                            ("taken", "Taken"),
+                        ],
+                        db_index=True,
+                        default="draft",
+                        max_length=16,
+                    ),
+                ),
+                (
+                    "is_hidden",
+                    models.BooleanField(default=False, help_text="Hidden pending moderator review"),
+                ),
+                ("hidden_reason", models.CharField(blank=True, max_length=200)),
+                ("wizard_step", models.PositiveSmallIntegerField(default=1)),
+                ("published_at", models.DateTimeField(blank=True, db_index=True, null=True)),
+                ("approved_at", models.DateTimeField(blank=True, null=True)),
+                ("confirmed_at", models.DateTimeField(blank=True, null=True)),
+                ("expires_at", models.DateTimeField(blank=True, null=True)),
+                ("status_changed_at", models.DateTimeField(blank=True, null=True)),
+                ("needs_check_sent_at", models.DateTimeField(blank=True, null=True)),
+                ("score", models.FloatField(db_index=True, default=0)),
+                ("views_7d", models.PositiveIntegerField(default=0)),
+                ("taps_7d", models.PositiveIntegerField(default=0)),
+                ("likes_7d", models.PositiveIntegerField(default=0)),
+                ("likes_count", models.PositiveIntegerField(default=0)),
+                ("comments_count", models.PositiveIntegerField(default=0)),
+                ("reports_count", models.PositiveIntegerField(default=0)),
+                (
+                    "search_vector",
+                    django.contrib.postgres.search.SearchVectorField(editable=False, null=True),
+                ),
             ],
             options={
-                'ordering': ['-published_at', '-created_at'],
+                "ordering": ["-published_at", "-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='ListingCampus',
+            name="ListingCampus",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('distance_m', models.PositiveIntegerField(blank=True, null=True)),
-                ('is_manual', models.BooleanField(default=False)),
-                ('is_excluded', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("distance_m", models.PositiveIntegerField(blank=True, null=True)),
+                ("is_manual", models.BooleanField(default=False)),
+                ("is_excluded", models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
-            name='ListingPhoto',
+            name="ListingPhoto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('image', models.ImageField(height_field='height', upload_to=apps.listings.models.listing_photo_upload_to, width_field='width')),
-                ('order', models.PositiveSmallIntegerField(default=0)),
-                ('width', models.PositiveIntegerField(blank=True, null=True)),
-                ('height', models.PositiveIntegerField(blank=True, null=True)),
-                ('phash', models.CharField(blank=True, db_index=True, max_length=16)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                (
+                    "image",
+                    models.ImageField(
+                        height_field="height",
+                        upload_to=apps.listings.models.listing_photo_upload_to,
+                        width_field="width",
+                    ),
+                ),
+                ("order", models.PositiveSmallIntegerField(default=0)),
+                ("width", models.PositiveIntegerField(blank=True, null=True)),
+                ("height", models.PositiveIntegerField(blank=True, null=True)),
+                ("phash", models.CharField(blank=True, db_index=True, max_length=16)),
             ],
             options={
-                'ordering': ['order', 'id'],
-                'abstract': False,
+                "ordering": ["order", "id"],
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='LostFoundDetails',
+            name="LostFoundDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('kind', models.CharField(choices=[('lost', 'Lost'), ('found', 'Found')], default='lost', max_length=6)),
-                ('item_type', models.CharField(max_length=80)),
-                ('happened_at', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "kind",
+                    models.CharField(
+                        choices=[("lost", "Lost"), ("found", "Found")], default="lost", max_length=6
+                    ),
+                ),
+                ("item_type", models.CharField(max_length=80)),
+                ("happened_at", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='NoteDetails',
+            name="NoteDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('course_code', models.CharField(max_length=20)),
-                ('course_title', models.CharField(blank=True, max_length=160)),
-                ('level', models.CharField(blank=True, max_length=40)),
-                ('format', models.CharField(choices=[('file', 'File (PDF)'), ('physical', 'Physical copy'), ('both', 'Both')], default='physical', max_length=10)),
-                ('file', models.FileField(blank=True, null=True, upload_to=apps.listings.models.notes_upload_to, validators=[django.core.validators.FileExtensionValidator(['pdf'])])),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("course_code", models.CharField(max_length=20)),
+                ("course_title", models.CharField(blank=True, max_length=160)),
+                ("level", models.CharField(blank=True, max_length=40)),
+                (
+                    "format",
+                    models.CharField(
+                        choices=[
+                            ("file", "File (PDF)"),
+                            ("physical", "Physical copy"),
+                            ("both", "Both"),
+                        ],
+                        default="physical",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "file",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to=apps.listings.models.notes_upload_to,
+                        validators=[django.core.validators.FileExtensionValidator(["pdf"])],
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='QuestionDetails',
+            name="QuestionDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='RoomDetails',
+            name="RoomDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('room_type', models.CharField(choices=[('single', 'Single room'), ('2_in_1', '2 in 1'), ('3_in_1', '3 in 1'), ('4_in_1', '4 in 1'), ('self_contained', 'Self-contained'), ('chamber_hall', 'Chamber & hall')], default='single', max_length=16)),
-                ('gender', models.CharField(choices=[('male', 'Male'), ('female', 'Female'), ('mixed', 'Mixed / any')], default='mixed', max_length=8)),
-                ('rooms_per_meter', models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='rooms sharing one electricity meter')),
-                ('water_supply', models.CharField(choices=[('flowing', 'Flowing water'), ('tank', 'Tank / polytank'), ('intermittent', 'Sometimes'), ('none', 'No water on site')], default='flowing', max_length=14)),
-                ('washroom', models.CharField(choices=[('in_room', 'In room'), ('shared', 'Shared')], default='shared', max_length=8)),
-                ('kitchen', models.BooleanField(default=False, verbose_name='kitchen')),
-                ('wifi', models.BooleanField(default=False, verbose_name='Wi-Fi')),
-                ('security', models.BooleanField(default=False, verbose_name='security / gated')),
-                ('furnished', models.BooleanField(default=False, verbose_name='furnished')),
-                ('mattress_included', models.BooleanField(default=False, verbose_name='mattress included')),
-                ('available_from', models.DateField(blank=True, null=True, verbose_name='available from')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "room_type",
+                    models.CharField(
+                        choices=[
+                            ("single", "Single room"),
+                            ("2_in_1", "2 in 1"),
+                            ("3_in_1", "3 in 1"),
+                            ("4_in_1", "4 in 1"),
+                            ("self_contained", "Self-contained"),
+                            ("chamber_hall", "Chamber & hall"),
+                        ],
+                        default="single",
+                        max_length=16,
+                    ),
+                ),
+                (
+                    "gender",
+                    models.CharField(
+                        choices=[("male", "Male"), ("female", "Female"), ("mixed", "Mixed / any")],
+                        default="mixed",
+                        max_length=8,
+                    ),
+                ),
+                (
+                    "rooms_per_meter",
+                    models.PositiveSmallIntegerField(
+                        blank=True, null=True, verbose_name="rooms sharing one electricity meter"
+                    ),
+                ),
+                (
+                    "water_supply",
+                    models.CharField(
+                        choices=[
+                            ("flowing", "Flowing water"),
+                            ("tank", "Tank / polytank"),
+                            ("intermittent", "Sometimes"),
+                            ("none", "No water on site"),
+                        ],
+                        default="flowing",
+                        max_length=14,
+                    ),
+                ),
+                (
+                    "washroom",
+                    models.CharField(
+                        choices=[("in_room", "In room"), ("shared", "Shared")],
+                        default="shared",
+                        max_length=8,
+                    ),
+                ),
+                ("kitchen", models.BooleanField(default=False, verbose_name="kitchen")),
+                ("wifi", models.BooleanField(default=False, verbose_name="Wi-Fi")),
+                ("security", models.BooleanField(default=False, verbose_name="security / gated")),
+                ("furnished", models.BooleanField(default=False, verbose_name="furnished")),
+                (
+                    "mattress_included",
+                    models.BooleanField(default=False, verbose_name="mattress included"),
+                ),
+                (
+                    "available_from",
+                    models.DateField(blank=True, null=True, verbose_name="available from"),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='RoommateDetails',
+            name="RoommateDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('post_kind', models.CharField(choices=[('have_room', 'I have a room'), ('need_room', 'I need a room')], default='need_room', max_length=10)),
-                ('gender_pref', models.CharField(choices=[('male', 'Male'), ('female', 'Female'), ('mixed', 'Mixed / any')], default='mixed', max_length=8)),
-                ('budget_min', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('budget_max', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('level', models.CharField(blank=True, max_length=40)),
-                ('move_in_date', models.DateField(blank=True, null=True)),
-                ('habits', models.JSONField(blank=True, default=list)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "post_kind",
+                    models.CharField(
+                        choices=[("have_room", "I have a room"), ("need_room", "I need a room")],
+                        default="need_room",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "gender_pref",
+                    models.CharField(
+                        choices=[("male", "Male"), ("female", "Female"), ("mixed", "Mixed / any")],
+                        default="mixed",
+                        max_length=8,
+                    ),
+                ),
+                (
+                    "budget_min",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True),
+                ),
+                (
+                    "budget_max",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True),
+                ),
+                ("level", models.CharField(blank=True, max_length=40)),
+                ("move_in_date", models.DateField(blank=True, null=True)),
+                ("habits", models.JSONField(blank=True, default=list)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ServiceCategory',
+            name="ServiceCategory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('name', models.CharField(max_length=80)),
-                ('slug', models.SlugField(max_length=80, unique=True)),
-                ('icon', models.CharField(default='package', help_text='Lucide icon name', max_length=40)),
-                ('min_price', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('max_price', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('order', models.PositiveSmallIntegerField(default=0)),
-                ('is_active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("name", models.CharField(max_length=80)),
+                ("slug", models.SlugField(max_length=80, unique=True)),
+                (
+                    "icon",
+                    models.CharField(
+                        default="package", help_text="Lucide icon name", max_length=40
+                    ),
+                ),
+                (
+                    "min_price",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True),
+                ),
+                (
+                    "max_price",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True),
+                ),
+                ("order", models.PositiveSmallIntegerField(default=0)),
+                ("is_active", models.BooleanField(default=True)),
             ],
             options={
-                'verbose_name_plural': 'service categories',
-                'ordering': ['order', 'name'],
-                'abstract': False,
+                "verbose_name_plural": "service categories",
+                "ordering": ["order", "name"],
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ServiceDetails',
+            name="ServiceDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('price_from', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True, validators=[django.core.validators.MinValueValidator(0)])),
-                ('hours_text', models.CharField(blank=True, max_length=120, verbose_name='opening hours')),
-                ('area_served', models.CharField(blank=True, max_length=120)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "price_from",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        max_digits=10,
+                        null=True,
+                        validators=[django.core.validators.MinValueValidator(0)],
+                    ),
+                ),
+                (
+                    "hours_text",
+                    models.CharField(blank=True, max_length=120, verbose_name="opening hours"),
+                ),
+                ("area_served", models.CharField(blank=True, max_length=120)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ShortStayDetails',
+            name="ShortStayDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('room_type', models.CharField(choices=[('single', 'Single room'), ('2_in_1', '2 in 1'), ('3_in_1', '3 in 1'), ('4_in_1', '4 in 1'), ('self_contained', 'Self-contained'), ('chamber_hall', 'Chamber & hall')], default='single', max_length=16)),
-                ('available_from', models.DateField(blank=True, null=True)),
-                ('available_to', models.DateField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "room_type",
+                    models.CharField(
+                        choices=[
+                            ("single", "Single room"),
+                            ("2_in_1", "2 in 1"),
+                            ("3_in_1", "3 in 1"),
+                            ("4_in_1", "4 in 1"),
+                            ("self_contained", "Self-contained"),
+                            ("chamber_hall", "Chamber & hall"),
+                        ],
+                        default="single",
+                        max_length=16,
+                    ),
+                ),
+                ("available_from", models.DateField(blank=True, null=True)),
+                ("available_to", models.DateField(blank=True, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudyDetails',
+            name="StudyDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('kind', models.CharField(choices=[('study_partner', 'Study partner'), ('tutor', 'Tutor')], default='study_partner', max_length=14)),
-                ('course_code', models.CharField(blank=True, max_length=20)),
-                ('level', models.CharField(blank=True, max_length=40)),
-                ('schedule_text', models.CharField(blank=True, max_length=120)),
-                ('mode', models.CharField(choices=[('online', 'Online'), ('in_person', 'In person')], default='in_person', max_length=10)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "kind",
+                    models.CharField(
+                        choices=[("study_partner", "Study partner"), ("tutor", "Tutor")],
+                        default="study_partner",
+                        max_length=14,
+                    ),
+                ),
+                ("course_code", models.CharField(blank=True, max_length=20)),
+                ("level", models.CharField(blank=True, max_length=40)),
+                ("schedule_text", models.CharField(blank=True, max_length=120)),
+                (
+                    "mode",
+                    models.CharField(
+                        choices=[("online", "Online"), ("in_person", "In person")],
+                        default="in_person",
+                        max_length=10,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='TripDetails',
+            name="TripDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('departs_at', models.DateTimeField()),
-                ('seats_available', models.PositiveSmallIntegerField(default=1)),
-                ('cost_share', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("departs_at", models.DateTimeField()),
+                ("seats_available", models.PositiveSmallIntegerField(default=1)),
+                (
+                    "cost_share",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='WantedDetails',
+            name="WantedDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('budget_max', models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True)),
-                ('needed_by', models.DateField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "budget_max",
+                    models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True),
+                ),
+                ("needed_by", models.DateField(blank=True, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ItemDetails',
+            name="ItemDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('condition', models.CharField(choices=[('new', 'New'), ('like_new', 'Like new'), ('used', 'Used')], default='used', max_length=10)),
-                ('pickup_by', models.DateField(blank=True, null=True, verbose_name='pick up by')),
-                ('category', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='listings.itemcategory')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "condition",
+                    models.CharField(
+                        choices=[("new", "New"), ("like_new", "Like new"), ("used", "Used")],
+                        default="used",
+                        max_length=10,
+                    ),
+                ),
+                ("pickup_by", models.DateField(blank=True, null=True, verbose_name="pick up by")),
+                (
+                    "category",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="listings.itemcategory",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='JobRequestDetails',
+            name="JobRequestDetails",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('availability', models.CharField(blank=True, max_length=120)),
-                ('expected_pay', models.CharField(blank=True, max_length=80)),
-                ('skills', taggit.managers.TaggableManager(blank=True, help_text='A comma-separated list of tags.', through='taggit.TaggedItem', to='taggit.Tag', verbose_name='Tags')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("availability", models.CharField(blank=True, max_length=120)),
+                ("expected_pay", models.CharField(blank=True, max_length=80)),
+                (
+                    "skills",
+                    taggit.managers.TaggableManager(
+                        blank=True,
+                        help_text="A comma-separated list of tags.",
+                        through="taggit.TaggedItem",
+                        to="taggit.Tag",
+                        verbose_name="Tags",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

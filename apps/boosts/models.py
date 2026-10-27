@@ -18,7 +18,9 @@ class Boost(TimeStampedModel):
         PAID = "paid", _("Paid")  # reserved; never used (no payment code)
 
     listing = models.ForeignKey("listings.Listing", on_delete=models.CASCADE, related_name="boosts")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="boosts")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="boosts"
+    )
     source = models.CharField(max_length=4, choices=Source.choices, default=Source.FREE)
     starts_at = models.DateTimeField(default=timezone.now)
     ends_at = models.DateTimeField()

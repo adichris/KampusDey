@@ -25,8 +25,11 @@ def _snapshot():
     rows = []
     for model in (Region, District, Town, Institution, Campus, Area, SourceRecord):
         for obj in model.objects.order_by("pk"):
-            data = {fl.attname: getattr(obj, fl.attname) for fl in model._meta.concrete_fields
-                    if fl.attname not in ("updated_at", "created_at")}
+            data = {
+                fl.attname: getattr(obj, fl.attname)
+                for fl in model._meta.concrete_fields
+                if fl.attname not in ("updated_at", "created_at")
+            }
             rows.append((model.__name__, data))
     return rows
 
@@ -41,7 +44,9 @@ def regions(db):
 def run_all(base_dir=None):
     pipeline.import_admin_boundaries(load("hdx_adm1.geojson"), load("hdx_adm2.geojson"))
     pipeline.import_osm_towns(load("overpass_towns.json"))
-    pipeline.import_wikidata_institutions(load("wikidata_institutions.json"), load("wikidata_campuses.json"))
+    pipeline.import_wikidata_institutions(
+        load("wikidata_institutions.json"), load("wikidata_campuses.json")
+    )
     pipeline.import_osm_campuses(load("overpass_campuses.json"))
     pipeline.import_reference_lists(FIX / "raw")
     areas = load("overpass_areas.json")
@@ -83,11 +88,17 @@ def test_full_import_creates_records_with_provenance(regions):
     assert not Institution.objects.filter(name="Old Closed College").exists()  # dissolved
     assert SourceRecord.objects.filter(source_id="Q900003").exists()  # but staged
     main = inst.campuses.order_by("pk").first()
-    assert main.town.name == "Fixtureton" and main.lat == pytest.approx(7.301)  # Wikidata coords preferred
+    assert main.town.name == "Fixtureton" and main.lat == pytest.approx(
+        7.301
+    )  # Wikidata coords preferred
     assert main.osm_id == "way/5001"  # matched by OSM wikidata tag
     assert Campus.objects.filter(name__contains="North Campus", institution=inst).exists()
     nursing = Campus.objects.get(name__startswith="Fixtureton Nursing")
-    assert nursing.kind == "nursing_midwifery" and nursing.confidence <= 0.5 and nursing.review_status == "unverified"
+    assert (
+        nursing.kind == "nursing_midwifery"
+        and nursing.confidence <= 0.5
+        and nursing.review_status == "unverified"
+    )
     for model in (Institution, Campus, Town, Area):
         for obj in model.objects.exclude(source="manual"):
             assert obj.source and obj.licence and obj.retrieved_at and obj.review_status
@@ -117,7 +128,10 @@ def test_reimport_is_idempotent(regions):
     run_all()
     after = _snapshot()
     diffs = [
-        (a[0], k, a[1][k], b[1][k]) for a, b in zip(before, after, strict=False) for k in a[1] if a[1][k] != b[1][k]
+        (a[0], k, a[1][k], b[1][k])
+        for a, b in zip(before, after, strict=False)
+        for k in a[1]
+        if a[1][k] != b[1][k]
     ]
     assert not diffs and len(before) == len(after)
 
@@ -140,10 +154,25 @@ def test_locked_fields_survive_reimport(regions):
 
 def test_admin_edit_locks_changed_fields(admin_client, regions):
     campus = f.CampusFactory(name="Before", town=f.TownFactory(region=regions[0]))
-    data = {"institution": campus.institution_id, "name": "After", "short_name": campus.short_name, "slug": campus.slug,
-            "kind": campus.kind, "town": campus.town_id, "is_active": "on", "lat": campus.lat, "lng": campus.lng,
-            "osm_id": "", "source": "manual", "source_id": "", "source_url": "", "licence": "", "confidence": 1,
-            "review_status": "verified", "locked_fields": "[]"}
+    data = {
+        "institution": campus.institution_id,
+        "name": "After",
+        "short_name": campus.short_name,
+        "slug": campus.slug,
+        "kind": campus.kind,
+        "town": campus.town_id,
+        "is_active": "on",
+        "lat": campus.lat,
+        "lng": campus.lng,
+        "osm_id": "",
+        "source": "manual",
+        "source_id": "",
+        "source_url": "",
+        "licence": "",
+        "confidence": 1,
+        "review_status": "verified",
+        "locked_fields": "[]",
+    }
     r = admin_client.post(f"/admin/locations/campus/{campus.pk}/change/", data)
     assert r.status_code == 302, r.content[:2000]
     campus.refresh_from_db()
@@ -172,7 +201,10 @@ def test_merge_moves_listings_and_areas(regions):
     pipeline.merge_campuses(keep, drop)
     drop.refresh_from_db()
     assert listing.campus_links.get().campus == keep and keep.areas.count() == 1
-    assert drop.review_status == "rejected" and not Campus.objects.visible().filter(pk=drop.pk).exists()
+    assert (
+        drop.review_status == "rejected"
+        and not Campus.objects.visible().filter(pk=drop.pk).exists()
+    )
 
 
 def test_duplicates_report_and_command(regions, capsys):

@@ -41,7 +41,7 @@ def test_no_ip_addresses_in_telemetry_tables(client):
     services.flush()
     for model in (Event, DailyListingStats, DailyCampusStats, PendingEvent):
         columns = [f.name for f in model._meta.get_fields()]
-        assert not any("ip" == c or c.endswith("_ip") or "address" in c for c in columns)
+        assert not any(c == "ip" or c.endswith("_ip") or "address" in c for c in columns)
     with connection.cursor() as cur:
         cur.execute("SELECT * FROM telemetry_event")
         assert "203.0.113.77" not in str(cur.fetchall())
@@ -50,9 +50,17 @@ def test_no_ip_addresses_in_telemetry_tables(client):
 def test_rollup_daily_stats_and_counters(campus):
     listing = f.ListingFactory()
     yesterday = timezone.now() - timedelta(days=1)
-    for kind, meta in [("view", {}), ("view", {}), ("tap", {"channel": "phone"}), ("like", {}), ("share", {})]:
+    for kind, meta in [
+        ("view", {}),
+        ("view", {}),
+        ("tap", {"channel": "phone"}),
+        ("like", {}),
+        ("share", {}),
+    ]:
         f.EventFactory(kind=kind, listing=listing, meta=meta, created_at=yesterday, campus=campus)
-    f.EventFactory(kind="search", meta={"query": "x", "results": 0}, campus=campus, created_at=yesterday)
+    f.EventFactory(
+        kind="search", meta={"query": "x", "results": 0}, campus=campus, created_at=yesterday
+    )
     services.rollup(timezone.localdate(yesterday))
     stats = DailyListingStats.objects.get(listing=listing)
     assert (stats.views, stats.taps, stats.likes, stats.shares) == (2, 1, 1, 1)

@@ -12,11 +12,28 @@ from apps.boosts.models import Boost
 from apps.chat.models import Block, Conversation, Message
 from apps.contacts.models import ContactCard, ContactChannel
 from apps.engagement.models import Comment, Like, Report, Review, SavedSearch
-from apps.external.models import ExternalJob, ExternalRun, ExternalSource, Place, PlaceCampus, PlaceClaim
+from apps.external.models import (
+    ExternalJob,
+    ExternalRun,
+    ExternalSource,
+    Place,
+    PlaceCampus,
+    PlaceClaim,
+)
 from apps.growth.models import Referral, Spotlight
 from apps.hostels.models import Hostel, HostelPhoto, HostelRoomType
 from apps.listings import models as lm
-from apps.locations.models import Area, Campus, CampusRequest, District, ImportLog, Institution, Region, SourceRecord, Town
+from apps.locations.models import (
+    Area,
+    Campus,
+    CampusRequest,
+    District,
+    ImportLog,
+    Institution,
+    Region,
+    SourceRecord,
+    Town,
+)
 from apps.moderation.models import BannedTerm, ModerationItem, PriceRangeSuggestion, ScamAlert
 from apps.notifications.models import Notification, NotificationPreference
 from apps.sitesettings.models import SectionAvailability
@@ -231,35 +248,83 @@ def _details(model, **defaults):
     return type(
         f"{model.__name__}Factory",
         (DjangoModelFactory,),
-        {"Meta": type("Meta", (), {"model": model}), "listing": factory.SubFactory(ListingFactory), **defaults},
+        {
+            "Meta": type("Meta", (), {"model": model}),
+            "listing": factory.SubFactory(ListingFactory),
+            **defaults,
+        },
     )
 
 
-RoomDetailsFactory = _details(lm.RoomDetails, listing=factory.SubFactory(ListingFactory, section="rooms"))
-RoommateDetailsFactory = _details(lm.RoommateDetails, listing=factory.SubFactory(ListingFactory, section="roommates", price=None))
-ShortStayDetailsFactory = _details(lm.ShortStayDetails, listing=factory.SubFactory(ListingFactory, section="short-stays"))
+RoomDetailsFactory = _details(
+    lm.RoomDetails, listing=factory.SubFactory(ListingFactory, section="rooms")
+)
+RoommateDetailsFactory = _details(
+    lm.RoommateDetails, listing=factory.SubFactory(ListingFactory, section="roommates", price=None)
+)
+ShortStayDetailsFactory = _details(
+    lm.ShortStayDetails, listing=factory.SubFactory(ListingFactory, section="short-stays")
+)
 ItemDetailsFactory = _details(lm.ItemDetails, category=factory.SubFactory(ItemCategoryFactory))
-WantedDetailsFactory = _details(lm.WantedDetails, listing=factory.SubFactory(ListingFactory, section="wanted", price=None))
-ServiceDetailsFactory = _details(lm.ServiceDetails, listing=factory.SubFactory(ListingFactory, section="services"),
-                                 service_type=factory.SubFactory(ServiceCategoryFactory))
-JobDetailsFactory = _details(lm.JobDetails, listing=factory.SubFactory(ListingFactory, section="jobs", price=None),
-                             pay_text="GH₵ 20/hr")
-JobRequestDetailsFactory = _details(lm.JobRequestDetails, listing=factory.SubFactory(ListingFactory, section="job-requests", price=None))
-ErrandDetailsFactory = _details(lm.ErrandDetails, listing=factory.SubFactory(ListingFactory, section="errands"))
-FoodDetailsFactory = _details(lm.FoodDetails, listing=factory.SubFactory(ListingFactory, section="food", price=None),
-                              available_until=factory.LazyFunction(lambda: timezone.now() + timedelta(hours=2)))
-EventDetailsFactory = _details(lm.EventDetails, listing=factory.SubFactory(ListingFactory, section="events", price=None),
-                               starts_at=factory.LazyFunction(lambda: timezone.now() + timedelta(days=2)), venue="Great Hall")
-NoteDetailsFactory = _details(lm.NoteDetails, listing=factory.SubFactory(ListingFactory, section="notes"), course_code="CSC101")
-StudyDetailsFactory = _details(lm.StudyDetails, listing=factory.SubFactory(ListingFactory, section="study", price=None))
-LostFoundDetailsFactory = _details(lm.LostFoundDetails, listing=factory.SubFactory(ListingFactory, section="lost-found", price=None),
-                                   item_type="ID card")
-TripDetailsFactory = _details(lm.TripDetails, listing=factory.SubFactory(ListingFactory, section="trips", price=None),
-                              origin_town=factory.SubFactory(TownFactory), destination_town=factory.SubFactory(TownFactory),
-                              departs_at=factory.LazyFunction(lambda: timezone.now() + timedelta(days=1)))
-AlertDetailsFactory = _details(lm.AlertDetails, listing=factory.SubFactory(ListingFactory, section="alerts", price=None),
-                               valid_until=factory.LazyFunction(lambda: timezone.now() + timedelta(hours=5)))
-QuestionDetailsFactory = _details(lm.QuestionDetails, listing=factory.SubFactory(ListingFactory, section="ask", price=None))
+WantedDetailsFactory = _details(
+    lm.WantedDetails, listing=factory.SubFactory(ListingFactory, section="wanted", price=None)
+)
+ServiceDetailsFactory = _details(
+    lm.ServiceDetails,
+    listing=factory.SubFactory(ListingFactory, section="services"),
+    service_type=factory.SubFactory(ServiceCategoryFactory),
+)
+JobDetailsFactory = _details(
+    lm.JobDetails,
+    listing=factory.SubFactory(ListingFactory, section="jobs", price=None),
+    pay_text="GH₵ 20/hr",
+)
+JobRequestDetailsFactory = _details(
+    lm.JobRequestDetails,
+    listing=factory.SubFactory(ListingFactory, section="job-requests", price=None),
+)
+ErrandDetailsFactory = _details(
+    lm.ErrandDetails, listing=factory.SubFactory(ListingFactory, section="errands")
+)
+FoodDetailsFactory = _details(
+    lm.FoodDetails,
+    listing=factory.SubFactory(ListingFactory, section="food", price=None),
+    available_until=factory.LazyFunction(lambda: timezone.now() + timedelta(hours=2)),
+)
+EventDetailsFactory = _details(
+    lm.EventDetails,
+    listing=factory.SubFactory(ListingFactory, section="events", price=None),
+    starts_at=factory.LazyFunction(lambda: timezone.now() + timedelta(days=2)),
+    venue="Great Hall",
+)
+NoteDetailsFactory = _details(
+    lm.NoteDetails,
+    listing=factory.SubFactory(ListingFactory, section="notes"),
+    course_code="CSC101",
+)
+StudyDetailsFactory = _details(
+    lm.StudyDetails, listing=factory.SubFactory(ListingFactory, section="study", price=None)
+)
+LostFoundDetailsFactory = _details(
+    lm.LostFoundDetails,
+    listing=factory.SubFactory(ListingFactory, section="lost-found", price=None),
+    item_type="ID card",
+)
+TripDetailsFactory = _details(
+    lm.TripDetails,
+    listing=factory.SubFactory(ListingFactory, section="trips", price=None),
+    origin_town=factory.SubFactory(TownFactory),
+    destination_town=factory.SubFactory(TownFactory),
+    departs_at=factory.LazyFunction(lambda: timezone.now() + timedelta(days=1)),
+)
+AlertDetailsFactory = _details(
+    lm.AlertDetails,
+    listing=factory.SubFactory(ListingFactory, section="alerts", price=None),
+    valid_until=factory.LazyFunction(lambda: timezone.now() + timedelta(hours=5)),
+)
+QuestionDetailsFactory = _details(
+    lm.QuestionDetails, listing=factory.SubFactory(ListingFactory, section="ask", price=None)
+)
 
 
 class HostelFactory(DjangoModelFactory):
@@ -466,7 +531,9 @@ class SpotlightFactory(DjangoModelFactory):
         model = Spotlight
 
     listing = factory.SubFactory(ListingFactory)
-    week_start = factory.LazyFunction(lambda: timezone.localdate() - timedelta(days=timezone.localdate().weekday()))
+    week_start = factory.LazyFunction(
+        lambda: timezone.localdate() - timedelta(days=timezone.localdate().weekday())
+    )
 
 
 class SectionAvailabilityFactory(DjangoModelFactory):
@@ -537,7 +604,9 @@ class ExternalJobFactory(DjangoModelFactory):
     class Meta:
         model = ExternalJob
 
-    external_source = factory.SubFactory(ExternalSourceFactory, slug="remotive", kind="remotive_jobs", name="Remotive (test)")
+    external_source = factory.SubFactory(
+        ExternalSourceFactory, slug="remotive", kind="remotive_jobs", name="Remotive (test)"
+    )
     source_id = factory.Sequence(lambda n: str(n))
     title = "Test Remote Writer"
     url = "https://remotive.com/remote-jobs/test"

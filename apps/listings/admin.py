@@ -20,22 +20,63 @@ class CampusLinkInline(KDTabularInline):
 
 DETAIL_INLINES = []
 for _model in [
-    m.RoomDetails, m.RoommateDetails, m.ShortStayDetails, m.ItemDetails, m.WantedDetails, m.ServiceDetails,
-    m.JobDetails, m.JobRequestDetails, m.ErrandDetails, m.FoodDetails, m.EventDetails, m.NoteDetails,
-    m.StudyDetails, m.LostFoundDetails, m.TripDetails, m.AlertDetails, m.QuestionDetails,
+    m.RoomDetails,
+    m.RoommateDetails,
+    m.ShortStayDetails,
+    m.ItemDetails,
+    m.WantedDetails,
+    m.ServiceDetails,
+    m.JobDetails,
+    m.JobRequestDetails,
+    m.ErrandDetails,
+    m.FoodDetails,
+    m.EventDetails,
+    m.NoteDetails,
+    m.StudyDetails,
+    m.LostFoundDetails,
+    m.TripDetails,
+    m.AlertDetails,
+    m.QuestionDetails,
 ]:
-    DETAIL_INLINES.append(type(f"{_model.__name__}Inline", (KDStackedInline,), {"model": _model, "max_num": 1,
-                                                                             "can_delete": False}))
+    DETAIL_INLINES.append(
+        type(
+            f"{_model.__name__}Inline",
+            (KDStackedInline,),
+            {"model": _model, "max_num": 1, "can_delete": False},
+        )
+    )
 
 
 @admin.register(m.Listing)
 class ListingAdmin(KDModelAdmin):
-    list_display = ["title", "section", "owner", "town", "status", "is_hidden", "score", "reports_count", "published_at"]
+    list_display = [
+        "title",
+        "section",
+        "owner",
+        "town",
+        "status",
+        "is_hidden",
+        "score",
+        "reports_count",
+        "published_at",
+    ]
     list_filter = ["status", "section", "is_hidden", "seller_type", "town__region"]
     search_fields = ["title", "description", "owner__email", "slug"]
     autocomplete_fields = ["owner", "town", "area", "contact_card"]
-    readonly_fields = ["score", "views_7d", "taps_7d", "likes_7d", "likes_count", "comments_count", "reports_count",
-                       "published_at", "approved_at", "confirmed_at", "status_changed_at", "created_at"]
+    readonly_fields = [
+        "score",
+        "views_7d",
+        "taps_7d",
+        "likes_7d",
+        "likes_count",
+        "comments_count",
+        "reports_count",
+        "published_at",
+        "approved_at",
+        "confirmed_at",
+        "status_changed_at",
+        "created_at",
+    ]
     list_select_related = ["owner", "town"]
     actions = ["approve_selected", "hide_selected", "mark_taken_selected", "archive_selected"]
     date_hierarchy = "created_at"
@@ -44,7 +85,9 @@ class ListingAdmin(KDModelAdmin):
         if obj is None:
             return [PhotoInline, CampusLinkInline]
         section_model = obj.section_obj.model
-        return [PhotoInline, CampusLinkInline] + [i for i in DETAIL_INLINES if i.model is section_model]
+        return [PhotoInline, CampusLinkInline] + [
+            i for i in DETAIL_INLINES if i.model is section_model
+        ]
 
     @admin.action(description=_("Approve"))
     def approve_selected(self, request, queryset):

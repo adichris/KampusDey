@@ -35,7 +35,9 @@ class ProvenanceMixin(models.Model):
     review_status = models.CharField(
         max_length=12, choices=ReviewStatus.choices, default=ReviewStatus.UNVERIFIED, db_index=True
     )
-    admin_locked = models.BooleanField(default=False, help_text=_("Imports never touch this record"))
+    admin_locked = models.BooleanField(
+        default=False, help_text=_("Imports never touch this record")
+    )
     locked_fields = models.JSONField(default=list, blank=True)
 
     class Meta:
@@ -139,9 +141,12 @@ class Institution(ProvenanceMixin, TimeStampedModel):
 class CampusQuerySet(models.QuerySet):
     def visible(self):
         """Campuses users may see: active, not rejected, not run by an unaccredited institution."""
-        return self.filter(is_active=True).exclude(review_status=ReviewStatus.REJECTED).exclude(
-            institution__gtec_status=GtecStatus.UNACCREDITED
-        ).exclude(institution__review_status=ReviewStatus.REJECTED)
+        return (
+            self.filter(is_active=True)
+            .exclude(review_status=ReviewStatus.REJECTED)
+            .exclude(institution__gtec_status=GtecStatus.UNACCREDITED)
+            .exclude(institution__review_status=ReviewStatus.REJECTED)
+        )
 
     def with_point(self):
         return self.filter(lat__isnull=False, lng__isnull=False)
@@ -232,7 +237,9 @@ class SourceRecord(TimeStampedModel):
 
     source = models.CharField(max_length=16, choices=Source.choices)
     source_id = models.CharField(max_length=200)
-    kind = models.CharField(max_length=40, blank=True, help_text=_("e.g. institution, campus, town"))
+    kind = models.CharField(
+        max_length=40, blank=True, help_text=_("e.g. institution, campus, town")
+    )
     raw = models.JSONField(default=dict)
     retrieved_at = models.DateTimeField()
     matched_content_type = models.ForeignKey(
@@ -244,7 +251,9 @@ class SourceRecord(TimeStampedModel):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["source", "kind", "source_id"], name="uniq_source_record")
+            models.UniqueConstraint(
+                fields=["source", "kind", "source_id"], name="uniq_source_record"
+            )
         ]
         indexes = [models.Index(fields=["matched_content_type", "matched_object_id"])]
 

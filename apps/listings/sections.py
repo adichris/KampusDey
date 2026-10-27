@@ -77,7 +77,11 @@ def info_roommates(listing, d):
 def info_short_stays(listing, d):
     span = ""
     if d and d.available_from:
-        span = f"{_d(d.available_from)}–{_d(d.available_to)}" if d.available_to else _d(d.available_from)
+        span = (
+            f"{_d(d.available_from)}–{_d(d.available_to)}"
+            if d.available_to
+            else _d(d.available_from)
+        )
     return _join(_price(listing), span)
 
 
@@ -88,7 +92,9 @@ def info_items(listing, d):
 def info_wanted(listing, d):
     from apps.core.templatetags.kd import ghs
 
-    return _join(d and d.budget_max and f"≤ {ghs(d.budget_max)}", d and d.needed_by and _d(d.needed_by))
+    return _join(
+        d and d.budget_max and f"≤ {ghs(d.budget_max)}", d and d.needed_by and _d(d.needed_by)
+    )
 
 
 def info_free(listing, d):
@@ -115,7 +121,8 @@ def info_errands(listing, d):
 
 def info_food(listing, d):
     return _join(
-        d and d.get_post_kind_display(), d and d.available_until and _("until %s") % _dt(d.available_until, "H:i")
+        d and d.get_post_kind_display(),
+        d and d.available_until and _("until %s") % _dt(d.available_until, "H:i"),
     )
 
 
@@ -132,7 +139,11 @@ def info_study(listing, d):
 
 
 def info_lost_found(listing, d):
-    return _join(d and d.get_kind_display(), d and d.item_type, d and _d(d.happened_at and d.happened_at.date()))
+    return _join(
+        d and d.get_kind_display(),
+        d and d.item_type,
+        d and _d(d.happened_at and d.happened_at.date()),
+    )
 
 
 def info_trips(listing, d):
@@ -143,7 +154,9 @@ def info_trips(listing, d):
 
 
 def info_alerts(listing, d):
-    return _join(d and d.get_alert_type_display(), d and d.valid_until and _("until %s") % _dt(d.valid_until))
+    return _join(
+        d and d.get_alert_type_display(), d and d.valid_until and _("until %s") % _dt(d.valid_until)
+    )
 
 
 def info_ask(listing, d):
@@ -153,42 +166,174 @@ def info_ask(listing, d):
 SECTIONS: dict[str, Section] = {
     s.slug: s
     for s in [
-        Section("rooms", _("Rooms & Hostels"), "bed", "RoomDetails", _("Rooms, hostels and apartments"),
-                sensitive=True, card_info=info_rooms),
-        Section("roommates", _("Roommates"), "users", "RoommateDetails", _("Find or offer a roommate"),
-                sensitive=True, price_allowed=False, card_info=info_roommates),
-        Section("short-stays", _("Short stays"), "hotel", "ShortStayDetails", _("Nights and short lets"),
-                card_info=info_short_stays),
-        Section("buy-sell", _("Buy & Sell"), "shopping-bag", "ItemDetails", _("Phones, laptops, furniture…"),
-                students_only_filter=True, card_info=info_items),
-        Section("wanted", _("Wanted"), "search-check", "WantedDetails", _("Ask for what you need"),
-                price_allowed=False, card_info=info_wanted),
-        Section("free-leaving", _("Free & Leaving"), "gift", "ItemDetails", _("Free things from leavers"),
-                price_allowed=False, students_only_filter=True, card_info=info_free),
-        Section("services", _("Services"), "wrench", "ServiceDetails", _("Repairs, printing, hair, laundry"),
-                students_only_filter=True, card_info=info_services),
-        Section("jobs", _("Jobs"), "briefcase", "JobDetails", _("Part-time, internships, gigs"),
-                price_allowed=False, expiry_field="deadline", card_info=info_jobs),
-        Section("job-requests", _("Job requests"), "hand-helping", "JobRequestDetails",
-                _("Students offering their skills"), price_allowed=False, card_info=info_job_requests),
-        Section("errands", _("Errands"), "bike", "ErrandDetails", _("Pick-ups, deliveries, queues"),
-                expiry_field="deadline", card_info=info_errands),
-        Section("food", _("Food"), "utensils", "FoodDetails", _("Share extra food, ask for a meal"),
-                sensitive=True, price_allowed=False, expiry_field="available_until", card_info=info_food),
-        Section("events", _("Events"), "calendar", "EventDetails", _("What's on around campus"),
-                expiry_field="ends_at", card_info=info_events),
-        Section("notes", _("Notes"), "book-open", "NoteDetails", _("Notes and past questions"),
-                card_info=info_notes),
-        Section("study", _("Study"), "graduation-cap", "StudyDetails", _("Study partners and tutors"),
-                card_info=info_study),
-        Section("lost-found", _("Lost & Found"), "search-x", "LostFoundDetails", _("Lost something? Found something?"),
-                sensitive=True, price_allowed=False, card_info=info_lost_found),
-        Section("trips", _("Trips"), "car", "TripDetails", _("Share rides home"),
-                default_enabled=False, price_allowed=False, expiry_field="departs_at", card_info=info_trips),
-        Section("alerts", _("Alerts"), "triangle-alert", "AlertDetails", _("Water, power and security alerts"),
-                price_allowed=False, expiry_field="valid_until", card_info=info_alerts),
-        Section("ask", _("Ask"), "circle-help", "QuestionDetails", _("Ask other students"),
-                price_allowed=False, card_info=info_ask),
+        Section(
+            "rooms",
+            _("Rooms & Hostels"),
+            "bed",
+            "RoomDetails",
+            _("Rooms, hostels and apartments"),
+            sensitive=True,
+            card_info=info_rooms,
+        ),
+        Section(
+            "roommates",
+            _("Roommates"),
+            "users",
+            "RoommateDetails",
+            _("Find or offer a roommate"),
+            sensitive=True,
+            price_allowed=False,
+            card_info=info_roommates,
+        ),
+        Section(
+            "short-stays",
+            _("Short stays"),
+            "hotel",
+            "ShortStayDetails",
+            _("Nights and short lets"),
+            card_info=info_short_stays,
+        ),
+        Section(
+            "buy-sell",
+            _("Buy & Sell"),
+            "shopping-bag",
+            "ItemDetails",
+            _("Phones, laptops, furniture…"),
+            students_only_filter=True,
+            card_info=info_items,
+        ),
+        Section(
+            "wanted",
+            _("Wanted"),
+            "search-check",
+            "WantedDetails",
+            _("Ask for what you need"),
+            price_allowed=False,
+            card_info=info_wanted,
+        ),
+        Section(
+            "free-leaving",
+            _("Free & Leaving"),
+            "gift",
+            "ItemDetails",
+            _("Free things from leavers"),
+            price_allowed=False,
+            students_only_filter=True,
+            card_info=info_free,
+        ),
+        Section(
+            "services",
+            _("Services"),
+            "wrench",
+            "ServiceDetails",
+            _("Repairs, printing, hair, laundry"),
+            students_only_filter=True,
+            card_info=info_services,
+        ),
+        Section(
+            "jobs",
+            _("Jobs"),
+            "briefcase",
+            "JobDetails",
+            _("Part-time, internships, gigs"),
+            price_allowed=False,
+            expiry_field="deadline",
+            card_info=info_jobs,
+        ),
+        Section(
+            "job-requests",
+            _("Job requests"),
+            "hand-helping",
+            "JobRequestDetails",
+            _("Students offering their skills"),
+            price_allowed=False,
+            card_info=info_job_requests,
+        ),
+        Section(
+            "errands",
+            _("Errands"),
+            "bike",
+            "ErrandDetails",
+            _("Pick-ups, deliveries, queues"),
+            expiry_field="deadline",
+            card_info=info_errands,
+        ),
+        Section(
+            "food",
+            _("Food"),
+            "utensils",
+            "FoodDetails",
+            _("Share extra food, ask for a meal"),
+            sensitive=True,
+            price_allowed=False,
+            expiry_field="available_until",
+            card_info=info_food,
+        ),
+        Section(
+            "events",
+            _("Events"),
+            "calendar",
+            "EventDetails",
+            _("What's on around campus"),
+            expiry_field="ends_at",
+            card_info=info_events,
+        ),
+        Section(
+            "notes",
+            _("Notes"),
+            "book-open",
+            "NoteDetails",
+            _("Notes and past questions"),
+            card_info=info_notes,
+        ),
+        Section(
+            "study",
+            _("Study"),
+            "graduation-cap",
+            "StudyDetails",
+            _("Study partners and tutors"),
+            card_info=info_study,
+        ),
+        Section(
+            "lost-found",
+            _("Lost & Found"),
+            "search-x",
+            "LostFoundDetails",
+            _("Lost something? Found something?"),
+            sensitive=True,
+            price_allowed=False,
+            card_info=info_lost_found,
+        ),
+        Section(
+            "trips",
+            _("Trips"),
+            "car",
+            "TripDetails",
+            _("Share rides home"),
+            default_enabled=False,
+            price_allowed=False,
+            expiry_field="departs_at",
+            card_info=info_trips,
+        ),
+        Section(
+            "alerts",
+            _("Alerts"),
+            "triangle-alert",
+            "AlertDetails",
+            _("Water, power and security alerts"),
+            price_allowed=False,
+            expiry_field="valid_until",
+            card_info=info_alerts,
+        ),
+        Section(
+            "ask",
+            _("Ask"),
+            "circle-help",
+            "QuestionDetails",
+            _("Ask other students"),
+            price_allowed=False,
+            card_info=info_ask,
+        ),
     ]
 }
 

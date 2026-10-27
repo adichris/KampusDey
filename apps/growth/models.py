@@ -6,8 +6,12 @@ from apps.core.models import TimeStampedModel
 
 
 class Referral(TimeStampedModel):
-    ambassador = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referrals")
-    referred_user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referred_by")
+    ambassador = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referrals"
+    )
+    referred_user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="referred_by"
+    )
     rewarded = models.BooleanField(default=False)
 
     class Meta:
@@ -19,7 +23,9 @@ class Referral(TimeStampedModel):
 
 class Spotlight(TimeStampedModel):
     listing = models.ForeignKey("listings.Listing", on_delete=models.CASCADE, null=True, blank=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
+    )
     campus = models.ForeignKey("locations.Campus", on_delete=models.CASCADE, null=True, blank=True)
     week_start = models.DateField()
     blurb = models.CharField(max_length=200, default=_("Student Business of the Week"))

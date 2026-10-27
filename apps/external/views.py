@@ -35,19 +35,36 @@ def around(request, campus_slug):
     page = Paginator(places, 30).get_page(request.GET.get("page"))
     view_mode = request.GET.get("view", "list")
     items = [
-        {"id": p.pk, "title": p.name, "url": p.get_absolute_url(), "lat": p.lat, "lng": p.lng, "approx": False,
-         "info": p.get_kind_display()}
-        for p in page if p.has_point
+        {
+            "id": p.pk,
+            "title": p.name,
+            "url": p.get_absolute_url(),
+            "lat": p.lat,
+            "lng": p.lng,
+            "approx": False,
+            "info": p.get_kind_display(),
+        }
+        for p in page
+        if p.has_point
     ]
     return render(
         request,
         "external/around.html",
-        {"campus": campus, "tabs": AROUND_TABS, "tab": tab, "page": page, "view_mode": view_mode, "items": items},
+        {
+            "campus": campus,
+            "tabs": AROUND_TABS,
+            "tab": tab,
+            "page": page,
+            "view_mode": view_mode,
+            "items": items,
+        },
     )
 
 
 def place(request, slug):
-    obj = get_object_or_404(Place.objects.visible().select_related("external_source", "town", "hostel"), slug=slug)
+    obj = get_object_or_404(
+        Place.objects.visible().select_related("external_source", "town", "hostel"), slug=slug
+    )
     record("view", request=request, meta={"place_id": obj.pk})
     links = obj.campus_links.select_related("campus").order_by("distance_m")
     services_listings = []
@@ -55,8 +72,16 @@ def place(request, slug):
         from apps.listings.selectors import visible_listings
 
         services_listings = visible_listings(request.user).filter(servicedetails__place=obj)[:12]
-    return render(request, "external/place.html", {"place": obj, "links": links, "services_listings": services_listings,
-                                                   "is_owner": request.user.is_authenticated and obj.owner_id == request.user.pk})
+    return render(
+        request,
+        "external/place.html",
+        {
+            "place": obj,
+            "links": links,
+            "services_listings": services_listings,
+            "is_owner": request.user.is_authenticated and obj.owner_id == request.user.pk,
+        },
+    )
 
 
 def place_tap(request, slug, kind):
@@ -88,7 +113,9 @@ def claim(request, slug):
     form = ClaimForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
         try:
-            services.submit_claim(obj, request.user, form.cleaned_data["proof_kind"], form.cleaned_data["proof"])
+            services.submit_claim(
+                obj, request.user, form.cleaned_data["proof_kind"], form.cleaned_data["proof"]
+            )
         except services.ClaimError as exc:
             messages.error(request, str(exc))
         else:

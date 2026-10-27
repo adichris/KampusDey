@@ -8,7 +8,16 @@ from .services import sync_room_type_listing
 
 class RoomTypeInline(KDTabularInline):
     model = HostelRoomType
-    fields = ["name", "room_type", "gender", "price", "price_period", "total_rooms", "available_rooms", "listing"]
+    fields = [
+        "name",
+        "room_type",
+        "gender",
+        "price",
+        "price_period",
+        "total_rooms",
+        "available_rooms",
+        "listing",
+    ]
     readonly_fields = ["listing"]
 
 

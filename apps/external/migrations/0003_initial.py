@@ -6,61 +6,96 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('external', '0002_initial'),
-        ('locations', '0001_initial'),
+        ("external", "0002_initial"),
+        ("locations", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='place',
-            name='town',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='places', to='locations.town'),
+            model_name="place",
+            name="town",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="places",
+                to="locations.town",
+            ),
         ),
         migrations.AddField(
-            model_name='placecampus',
-            name='campus',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='place_links', to='locations.campus'),
+            model_name="placecampus",
+            name="campus",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="place_links",
+                to="locations.campus",
+            ),
         ),
         migrations.AddField(
-            model_name='placecampus',
-            name='place',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='campus_links', to='external.place'),
+            model_name="placecampus",
+            name="place",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="campus_links",
+                to="external.place",
+            ),
         ),
         migrations.AddField(
-            model_name='place',
-            name='campuses',
-            field=models.ManyToManyField(related_name='places', through='external.PlaceCampus', to='locations.campus'),
+            model_name="place",
+            name="campuses",
+            field=models.ManyToManyField(
+                related_name="places", through="external.PlaceCampus", to="locations.campus"
+            ),
         ),
         migrations.AddField(
-            model_name='placeclaim',
-            name='place',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='claims', to='external.place'),
+            model_name="placeclaim",
+            name="place",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="claims",
+                to="external.place",
+            ),
         ),
         migrations.AddField(
-            model_name='placeclaim',
-            name='reviewed_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="placeclaim",
+            name="reviewed_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='placeclaim',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='place_claims', to=settings.AUTH_USER_MODEL),
+            model_name="placeclaim",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="place_claims",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddConstraint(
-            model_name='externaljob',
-            constraint=models.UniqueConstraint(fields=('external_source', 'source_id'), name='uniq_external_job'),
+            model_name="externaljob",
+            constraint=models.UniqueConstraint(
+                fields=("external_source", "source_id"), name="uniq_external_job"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='placecampus',
-            constraint=models.UniqueConstraint(fields=('place', 'campus'), name='uniq_place_campus'),
+            model_name="placecampus",
+            constraint=models.UniqueConstraint(
+                fields=("place", "campus"), name="uniq_place_campus"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='place',
-            constraint=models.UniqueConstraint(fields=('external_source', 'source_id'), name='uniq_place_source_id'),
+            model_name="place",
+            constraint=models.UniqueConstraint(
+                fields=("external_source", "source_id"), name="uniq_place_source_id"
+            ),
         ),
     ]

@@ -16,8 +16,11 @@ def default_card(owner) -> ContactCard:
         ContactChannel.objects.create(card=card, kind=ContactChannel.Kind.CHAT, order=10)
         if owner.phone:
             ContactChannel.objects.create(
-                card=card, kind=ContactChannel.Kind.PHONE, value=owner.phone.as_e164,
-                is_verified=owner.phone_verified, order=2,
+                card=card,
+                kind=ContactChannel.Kind.PHONE,
+                value=owner.phone.as_e164,
+                is_verified=owner.phone_verified,
+                order=2,
             )
     return card
 
@@ -42,13 +45,18 @@ def apply_contact_step(card: ContactCard, data: dict) -> ContactCard:
             continue
         stored = "" if kind in ("email", "chat") else value
         verified = bool(
-            kind in ("phone", "whatsapp") and owner.phone_verified and owner.phone and owner.phone.as_e164 == value
+            kind in ("phone", "whatsapp")
+            and owner.phone_verified
+            and owner.phone
+            and owner.phone.as_e164 == value
         )
         if existing:
             existing.value, existing.is_verified, existing.order = stored, verified, order[kind]
             existing.save()
         else:
-            ContactChannel.objects.create(card=card, kind=kind, value=stored, is_verified=verified, order=order[kind])
+            ContactChannel.objects.create(
+                card=card, kind=kind, value=stored, is_verified=verified, order=order[kind]
+            )
     card.preferred_time = data.get("preferred_time") or ""
     card.save()
     card._prefetched_objects_cache = {}

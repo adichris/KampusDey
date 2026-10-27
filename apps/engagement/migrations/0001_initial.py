@@ -7,7 +7,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -16,70 +15,171 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Like',
+            name="Like",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
             ],
         ),
         migrations.CreateModel(
-            name='Report',
+            name="Report",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('object_id', models.PositiveBigIntegerField()),
-                ('reason', models.CharField(choices=[('scam', 'Scam or fraud'), ('fake_listing', 'Fake listing'), ('wrong_price', 'Wrong price'), ('offensive', 'Offensive'), ('spam', 'Spam'), ('duplicate', 'Duplicate'), ('closed', 'Closed (places)'), ('wrong_location', 'Wrong location (places)'), ('not_real', 'Not a real place (places)'), ('other', 'Other')], max_length=16)),
-                ('details', models.TextField(blank=True, max_length=1000)),
-                ('status', models.CharField(choices=[('open', 'Open'), ('actioned', 'Actioned'), ('dismissed', 'Dismissed')], db_index=True, default='open', max_length=10)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("object_id", models.PositiveBigIntegerField()),
+                (
+                    "reason",
+                    models.CharField(
+                        choices=[
+                            ("scam", "Scam or fraud"),
+                            ("fake_listing", "Fake listing"),
+                            ("wrong_price", "Wrong price"),
+                            ("offensive", "Offensive"),
+                            ("spam", "Spam"),
+                            ("duplicate", "Duplicate"),
+                            ("closed", "Closed (places)"),
+                            ("wrong_location", "Wrong location (places)"),
+                            ("not_real", "Not a real place (places)"),
+                            ("other", "Other"),
+                        ],
+                        max_length=16,
+                    ),
+                ),
+                ("details", models.TextField(blank=True, max_length=1000)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("open", "Open"),
+                            ("actioned", "Actioned"),
+                            ("dismissed", "Dismissed"),
+                        ],
+                        db_index=True,
+                        default="open",
+                        max_length=10,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Review',
+            name="Review",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('rating', models.PositiveSmallIntegerField(validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(5)])),
-                ('body', models.TextField(blank=True, max_length=1000)),
-                ('status', models.CharField(choices=[('visible', 'Visible'), ('hidden', 'Hidden')], default='visible', max_length=8)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                (
+                    "rating",
+                    models.PositiveSmallIntegerField(
+                        validators=[
+                            django.core.validators.MinValueValidator(1),
+                            django.core.validators.MaxValueValidator(5),
+                        ]
+                    ),
+                ),
+                ("body", models.TextField(blank=True, max_length=1000)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("visible", "Visible"), ("hidden", "Hidden")],
+                        default="visible",
+                        max_length=8,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='SavedSearch',
+            name="SavedSearch",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('params', models.JSONField(blank=True, default=dict)),
-                ('section', models.CharField(blank=True, max_length=20)),
-                ('last_notified_at', models.DateTimeField(blank=True, null=True)),
-                ('is_active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("params", models.JSONField(blank=True, default=dict)),
+                ("section", models.CharField(blank=True, max_length=20)),
+                ("last_notified_at", models.DateTimeField(blank=True, null=True)),
+                ("is_active", models.BooleanField(default=True)),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Comment',
+            name="Comment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('body', models.TextField(help_text='Stored masked', max_length=1000)),
-                ('is_owner_reply', models.BooleanField(default=False)),
-                ('is_hidden', models.BooleanField(default=False)),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='comments', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("body", models.TextField(help_text="Stored masked", max_length=1000)),
+                ("is_owner_reply", models.BooleanField(default=False)),
+                ("is_hidden", models.BooleanField(default=False)),
+                (
+                    "author",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="comments",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['created_at'],
+                "ordering": ["created_at"],
             },
         ),
     ]

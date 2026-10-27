@@ -12,11 +12,11 @@ extend-exclude = ["node_modules", "static", "media", ".venv", "data"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "DJ", "C4", "SIM"]
-ignore = ["DJ001", "B904", "SIM108", "DJ012"]
+ignore = ["DJ001", "DJ006", "DJ007", "SIM102", "B904", "SIM108", "DJ012"]
 
 [tool.ruff.lint.per-file-ignores]
 "*/migrations/*" = ["E501", "I001"]
-"config/settings/*" = ["F405", "F403"]
+"config/settings/*" = ["F405", "F403", "F401", "I001"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "config"]

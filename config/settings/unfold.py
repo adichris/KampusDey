@@ -25,7 +25,9 @@ UNFOLD = {
     "SITE_TITLE": "KampusDey admin",
     "SITE_HEADER": "KampusDey",
     "SITE_SYMBOL": "school",
-    "SITE_FAVICONS": [{"rel": "icon", "type": "image/svg+xml", "href": lambda r: static("img/icon.svg")}],
+    "SITE_FAVICONS": [
+        {"rel": "icon", "type": "image/svg+xml", "href": lambda r: static("img/icon.svg")}
+    ],
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "DASHBOARD_CALLBACK": B + "dashboard_callback",
@@ -51,7 +53,11 @@ UNFOLD = {
             {
                 "title": _("Overview"),
                 "items": [
-                    {"title": _("Dashboard"), "icon": "dashboard", "link": reverse_lazy("admin:index")},
+                    {
+                        "title": _("Dashboard"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
                 ],
             },
             {
@@ -80,10 +86,14 @@ UNFOLD = {
                     _item(_("Districts"), "map", "locations.district"),
                     _item(_("Towns"), "location_city", "locations.town"),
                     _item(_("Institutions"), "account_balance", "locations.institution"),
-                    _item(_("Campuses"), "school", "locations.campus", B + "badge_unverified_campuses"),
+                    _item(
+                        _("Campuses"), "school", "locations.campus", B + "badge_unverified_campuses"
+                    ),
                     _item(_("Areas"), "pin_drop", "locations.area"),
                     _item(
-                        _("Campus requests"), "add_location", "locations.campusrequest",
+                        _("Campus requests"),
+                        "add_location",
+                        "locations.campusrequest",
                         B + "badge_campus_requests",
                     ),
                     _item(_("Source records"), "database", "locations.sourcerecord"),
@@ -96,7 +106,9 @@ UNFOLD = {
                     _item(_("Users"), "person", "accounts.user"),
                     _item(_("Profiles"), "badge", "accounts.profile"),
                     _item(
-                        _("Verification requests"), "verified", "accounts.verificationrequest",
+                        _("Verification requests"),
+                        "verified",
+                        "accounts.verificationrequest",
                         B + "badge_verifications",
                     ),
                 ],
@@ -105,7 +117,12 @@ UNFOLD = {
                 "title": _("Moderation"),
                 "collapsible": True,
                 "items": [
-                    _item(_("Moderation queue"), "gavel", "moderation.moderationitem", B + "badge_moderation"),
+                    _item(
+                        _("Moderation queue"),
+                        "gavel",
+                        "moderation.moderationitem",
+                        B + "badge_moderation",
+                    ),
                     _item(_("Reports"), "flag", "engagement.report", B + "badge_reports"),
                     _item(_("Banned terms"), "block", "moderation.bannedterm"),
                     _item(_("Scam alerts"), "warning", "moderation.scamalert"),
@@ -129,7 +146,9 @@ UNFOLD = {
                     _item(_("Source registry"), "hub", "external.externalsource"),
                     _item(_("Runs"), "history", "external.externalrun"),
                     _item(_("Places"), "storefront", "external.place"),
-                    _item(_("Place claims"), "how_to_reg", "external.placeclaim", B + "badge_claims"),
+                    _item(
+                        _("Place claims"), "how_to_reg", "external.placeclaim", B + "badge_claims"
+                    ),
                     _item(_("Remote jobs"), "work", "external.externaljob"),
                 ],
             },
@@ -159,7 +178,9 @@ UNFOLD = {
                         "icon": "tune",
                         "link": reverse_lazy("admin:constance_config_changelist"),
                     },
-                    _item(_("Section availability"), "toggle_on", "sitesettings.sectionavailability"),
+                    _item(
+                        _("Section availability"), "toggle_on", "sitesettings.sectionavailability"
+                    ),
                     {
                         "title": _("Integrations"),
                         "icon": "key",

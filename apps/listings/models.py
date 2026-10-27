@@ -76,7 +76,9 @@ class Listing(GeoPointMixin, TimeStampedModel):
 
     VISIBLE_STATUSES = (Status.ACTIVE, Status.NEEDS_CHECK)
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="listings")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="listings"
+    )
     section = models.CharField(max_length=20, choices=SECTION_CHOICES, db_index=True)
     title = models.CharField(_("title"), max_length=120)
     slug = models.SlugField(max_length=140, unique=True)
@@ -95,14 +97,20 @@ class Listing(GeoPointMixin, TimeStampedModel):
         "locations.Campus", through="ListingCampus", related_name="listings", blank=True
     )
     contact_card = models.ForeignKey(
-        "contacts.ContactCard", on_delete=models.SET_NULL, null=True, blank=True, related_name="listings"
+        "contacts.ContactCard",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="listings",
     )
     contact_visibility = models.CharField(
         max_length=8, choices=Visibility.choices, default=Visibility.PUBLIC
     )
     hide_number = models.BooleanField(_("hide my phone number (chat only)"), default=False)
     seller_type = models.CharField(max_length=10, blank=True, db_index=True)
-    status = models.CharField(max_length=16, choices=Status.choices, default=Status.DRAFT, db_index=True)
+    status = models.CharField(
+        max_length=16, choices=Status.choices, default=Status.DRAFT, db_index=True
+    )
     is_hidden = models.BooleanField(default=False, help_text=_("Hidden pending moderator review"))
     hidden_reason = models.CharField(max_length=200, blank=True)
     wizard_step = models.PositiveSmallIntegerField(default=1)
@@ -199,13 +207,17 @@ class Listing(GeoPointMixin, TimeStampedModel):
 
 class ListingCampus(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="campus_links")
-    campus = models.ForeignKey("locations.Campus", on_delete=models.CASCADE, related_name="listing_links")
+    campus = models.ForeignKey(
+        "locations.Campus", on_delete=models.CASCADE, related_name="listing_links"
+    )
     distance_m = models.PositiveIntegerField(null=True, blank=True)
     is_manual = models.BooleanField(default=False)
     is_excluded = models.BooleanField(default=False)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["listing", "campus"], name="uniq_listing_campus")]
+        constraints = [
+            models.UniqueConstraint(fields=["listing", "campus"], name="uniq_listing_campus")
+        ]
         indexes = [models.Index(fields=["campus", "is_excluded"])]
 
     def __str__(self):
@@ -213,14 +225,22 @@ class ListingCampus(models.Model):
 
 
 class PhotoBase(TimeStampedModel):
-    image = models.ImageField(upload_to=listing_photo_upload_to, width_field="width", height_field="height")
+    image = models.ImageField(
+        upload_to=listing_photo_upload_to, width_field="width", height_field="height"
+    )
     order = models.PositiveSmallIntegerField(default=0)
     width = models.PositiveIntegerField(null=True, blank=True)
     height = models.PositiveIntegerField(null=True, blank=True)
     phash = models.CharField(max_length=16, blank=True, db_index=True)
-    thumb = ImageSpecField(source="image", processors=[ResizeToFit(400, 400)], format="WEBP", options={"quality": 75})
-    card = ImageSpecField(source="image", processors=[ResizeToFit(800, 800)], format="WEBP", options={"quality": 78})
-    full = ImageSpecField(source="image", processors=[ResizeToFit(1600, 1600)], format="WEBP", options={"quality": 82})
+    thumb = ImageSpecField(
+        source="image", processors=[ResizeToFit(400, 400)], format="WEBP", options={"quality": 75}
+    )
+    card = ImageSpecField(
+        source="image", processors=[ResizeToFit(800, 800)], format="WEBP", options={"quality": 78}
+    )
+    full = ImageSpecField(
+        source="image", processors=[ResizeToFit(1600, 1600)], format="WEBP", options={"quality": 82}
+    )
 
     class Meta:
         abstract = True
@@ -293,7 +313,11 @@ class RoomDetails(Details):
     mattress_included = models.BooleanField(_("mattress included"), default=False)
     available_from = models.DateField(_("available from"), null=True, blank=True)
     hostel_room_type = models.ForeignKey(
-        "hostels.HostelRoomType", on_delete=models.SET_NULL, null=True, blank=True, related_name="listings"
+        "hostels.HostelRoomType",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="listings",
     )
 
 
@@ -350,14 +374,20 @@ class WantedDetails(Details):
 
 
 class ServiceDetails(Details):
-    service_type = models.ForeignKey(ServiceCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    service_type = models.ForeignKey(
+        ServiceCategory, on_delete=models.SET_NULL, null=True, blank=True
+    )
     price_from = models.DecimalField(
         max_digits=10, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)]
     )
     hours_text = models.CharField(_("opening hours"), max_length=120, blank=True)
     area_served = models.CharField(max_length=120, blank=True)
     place = models.ForeignKey(
-        "external.Place", on_delete=models.SET_NULL, null=True, blank=True, related_name="service_listings"
+        "external.Place",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="service_listings",
     )
 
 
@@ -419,7 +449,10 @@ class NoteDetails(Details):
     level = models.CharField(max_length=40, blank=True)
     format = models.CharField(max_length=10, choices=Format.choices, default=Format.PHYSICAL)
     file = models.FileField(
-        upload_to=notes_upload_to, null=True, blank=True, validators=[FileExtensionValidator(["pdf"])]
+        upload_to=notes_upload_to,
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(["pdf"])],
     )
 
 
@@ -451,7 +484,9 @@ class LostFoundDetails(Details):
 
 class TripDetails(Details):
     origin_town = models.ForeignKey("locations.Town", on_delete=models.PROTECT, related_name="+")
-    destination_town = models.ForeignKey("locations.Town", on_delete=models.PROTECT, related_name="+")
+    destination_town = models.ForeignKey(
+        "locations.Town", on_delete=models.PROTECT, related_name="+"
+    )
     departs_at = models.DateTimeField()
     seats_available = models.PositiveSmallIntegerField(default=1)
     cost_share = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)

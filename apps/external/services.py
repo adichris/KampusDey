@@ -1,4 +1,4 @@
-"""Source registry gate, OSM places, Remotive jobs, partner feeds, claim flow (DATA_SOURCES Part 2)."""
+"""Source registry gate, OSM places, Remotive jobs, partner feeds, claims (DATA_SOURCES Part 2)."""
 
 from __future__ import annotations
 
@@ -18,7 +18,15 @@ from apps.core import geo
 from apps.core.utils import unique_slug
 from apps.locations.models import Campus, Source
 
-from .models import ACCOMMODATION_KINDS, ExternalJob, ExternalRun, ExternalSource, Place, PlaceCampus, PlaceClaim
+from .models import (
+    ACCOMMODATION_KINDS,
+    ExternalJob,
+    ExternalRun,
+    ExternalSource,
+    Place,
+    PlaceCampus,
+    PlaceClaim,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -86,8 +94,12 @@ def check_runnable(source: ExternalSource, now=None, force_interval=False):
         if now - source.last_run_at < timedelta(minutes=source.min_interval_minutes):
             raise SourceNotRunnable(_("Minimum interval has not passed yet."))
     if source.kind == ExternalSource.Kind.REMOTIVE_JOBS:
-        per_day = min(max(config.REMOTIVE_FETCHES_PER_DAY, 1), settings.REMOTIVE_HARD_MAX_FETCHES_PER_DAY)
-        today = source.runs.filter(started_at__gte=now - timedelta(days=1)).exclude(status=ExternalRun.Status.SKIPPED)
+        per_day = min(
+            max(config.REMOTIVE_FETCHES_PER_DAY, 1), settings.REMOTIVE_HARD_MAX_FETCHES_PER_DAY
+        )
+        today = source.runs.filter(started_at__gte=now - timedelta(days=1)).exclude(
+            status=ExternalRun.Status.SKIPPED
+        )
         if today.count() >= per_day:
             raise SourceNotRunnable(_("Remotive daily fetch cap reached."))
         min_gap = timedelta(hours=24 / per_day)
@@ -108,7 +120,11 @@ def run_source(source: ExternalSource, fetcher=None, now=None) -> ExternalRun:
         else:
             result = import_partner_feed(source, data=fetcher() if fetcher else None, now=now)
         run.status = ExternalRun.Status.OK
-        run.created, run.updated, run.removed = result["created"], result["updated"], result["removed"]
+        run.created, run.updated, run.removed = (
+            result["created"],
+            result["updated"],
+            result["removed"],
+        )
     except Exception as exc:  # recorded on the run, never raised to beat
         logger.exception("external source %s failed", source.slug)
         run.status = ExternalRun.Status.FAILED
@@ -126,7 +142,9 @@ def run_due_sources(now=None) -> list:
     for source in ExternalSource.objects.filter(permission_status="approved", enabled=True):
         try:
             if source.kind == ExternalSource.Kind.OSM_PLACES and source.last_run_at:
-                if (now or timezone.now()) - source.last_run_at < timedelta(days=config.PLACES_REFRESH_DAYS):
+                if (now or timezone.now()) - source.last_run_at < timedelta(
+                    days=config.PLACES_REFRESH_DAYS
+                ):
                     continue
             runs.append(run_source(source, now=now))
         except SourceNotRunnable:
@@ -196,10 +214,18 @@ def _upsert_place(source, campus, el, now):
         place.slug = unique_slug(place, f"{name}-{campus.town.name}")
     distance = int(geo.haversine_m(campus.lat, campus.lng, lat, lng))
     if place.status == Place.Status.CLAIMED or place.admin_locked:
-        PlaceCampus.objects.update_or_create(place=place, campus=campus, defaults={"distance_m": distance})
+        PlaceCampus.objects.update_or_create(
+            place=place, campus=campus, defaults={"distance_m": distance}
+        )
         return None  # claimed places are never changed by refreshes
     address = ", ".join(
-        p for p in [tags.get("addr:housenumber", ""), tags.get("addr:street", ""), tags.get("addr:city", "")] if p
+        p
+        for p in [
+            tags.get("addr:housenumber", ""),
+            tags.get("addr:street", ""),
+            tags.get("addr:city", ""),
+        ]
+        if p
     )
     values = {
         "name": name,
@@ -209,7 +235,9 @@ def _upsert_place(source, campus, el, now):
         "address": address[:300],
         "website": (tags.get("website") or tags.get("contact:website") or "")[:400],
         "opening_hours": (tags.get("opening_hours") or "")[:300],
-        "phone": (tags.get("phone") or tags.get("contact:phone") or "")[:40] if config.IMPORT_PLACE_PHONES else "",
+        "phone": (tags.get("phone") or tags.get("contact:phone") or "")[:40]
+        if config.IMPORT_PLACE_PHONES
+        else "",
         "source": Source.OSM,
         "source_url": f"https://www.openstreetmap.org/{source_id}",
         "licence": "ODbL 1.0",
@@ -229,7 +257,9 @@ def _upsert_place(source, campus, el, now):
     place.last_seen_at = now
     place.retrieved_at = now
     place.save()
-    PlaceCampus.objects.update_or_create(place=place, campus=campus, defaults={"distance_m": distance})
+    PlaceCampus.objects.update_or_create(
+        place=place, campus=campus, defaults={"distance_m": distance}
+    )
     if created:
         return "created"
     return "updated" if changed else None
@@ -238,8 +268,10 @@ def _upsert_place(source, campus, el, now):
 def mark_missing(source, seen_ids: set[str], now) -> int:
     """A place missing from two consecutive refreshes becomes `removed` (claimed never)."""
     removed = 0
-    for place in Place.objects.filter(external_source=source).exclude(source_id__in=seen_ids).exclude(
-        status__in=[Place.Status.CLAIMED, Place.Status.REMOVED]
+    for place in (
+        Place.objects.filter(external_source=source)
+        .exclude(source_id__in=seen_ids)
+        .exclude(status__in=[Place.Status.CLAIMED, Place.Status.REMOVED])
     ):
         place.missing_count += 1
         if place.missing_count >= 2:
@@ -255,8 +287,10 @@ def places_for_campus(campus, kinds=None):
         qs = qs.filter(kind__in=list(kinds))
     from django.db.models import F
 
-    return qs.annotate(distance_m=F("campus_links__distance_m")).select_related("external_source").order_by(
-        "distance_m", "name"
+    return (
+        qs.annotate(distance_m=F("campus_links__distance_m"))
+        .select_related("external_source")
+        .order_by("distance_m", "name")
     )
 
 
@@ -289,10 +323,7 @@ CATEGORY_ALIASES = {
 def category_allowed(category: str, wanted: list[str]) -> bool:
     name = (category or "").strip().lower()
     slug = name.replace(" / ", "-").replace(" ", "-")
-    for item in wanted:
-        if item in (name, slug) or name in CATEGORY_ALIASES.get(item, set()):
-            return True
-    return False
+    return any(item in (name, slug) or name in CATEGORY_ALIASES.get(item, set()) for item in wanted)
 
 
 def _keywords(value: str) -> list[str]:
@@ -338,7 +369,9 @@ def import_remotive_jobs(source: ExternalSource, data: dict | None = None, now=N
         # The full description is deliberately never stored (§16.2).
         obj = ExternalJob.objects.filter(external_source=source, source_id=source_id).first()
         if obj is None:
-            ExternalJob.objects.create(external_source=source, source_id=source_id, first_seen_at=now, **values)
+            ExternalJob.objects.create(
+                external_source=source, source_id=source_id, first_seen_at=now, **values
+            )
             stats["created"] += 1
         else:
             if obj.status == ExternalJob.Status.EXPIRED:
@@ -348,7 +381,9 @@ def import_remotive_jobs(source: ExternalSource, data: dict | None = None, now=N
             obj.save()
             stats["updated"] += 1
     cutoff = now - timedelta(days=config.EXTERNAL_JOB_MAX_AGE_DAYS)
-    stale = ExternalJob.objects.filter(external_source=source, status=ExternalJob.Status.ACTIVE).exclude(source_id__in=seen)
+    stale = ExternalJob.objects.filter(
+        external_source=source, status=ExternalJob.Status.ACTIVE
+    ).exclude(source_id__in=seen)
     stats["removed"] += stale.update(status=ExternalJob.Status.EXPIRED)
     stats["removed"] += ExternalJob.objects.filter(
         external_source=source, status=ExternalJob.Status.ACTIVE, published_at__lt=cutoff
@@ -376,19 +411,27 @@ def import_partner_feed(source: ExternalSource, data=None, now=None) -> dict:
             continue
         seen.add(source_id)
         _obj, created = ExternalJob.objects.update_or_create(
-            external_source=source, source_id=source_id,
+            external_source=source,
+            source_id=source_id,
             defaults={
                 "title": (item.get("title") or "")[:250],
-                "company": str(item.get("company") or (item.get("author") or {}).get("name", ""))[:200],
+                "company": str(item.get("company") or (item.get("author") or {}).get("name", ""))[
+                    :200
+                ],
                 "url": url,
-                "published_at": parse_datetime(item.get("date_published") or item.get("published") or "") or now,
+                "published_at": parse_datetime(
+                    item.get("date_published") or item.get("published") or ""
+                )
+                or now,
                 "last_seen_at": now,
                 "status": ExternalJob.Status.ACTIVE,
             },
         )
         stats["created" if created else "updated"] += 1
-    stats["removed"] = ExternalJob.objects.filter(external_source=source, status="active").exclude(source_id__in=seen).update(
-        status=ExternalJob.Status.EXPIRED
+    stats["removed"] = (
+        ExternalJob.objects.filter(external_source=source, status="active")
+        .exclude(source_id__in=seen)
+        .update(status=ExternalJob.Status.EXPIRED)
     )
     return stats
 
@@ -439,8 +482,11 @@ def decide_claim(claim: PlaceClaim, approve: bool, reviewer, reason: str = "") -
                 profile.role = "landlord"
                 profile.save(update_fields=["role"])
             hostel = Hostel(
-                owner=claim.user, name=place.name, town=place.town or place.campuses.first().town,
-                lat=place.lat, lng=place.lng,
+                owner=claim.user,
+                name=place.name,
+                town=place.town or place.campuses.first().town,
+                lat=place.lat,
+                lng=place.lng,
             )
             hostel.slug = unique_slug(hostel, place.name)
             hostel.save()
@@ -456,5 +502,10 @@ def decide_claim(claim: PlaceClaim, approve: bool, reviewer, reason: str = "") -
     else:
         place.status = Place.Status.UNCLAIMED
         place.save(update_fields=["status", "updated_at"])
-        notify(claim.user, "claim", _("Your claim for %(name)s was not approved") % {"name": place.name}, reason)
+        notify(
+            claim.user,
+            "claim",
+            _("Your claim for %(name)s was not approved") % {"name": place.name},
+            reason,
+        )
     return claim

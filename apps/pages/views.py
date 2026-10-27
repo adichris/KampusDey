@@ -23,7 +23,10 @@ def data_sources(request):
     return render(
         request,
         "pages/data_sources.html",
-        {"last": last, "external_sources": ExternalSource.objects.exclude(permission_status="suspended")},
+        {
+            "last": last,
+            "external_sources": ExternalSource.objects.exclude(permission_status="suspended"),
+        },
     )
 
 
@@ -62,7 +65,12 @@ def manifest(request):
         "icons": [
             {"src": static("img/icon-192.png"), "sizes": "192x192", "type": "image/png"},
             {"src": static("img/icon-512.png"), "sizes": "512x512", "type": "image/png"},
-            {"src": static("img/icon-512.png"), "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+            {
+                "src": static("img/icon-512.png"),
+                "sizes": "512x512",
+                "type": "image/png",
+                "purpose": "maskable",
+            },
         ],
     }
     return HttpResponse(json.dumps(data), content_type="application/manifest+json")
@@ -78,7 +86,9 @@ def service_worker(request):
         static("vendor/alpine-csp.min.js"),
         static("img/icon.svg"),
     ]
-    body = render(request, "pages/sw.js", {"assets": json.dumps(assets), "version": settings.STATIC_URL}).content
+    body = render(
+        request, "pages/sw.js", {"assets": json.dumps(assets), "version": settings.STATIC_URL}
+    ).content
     response = HttpResponse(body, content_type="application/javascript")
     response["Service-Worker-Allowed"] = "/"
     return response

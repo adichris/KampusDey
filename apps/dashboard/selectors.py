@@ -14,18 +14,33 @@ def listing_stats(listing) -> dict:
         DailyListingStats.objects.filter(listing=listing)
         .annotate(week=TruncWeek("date"))
         .values("week")
-        .annotate(views=Sum("views"), taps=Sum("taps"), likes=Sum("likes"), shares=Sum("shares"),
-                  comments=Sum("comments"))
+        .annotate(
+            views=Sum("views"),
+            taps=Sum("taps"),
+            likes=Sum("likes"),
+            shares=Sum("shares"),
+            comments=Sum("comments"),
+        )
         .order_by("-week")[:12]
     )
     channels = Counter()
-    for item in DailyListingStats.objects.filter(listing=listing).values_list("taps_by_channel", flat=True):
+    for item in DailyListingStats.objects.filter(listing=listing).values_list(
+        "taps_by_channel", flat=True
+    ):
         channels.update(item or {})
     # Today's not-yet-rolled-up events, so new listings see numbers immediately.
     today_start = timezone.now() - timedelta(hours=24)
-    live = Counter(Event.objects.filter(listing=listing, created_at__gte=today_start).values_list("kind", flat=True))
+    live = Counter(
+        Event.objects.filter(listing=listing, created_at__gte=today_start).values_list(
+            "kind", flat=True
+        )
+    )
     totals = DailyListingStats.objects.filter(listing=listing).aggregate(
-        views=Sum("views"), taps=Sum("taps"), likes=Sum("likes"), shares=Sum("shares"), comments=Sum("comments")
+        views=Sum("views"),
+        taps=Sum("taps"),
+        likes=Sum("likes"),
+        shares=Sum("shares"),
+        comments=Sum("comments"),
     )
     return {
         "weeks": list(rows),

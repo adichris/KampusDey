@@ -29,7 +29,12 @@ def test_email_preferences_respected():
 
 def test_one_tap_links_in_email():
     user = f.UserFactory()
-    notify(user, "still_available", "Still there?", extra={"confirm_url": "http://x/c", "taken_url": "http://x/t"})
+    notify(
+        user,
+        "still_available",
+        "Still there?",
+        extra={"confirm_url": "http://x/c", "taken_url": "http://x/t"},
+    )
     send_email_batch()
     assert "http://x/c" in mail.outbox[0].body
 
@@ -41,7 +46,9 @@ def test_notification_list_marks_read(client_user, user):
 
 
 def test_preferences_page(client_user, user):
-    r = client_user.post(reverse("notifications:preferences"), {"email_triggers": ["message"], "weekly_digest": ""})
+    r = client_user.post(
+        reverse("notifications:preferences"), {"email_triggers": ["message"], "weekly_digest": ""}
+    )
     assert r.status_code == 302
     assert prefs_for(user).email_triggers == ["message"] and not prefs_for(user).weekly_digest
 

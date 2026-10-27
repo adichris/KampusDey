@@ -129,7 +129,9 @@ class Profile(TimeStampedModel):
     def effective_seller_type(self):
         if self.seller_type:
             return self.seller_type
-        return self.SellerType.STUDENT if self.role == self.Role.STUDENT else self.SellerType.BUSINESS
+        return (
+            self.SellerType.STUDENT if self.role == self.Role.STUDENT else self.SellerType.BUSINESS
+        )
 
 
 def verification_upload_to(instance, filename):

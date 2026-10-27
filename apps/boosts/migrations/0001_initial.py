@@ -5,27 +5,40 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Boost',
+            name="Boost",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('source', models.CharField(choices=[('free', 'Free'), ('paid', 'Paid')], default='free', max_length=4)),
-                ('starts_at', models.DateTimeField(default=django.utils.timezone.now)),
-                ('ends_at', models.DateTimeField()),
-                ('used_bonus', models.BooleanField(default=False)),
-                ('end_notified', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                (
+                    "source",
+                    models.CharField(
+                        choices=[("free", "Free"), ("paid", "Paid")], default="free", max_length=4
+                    ),
+                ),
+                ("starts_at", models.DateTimeField(default=django.utils.timezone.now)),
+                ("ends_at", models.DateTimeField()),
+                ("used_bonus", models.BooleanField(default=False)),
+                ("end_notified", models.BooleanField(default=False)),
             ],
             options={
-                'ordering': ['-starts_at'],
+                "ordering": ["-starts_at"],
             },
         ),
     ]

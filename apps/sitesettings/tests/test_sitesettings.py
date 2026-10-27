@@ -20,7 +20,9 @@ def test_integration_admin_never_shows_secrets(admin_client):
     integ = IntegrationSettings.load()
     integ.turnstile_secret = "very-secret-value"
     integ.save()
-    html = admin_client.get(f"/admin/sitesettings/integrationsettings/{integ.pk}/change/").content.decode()
+    html = admin_client.get(
+        f"/admin/sitesettings/integrationsettings/{integ.pk}/change/"
+    ).content.decode()
     assert "very-secret-value" not in html and "•••• set" in html
 
 
@@ -38,7 +40,9 @@ def test_rotate_field_keys(settings):
     integ = IntegrationSettings.load()
     integ.sms_api_key = "abc"
     integ.save()
-    settings.FIELD_ENCRYPTION_KEY = Fernet.generate_key().decode() + "," + settings.FIELD_ENCRYPTION_KEY
+    settings.FIELD_ENCRYPTION_KEY = (
+        Fernet.generate_key().decode() + "," + settings.FIELD_ENCRYPTION_KEY
+    )
     call_command("rotate_field_keys")
     settings.FIELD_ENCRYPTION_KEY = settings.FIELD_ENCRYPTION_KEY.split(",")[0]
     assert IntegrationSettings.load().sms_api_key == "abc"

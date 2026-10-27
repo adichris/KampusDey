@@ -6,30 +6,44 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('growth', '0001_initial'),
-        ('listings', '0001_initial'),
-        ('locations', '0001_initial'),
+        ("growth", "0001_initial"),
+        ("listings", "0001_initial"),
+        ("locations", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='spotlight',
-            name='campus',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='locations.campus'),
+            model_name="spotlight",
+            name="campus",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="locations.campus",
+            ),
         ),
         migrations.AddField(
-            model_name='spotlight',
-            name='listing',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='listings.listing'),
+            model_name="spotlight",
+            name="listing",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="listings.listing",
+            ),
         ),
         migrations.AddField(
-            model_name='spotlight',
-            name='user',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="spotlight",
+            name="user",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

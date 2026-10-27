@@ -16,7 +16,11 @@ class DateTimeInput(forms.DateTimeInput):
 
     def format_value(self, value):
         if hasattr(value, "strftime"):
-            return timezone.localtime(value).strftime("%Y-%m-%dT%H:%M") if timezone.is_aware(value) else value.strftime("%Y-%m-%dT%H:%M")
+            return (
+                timezone.localtime(value).strftime("%Y-%m-%dT%H:%M")
+                if timezone.is_aware(value)
+                else value.strftime("%Y-%m-%dT%H:%M")
+            )
         return value
 
 
@@ -44,7 +48,11 @@ class CommonForm(forms.ModelForm):
         self.section = section
         self.fields["title"].widget.attrs.update({"maxlength": 120, "autocomplete": "off"})
         listing = self.instance
-        self.fields["area"].queryset = Area.objects.visible().filter(town=listing.town) if listing.town_id else Area.objects.none()
+        self.fields["area"].queryset = (
+            Area.objects.visible().filter(town=listing.town)
+            if listing.town_id
+            else Area.objects.none()
+        )
         self.fields["area"].required = False
         if listing.has_point and not self.is_bound:
             self.initial.update(lat=listing.lat, lng=listing.lng)
@@ -179,7 +187,8 @@ class FoodDetailsForm(forms.ModelForm):
             raise forms.ValidationError(_("Choose a time in the future."))
         if value > now + timedelta(hours=config.FOOD_POST_MAX_HOURS):
             raise forms.ValidationError(
-                _("Food posts can stay up for at most %(h)s hours.") % {"h": config.FOOD_POST_MAX_HOURS}
+                _("Food posts can stay up for at most %(h)s hours.")
+                % {"h": config.FOOD_POST_MAX_HOURS}
             )
         return value
 
@@ -283,33 +292,53 @@ DETAILS_FORMS = {
 
 
 class ContactStepForm(forms.Form):
-    whatsapp = forms.CharField(label="WhatsApp", required=False, max_length=20,
-                               widget=forms.TextInput(attrs={"inputmode": "tel", "placeholder": "024 000 0000"}))
-    phone = forms.CharField(label=_("Phone for calls"), required=False, max_length=20,
-                            widget=forms.TextInput(attrs={"inputmode": "tel"}))
+    whatsapp = forms.CharField(
+        label="WhatsApp",
+        required=False,
+        max_length=20,
+        widget=forms.TextInput(attrs={"inputmode": "tel", "placeholder": "024 000 0000"}),
+    )
+    phone = forms.CharField(
+        label=_("Phone for calls"),
+        required=False,
+        max_length=20,
+        widget=forms.TextInput(attrs={"inputmode": "tel"}),
+    )
     telegram = forms.CharField(label=_("Telegram username"), required=False, max_length=40)
-    email_relay = forms.BooleanField(label=_("Allow email messages (relayed, your address stays hidden)"),
-                                     required=False)
+    email_relay = forms.BooleanField(
+        label=_("Allow email messages (relayed, your address stays hidden)"), required=False
+    )
     chat = forms.BooleanField(label=_("Allow in-app chat"), required=False, initial=True)
     preferred_time = forms.CharField(label=_("Best time to contact"), required=False, max_length=80)
-    contact_visibility = forms.ChoiceField(label=_("Who can see contact buttons"),
-                                           choices=m.Listing.Visibility.choices, widget=forms.RadioSelect)
+    contact_visibility = forms.ChoiceField(
+        label=_("Who can see contact buttons"),
+        choices=m.Listing.Visibility.choices,
+        widget=forms.RadioSelect,
+    )
     hide_number = forms.BooleanField(label=_("Hide my number — chat only"), required=False)
-    keep_campuses = forms.MultipleChoiceField(required=False, widget=forms.CheckboxSelectMultiple,
-                                              label=_("Show on these campuses"))
-    add_campus = forms.ModelChoiceField(queryset=Campus.objects.none(), required=False,
-                                        label=_("Add another campus"))
+    keep_campuses = forms.MultipleChoiceField(
+        required=False, widget=forms.CheckboxSelectMultiple, label=_("Show on these campuses")
+    )
+    add_campus = forms.ModelChoiceField(
+        queryset=Campus.objects.none(), required=False, label=_("Add another campus")
+    )
 
     def __init__(self, *args, listing=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.listing = listing
         links = list(listing.campus_links.select_related("campus")) if listing else []
-        self.fields["keep_campuses"].choices = [(str(link.campus_id), str(link.campus)) for link in links]
+        self.fields["keep_campuses"].choices = [
+            (str(link.campus_id), str(link.campus)) for link in links
+        ]
         if not self.is_bound:
-            self.initial["keep_campuses"] = [str(link.campus_id) for link in links if not link.is_excluded]
+            self.initial["keep_campuses"] = [
+                str(link.campus_id) for link in links if not link.is_excluded
+            ]
         self.fields["add_campus"].queryset = Campus.objects.visible().select_related("town")
         if listing and listing.is_need_food:
-            self.fields["contact_visibility"].choices = [("members", m.Listing.Visibility.MEMBERS.label)]
+            self.fields["contact_visibility"].choices = [
+                ("members", m.Listing.Visibility.MEMBERS.label)
+            ]
 
     def clean(self):
         from phonenumber_field.phonenumber import PhoneNumber
@@ -327,7 +356,14 @@ class ContactStepForm(forms.Form):
         if tg and not tg.replace("_", "").isalnum():
             self.add_error("telegram", _("Telegram usernames use letters, numbers and _."))
         data["telegram"] = tg
-        if not any([data.get("whatsapp"), data.get("phone") and not data.get("hide_number"), tg,
-                    data.get("email_relay"), data.get("chat")]):
+        if not any(
+            [
+                data.get("whatsapp"),
+                data.get("phone") and not data.get("hide_number"),
+                tg,
+                data.get("email_relay"),
+                data.get("chat"),
+            ]
+        ):
             raise forms.ValidationError(_("Choose at least one way to be contacted."))
         return data

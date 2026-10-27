@@ -32,7 +32,9 @@ def test_zero_availability_hides_listing_and_restores(landlord, campus):
 
 
 def test_stepper_clamps(landlord):
-    rt = f.HostelRoomTypeFactory(hostel=f.HostelFactory(owner=landlord), total_rooms=3, available_rooms=3)
+    rt = f.HostelRoomTypeFactory(
+        hostel=f.HostelFactory(owner=landlord), total_rooms=3, available_rooms=3
+    )
     services.sync_room_type_listing(rt)
     services.step_available(rt, +1)
     assert rt.available_rooms == 3
@@ -43,13 +45,31 @@ def test_stepper_clamps(landlord):
 def test_manager_views(client, landlord, campus):
     client.force_login(landlord)
     assert client.get(reverse("hostels:manager")).status_code == 200
-    r = client.post(reverse("hostels:create"), {"name": "Green Lodge", "description": "Quiet", "rules": "",
-                                                "town": campus.town_id, "campuses": [campus.pk], "amenities": ["wifi"]})
+    r = client.post(
+        reverse("hostels:create"),
+        {
+            "name": "Green Lodge",
+            "description": "Quiet",
+            "rules": "",
+            "town": campus.town_id,
+            "campuses": [campus.pk],
+            "amenities": ["wifi"],
+        },
+    )
     hostel = landlord.hostels.get()
     assert r.status_code == 302
-    client.post(reverse("hostels:room_type_new", args=[hostel.pk]),
-                {"name": "Single", "room_type": "single", "gender": "mixed", "price": "4000", "price_period": "per_year",
-                 "total_rooms": "4", "available_rooms": "1"})
+    client.post(
+        reverse("hostels:room_type_new", args=[hostel.pk]),
+        {
+            "name": "Single",
+            "room_type": "single",
+            "gender": "mixed",
+            "price": "4000",
+            "price_period": "per_year",
+            "total_rooms": "4",
+            "available_rooms": "1",
+        },
+    )
     rt = hostel.room_types.get()
     assert rt.listing.section == "rooms" and rt.listing.roomdetails.wifi
     r = client.post(reverse("hostels:step", args=[hostel.pk, rt.pk, "down"]))

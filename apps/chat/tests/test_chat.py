@@ -16,7 +16,11 @@ def test_two_users_can_chat(client):
     r = client.post(reverse("chat:start", args=[listing.pk]))
     conv = Conversation.objects.get()
     assert r.url == conv.get_absolute_url()
-    client.post(reverse("chat:send", args=[conv.pk]), {"body": "Hi, is it available?"}, HTTP_HX_REQUEST="true")
+    client.post(
+        reverse("chat:send", args=[conv.pk]),
+        {"body": "Hi, is it available?"},
+        HTTP_HX_REQUEST="true",
+    )
     client.force_login(listing.owner)
     page = client.get(conv.get_absolute_url(), HTTP_USER_AGENT="Mozilla/5.0 Mobile")
     assert b"Hi, is it available?" in page.content
@@ -56,7 +60,9 @@ def test_scam_keywords_show_banner(client):
     msg = services.send_message(conv, conv.starter, "Please send money by MoMo first")
     assert msg.has_scam_warning
     client.force_login(conv.owner)
-    assert "Never pay before viewing the room." in client.get(conv.get_absolute_url()).content.decode()
+    assert (
+        "Never pay before viewing the room." in client.get(conv.get_absolute_url()).content.decode()
+    )
     assert not services.send_message(conv, conv.starter, "Can I view it tomorrow?").has_scam_warning
 
 

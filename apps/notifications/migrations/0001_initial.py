@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,39 +14,110 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='NotificationPreference',
+            name="NotificationPreference",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('email_triggers', models.JSONField(blank=True, default=list, help_text='Triggers that also send email')),
-                ('weekly_digest', models.BooleanField(default=True)),
-                ('push_enabled', models.BooleanField(default=False)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='notification_prefs', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                (
+                    "email_triggers",
+                    models.JSONField(
+                        blank=True, default=list, help_text="Triggers that also send email"
+                    ),
+                ),
+                ("weekly_digest", models.BooleanField(default=True)),
+                ("push_enabled", models.BooleanField(default=False)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notification_prefs",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('trigger', models.CharField(choices=[('message', 'New message'), ('comment', 'New comment or question'), ('reply', 'Reply to your question'), ('saved_search', 'Saved search match'), ('still_available', "'Still available?' check"), ('boost_ended', 'Boost ended'), ('verification', 'Verification decision'), ('campus_request', 'Campus request result'), ('claim', 'Place claim decision'), ('referral', 'Referral reward')], max_length=16)),
-                ('title', models.CharField(max_length=160)),
-                ('body', models.CharField(blank=True, max_length=400)),
-                ('url', models.CharField(blank=True, max_length=300)),
-                ('data', models.JSONField(blank=True, default=dict, help_text='Extra links for the email, e.g. one-tap')),
-                ('read_at', models.DateTimeField(blank=True, null=True)),
-                ('emailed_at', models.DateTimeField(blank=True, null=True)),
-                ('email_skipped', models.BooleanField(default=False)),
-                ('recipient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                (
+                    "trigger",
+                    models.CharField(
+                        choices=[
+                            ("message", "New message"),
+                            ("comment", "New comment or question"),
+                            ("reply", "Reply to your question"),
+                            ("saved_search", "Saved search match"),
+                            ("still_available", "'Still available?' check"),
+                            ("boost_ended", "Boost ended"),
+                            ("verification", "Verification decision"),
+                            ("campus_request", "Campus request result"),
+                            ("claim", "Place claim decision"),
+                            ("referral", "Referral reward"),
+                        ],
+                        max_length=16,
+                    ),
+                ),
+                ("title", models.CharField(max_length=160)),
+                ("body", models.CharField(blank=True, max_length=400)),
+                ("url", models.CharField(blank=True, max_length=300)),
+                (
+                    "data",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text="Extra links for the email, e.g. one-tap",
+                    ),
+                ),
+                ("read_at", models.DateTimeField(blank=True, null=True)),
+                ("emailed_at", models.DateTimeField(blank=True, null=True)),
+                ("email_skipped", models.BooleanField(default=False)),
+                (
+                    "recipient",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="notifications",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
-                'indexes': [models.Index(fields=['recipient', 'read_at'], name='notificatio_recipie_564b1f_idx'), models.Index(fields=['emailed_at', 'email_skipped'], name='notificatio_emailed_2ee1e9_idx')],
+                "ordering": ["-created_at"],
+                "indexes": [
+                    models.Index(
+                        fields=["recipient", "read_at"], name="notificatio_recipie_564b1f_idx"
+                    ),
+                    models.Index(
+                        fields=["emailed_at", "email_skipped"],
+                        name="notificatio_emailed_2ee1e9_idx",
+                    ),
+                ],
             },
         ),
     ]

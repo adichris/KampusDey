@@ -213,4 +213,8 @@ def detail_facts(details):
 
 @register.filter
 def alias_other(conversation, user):
-    return conversation.owner_alias if conversation.starter_id == user.pk else conversation.starter_alias
+    return (
+        conversation.owner_alias
+        if conversation.starter_id == user.pk
+        else conversation.starter_alias
+    )

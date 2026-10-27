@@ -55,7 +55,12 @@ def clean_image(upload, max_mb: int) -> tuple[ContentFile, int, int, str]:
     else:
         clean.save(out, format="JPEG", quality=85, optimize=True, progressive=True)
         ext = "jpg"
-    return ContentFile(out.getvalue(), name=f"{uuid.uuid4().hex}.{ext}"), clean.width, clean.height, phash
+    return (
+        ContentFile(out.getvalue(), name=f"{uuid.uuid4().hex}.{ext}"),
+        clean.width,
+        clean.height,
+        phash,
+    )
 
 
 def _looks_like_image(head: bytes) -> bool:

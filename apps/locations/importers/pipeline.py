@@ -24,7 +24,17 @@ from apps.core import geo
 from apps.core.text import normalise_name, trigram_similarity
 
 from ..classify import classify_kind
-from ..models import Area, Campus, District, GtecStatus, Institution, Region, ReviewStatus, Source, Town
+from ..models import (
+    Area,
+    Campus,
+    District,
+    GtecStatus,
+    Institution,
+    Region,
+    ReviewStatus,
+    Source,
+    Town,
+)
 from . import http
 from .base import (
     Summary,
@@ -113,7 +123,9 @@ def _region_key(name: str) -> str:
 
 
 @transaction.atomic
-def import_admin_boundaries(regions_geojson: dict, districts_geojson: dict | None = None) -> Summary:
+def import_admin_boundaries(
+    regions_geojson: dict, districts_geojson: dict | None = None
+) -> Summary:
     summary = Summary("import_admin_boundaries", Source.HDX)
     regions = {_region_key(r.name): r for r in Region.objects.all()}
     by_pcode = {}
@@ -130,7 +142,11 @@ def import_admin_boundaries(regions_geojson: dict, districts_geojson: dict | Non
         values = {
             "hdx_pcode": pcode,
             "boundary": boundary,
-            **({"min_lat": box[0], "max_lat": box[1], "min_lng": box[2], "max_lng": box[3]} if box else {}),
+            **(
+                {"min_lat": box[0], "max_lat": box[1], "min_lng": box[2], "max_lng": box[3]}
+                if box
+                else {}
+            ),
             **provenance(Source.HDX, pcode, "https://data.humdata.org/dataset/cod-ab-gha"),
         }
         # Regions keep the seeded name; HDX adds geometry and the P-code.
@@ -159,7 +175,11 @@ def import_admin_boundaries(regions_geojson: dict, districts_geojson: dict | Non
                 "name": name,
                 "hdx_pcode": pcode,
                 "boundary": boundary,
-                **({"min_lat": box[0], "max_lat": box[1], "min_lng": box[2], "max_lng": box[3]} if box else {}),
+                **(
+                    {"min_lat": box[0], "max_lat": box[1], "min_lng": box[2], "max_lng": box[3]}
+                    if box
+                    else {}
+                ),
                 **provenance(Source.HDX, pcode, "https://data.humdata.org/dataset/cod-ab-gha"),
             },
         )
@@ -170,7 +190,9 @@ def import_admin_boundaries(regions_geojson: dict, districts_geojson: dict | Non
 
 
 def district_for_point(lat, lng):
-    for d in District.objects.filter(min_lat__lte=lat, max_lat__gte=lat, min_lng__lte=lng, max_lng__gte=lng):
+    for d in District.objects.filter(
+        min_lat__lte=lat, max_lat__gte=lat, min_lng__lte=lng, max_lng__gte=lng
+    ):
         if geo.geometry_contains(d.boundary, lat, lng):
             return d
     return None
@@ -209,7 +231,9 @@ def import_osm_towns(data: dict) -> Summary:
             "lng": lng,
         }
         if created or not town.source_id or town.source == Source.OSM:
-            values.update(provenance(Source.OSM, source_id, f"https://www.openstreetmap.org/{source_id}"))
+            values.update(
+                provenance(Source.OSM, source_id, f"https://www.openstreetmap.org/{source_id}")
+            )
         changed = apply_fields(town, values)
         if save_if_changed(town, changed):
             summary.inc("towns_created" if created else "towns_updated")
@@ -233,7 +257,9 @@ def _resolve_town(point, adm_label, region):
     if adm_label and region is not None:
         return Town.objects.create(
             region=region,
-            name=re.sub(r" (Municipal|Metropolitan)?\s*(District|Municipality|Assembly)$", "", adm_label),
+            name=re.sub(
+                r" (Municipal|Metropolitan)?\s*(District|Municipality|Assembly)$", "", adm_label
+            ),
             slug=unique_slug(Town, f"{adm_label}-{region.slug}"),
             source=Source.WIKIDATA,
             confidence=0.5,
@@ -243,7 +269,9 @@ def _resolve_town(point, adm_label, region):
     return None
 
 
-def _ensure_main_campus(inst: Institution, point, town, source, source_id, url, confidence, summary):
+def _ensure_main_campus(
+    inst: Institution, point, town, source, source_id, url, confidence, summary
+):
     campus = inst.campuses.order_by("pk").first()
     if campus is None:
         existing = match_campus(inst.name, point, town.region if town else None)
@@ -262,15 +290,25 @@ def _ensure_main_campus(inst: Institution, point, town, source, source_id, url, 
             name=inst.name,
             short_name=inst.short_name,
             kind=inst.kind,
-            slug=unique_slug(Campus, inst.short_name and f"{inst.short_name}-{town.name}" or inst.name),
+            slug=unique_slug(
+                Campus, inst.short_name and f"{inst.short_name}-{town.name}" or inst.name
+            ),
         )
-        apply_fields(campus, {"lat": point[0] if point else None, "lng": point[1] if point else None,
-                              **provenance(source, source_id, url, confidence)})
+        apply_fields(
+            campus,
+            {
+                "lat": point[0] if point else None,
+                "lng": point[1] if point else None,
+                **provenance(source, source_id, url, confidence),
+            },
+        )
         save_if_changed(campus, [])
         summary.inc("campuses_created")
         return campus
     values = {"short_name": inst.short_name or None}
-    if point and (not campus.has_point or campus.source in (Source.WIKIDATA, Source.MANUAL, Source.OSM)):
+    if point and (
+        not campus.has_point or campus.source in (Source.WIKIDATA, Source.MANUAL, Source.OSM)
+    ):
         values.update(lat=point[0], lng=point[1])
     if campus.source == Source.MANUAL and not campus.source_id:
         values.update(provenance(source, source_id, url, confidence))
@@ -303,12 +341,16 @@ def import_wikidata_institutions(data: dict, campus_data: dict | None = None) ->
         inst = match.obj or Institution(name=name, slug=unique_slug(Institution, name))
         created = inst.pk is None
         url = f"https://www.wikidata.org/wiki/{qid}"
-        confidence = 1.0 if match.method == "wikidata_id" else (match.confidence if not created else 0.5)
+        confidence = (
+            1.0 if match.method == "wikidata_id" else (match.confidence if not created else 0.5)
+        )
         values = {
             "name": name if created else None,
             "short_name": _value(row, "shortName"),
             "website": _value(row, "site"),
-            "wikidata_id": qid if not Institution.objects.filter(wikidata_id=qid).exclude(pk=inst.pk).exists() else None,
+            "wikidata_id": qid
+            if not Institution.objects.filter(wikidata_id=qid).exclude(pk=inst.pk).exists()
+            else None,
         }
         if created:
             values["kind"] = classify_kind(name)
@@ -342,11 +384,22 @@ def import_wikidata_institutions(data: dict, campus_data: dict | None = None) ->
             if town is None:
                 summary.inc("campus_skipped_no_town")
                 continue
-            campus = Campus(institution=parent, town=town, name=name, kind=parent.kind,
-                            slug=unique_slug(Campus, name))
+            campus = Campus(
+                institution=parent,
+                town=town,
+                name=name,
+                kind=parent.kind,
+                slug=unique_slug(Campus, name),
+            )
         created = campus.pk is None
-        changed = apply_fields(campus, {"lat": point[0] if point else None, "lng": point[1] if point else None,
-                                        **provenance(Source.WIKIDATA, qid, f"https://www.wikidata.org/wiki/{qid}", 0.9)})
+        changed = apply_fields(
+            campus,
+            {
+                "lat": point[0] if point else None,
+                "lng": point[1] if point else None,
+                **provenance(Source.WIKIDATA, qid, f"https://www.wikidata.org/wiki/{qid}", 0.9),
+            },
+        )
         if save_if_changed(campus, changed):
             summary.inc("sub_campuses_created" if created else "sub_campuses_updated")
         link_record(record, campus, "parent", 0.9)
@@ -395,15 +448,24 @@ def import_osm_campuses(data: dict) -> Summary:
             inst = inst_match.obj
             if inst is None:
                 inst = Institution.objects.create(
-                    name=name, slug=unique_slug(Institution, name), kind=classify_kind(name),
-                    short_name=tags.get("short_name", ""), website=tags.get("website", "")[:200],
+                    name=name,
+                    slug=unique_slug(Institution, name),
+                    kind=classify_kind(name),
+                    short_name=tags.get("short_name", ""),
+                    website=tags.get("website", "")[:200],
                     **provenance(Source.OSM, source_id, url, 0.5),
                     retrieved_at=timezone.now(),
                 )
                 summary.inc("institutions_created")
             campus = Campus(
-                institution=inst, town=town, name=name, kind=inst.kind, osm_id=source_id,
-                slug=unique_slug(Campus, name), lat=point[0], lng=point[1],
+                institution=inst,
+                town=town,
+                name=name,
+                kind=inst.kind,
+                osm_id=source_id,
+                slug=unique_slug(Campus, name),
+                lat=point[0],
+                lng=point[1],
                 **provenance(Source.OSM, source_id, url, 0.5),
             )
             save_if_changed(campus, [])
@@ -493,7 +555,14 @@ def parse_reference_file(path: Path) -> list[dict]:
         m = re.match(r"(.+?),\s*([A-Z][\w\- ]+)$", name)
         if not town and m:
             name, town = m.group(1).strip(), m.group(2).strip()
-        entries.append({"name": name, "town": town, "category": parts[2] if len(parts) > 2 else "", "status": ""})
+        entries.append(
+            {
+                "name": name,
+                "town": town,
+                "category": parts[2] if len(parts) > 2 else "",
+                "status": "",
+            }
+        )
     return entries
 
 
@@ -515,7 +584,11 @@ def _list_meta(path: Path) -> dict:
 def import_reference_lists(base_dir: Path | None = None) -> Summary:
     base_dir = Path(base_dir or http.RAW_DIR)
     summary = Summary("import_reference_lists", Source.GTEC)
-    for source, folder in ((Source.GTEC, "gtec"), (Source.MOH, "moh"), (Source.WIKIPEDIA, "wikipedia")):
+    for source, folder in (
+        (Source.GTEC, "gtec"),
+        (Source.MOH, "moh"),
+        (Source.WIKIPEDIA, "wikipedia"),
+    ):
         for path in sorted((base_dir / folder).glob("*")) if (base_dir / folder).exists() else []:
             if path.name.endswith(".meta.json") or path.name.startswith("."):
                 continue
@@ -556,16 +629,24 @@ def _apply_reference(entry, source, path, meta, summary):
         name=name,
         slug=unique_slug(Institution, name),
         kind=classify_kind(name),
-        gtec_status=status if source == Source.GTEC and status in GtecStatus.values else GtecStatus.UNKNOWN,
+        gtec_status=status
+        if source == Source.GTEC and status in GtecStatus.values
+        else GtecStatus.UNKNOWN,
         gtec_note=f"{note} ({path.name})"[:300] if source == Source.GTEC else "",
-        **provenance(source, source_id, meta.get("url", ""), 0.4 if source == Source.WIKIPEDIA else 0.5),
+        **provenance(
+            source, source_id, meta.get("url", ""), 0.4 if source == Source.WIKIPEDIA else 0.5
+        ),
     )
     save_if_changed(inst, [])
     link_record(record, inst, "new", inst.confidence)
     summary.inc(f"{source}_created")
     if town is not None:
         campus = Campus(
-            institution=inst, town=town, name=name, kind=inst.kind, slug=unique_slug(Campus, name),
+            institution=inst,
+            town=town,
+            name=name,
+            kind=inst.kind,
+            slug=unique_slug(Campus, name),
             **provenance(source, source_id, meta.get("url", ""), inst.confidence),
         )
         save_if_changed(campus, [])
@@ -576,7 +657,7 @@ def _apply_reference(entry, source, path, meta, summary):
 # OSM areas around campuses
 # ---------------------------------------------------------------------------
 def import_osm_areas_for_campus(campus: Campus, data: dict, summary: Summary) -> None:
-    seen = set(normalise_name(a.name) for a in Area.objects.filter(campus=campus))
+    seen = {normalise_name(a.name) for a in Area.objects.filter(campus=campus)}
     town_norm = normalise_name(campus.town.name)
     for el in data.get("elements", []):
         tags = el.get("tags", {})
@@ -595,11 +676,23 @@ def import_osm_areas_for_campus(campus: Campus, data: dict, summary: Summary) ->
             continue
         created = area is None
         if created:
-            area = Area(town=campus.town, campus=campus, name=name,
-                        slug=unique_slug(Area, f"{name}-{campus.town.name}"),
-                        review_status=ReviewStatus.UNVERIFIED)
-        changed = apply_fields(area, {"lat": el.get("lat"), "lng": el.get("lon"),
-                                      **provenance(Source.OSM, source_id, f"https://www.openstreetmap.org/{source_id}", 0.8)})
+            area = Area(
+                town=campus.town,
+                campus=campus,
+                name=name,
+                slug=unique_slug(Area, f"{name}-{campus.town.name}"),
+                review_status=ReviewStatus.UNVERIFIED,
+            )
+        changed = apply_fields(
+            area,
+            {
+                "lat": el.get("lat"),
+                "lng": el.get("lon"),
+                **provenance(
+                    Source.OSM, source_id, f"https://www.openstreetmap.org/{source_id}", 0.8
+                ),
+            },
+        )
         if save_if_changed(area, changed):
             summary.inc("areas_created" if created else "areas_updated")
         seen.add(norm)
@@ -639,19 +732,23 @@ def locations_report() -> dict:
         "districts": District.objects.count(),
         "towns": Town.objects.count(),
         "towns_with_points": Town.objects.filter(lat__isnull=False).count(),
-        "institutions_by_source": dict(Institution.objects.values_list("source").annotate(n=Count("id"))),
+        "institutions_by_source": dict(
+            Institution.objects.values_list("source").annotate(n=Count("id"))
+        ),
         "campuses_by_source": dict(campuses.values_list("source").annotate(n=Count("id"))),
         "campuses": total,
         "campuses_with_points": with_point,
         "campuses_with_points_pct": round(100 * with_point / total, 1) if total else 0,
-        "campuses_without_points": list(campuses.filter(lat__isnull=True).values_list("name", flat=True)[:50]),
+        "campuses_without_points": list(
+            campuses.filter(lat__isnull=True).values_list("name", flat=True)[:50]
+        ),
         "unverified_campuses": campuses.filter(review_status=ReviewStatus.UNVERIFIED).count(),
         "unverified_areas": Area.objects.filter(review_status=ReviewStatus.UNVERIFIED).count(),
         "possible_duplicates": [(a.name, b.name, round(s, 2)) for a, b, s in dupes[:50]],
         "gtec_flagged": list(
-            Institution.objects.filter(gtec_status__in=[GtecStatus.EXPIRED, GtecStatus.UNACCREDITED]).values_list(
-                "name", "gtec_status"
-            )
+            Institution.objects.filter(
+                gtec_status__in=[GtecStatus.EXPIRED, GtecStatus.UNACCREDITED]
+            ).values_list("name", "gtec_status")
         ),
         "match_methods": _match_rates(),
     }
@@ -669,7 +766,9 @@ def _match_rates():
 
 
 def possible_duplicates(threshold: float = 0.8):
-    items = list(Campus.objects.exclude(review_status=ReviewStatus.REJECTED).only("id", "name", "slug"))
+    items = list(
+        Campus.objects.exclude(review_status=ReviewStatus.REJECTED).only("id", "name", "slug")
+    )
     norms = [(c, normalise_name(c.name)) for c in items]
     pairs = []
     for i, (a, na) in enumerate(norms):
@@ -736,7 +835,9 @@ def fetch_wikidata():
     http.save_raw("wikidata", "institutions", data)
     qids = [(_value(r, "item") or "").rsplit("/", 1)[-1] for r in data["results"]["bindings"]]
     values = " ".join(f"wd:{q}" for q in qids if q.startswith("Q"))
-    campus_data = http.sparql(WIKIDATA_CAMPUS_QUERY % values) if values else {"results": {"bindings": []}}
+    campus_data = (
+        http.sparql(WIKIDATA_CAMPUS_QUERY % values) if values else {"results": {"bindings": []}}
+    )
     http.save_raw("wikidata", "campuses", campus_data)
     return data, campus_data
 

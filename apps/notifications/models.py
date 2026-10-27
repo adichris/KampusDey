@@ -19,29 +19,40 @@ class Trigger(models.TextChoices):
 
 
 class Notification(TimeStampedModel):
-    """In-app notification. Implemented in-house instead of django-notifications-hq (see PROGRESS)."""
+    """In-app notification. Built in-house instead of django-notifications-hq (see PROGRESS)."""
 
-    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"
+    )
     trigger = models.CharField(max_length=16, choices=Trigger.choices)
     title = models.CharField(max_length=160)
     body = models.CharField(max_length=400, blank=True)
     url = models.CharField(max_length=300, blank=True)
-    data = models.JSONField(default=dict, blank=True, help_text=_("Extra links for the email, e.g. one-tap"))
+    data = models.JSONField(
+        default=dict, blank=True, help_text=_("Extra links for the email, e.g. one-tap")
+    )
     read_at = models.DateTimeField(null=True, blank=True)
     emailed_at = models.DateTimeField(null=True, blank=True)
     email_skipped = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created_at"]
-        indexes = [models.Index(fields=["recipient", "read_at"]), models.Index(fields=["emailed_at", "email_skipped"])]
+        indexes = [
+            models.Index(fields=["recipient", "read_at"]),
+            models.Index(fields=["emailed_at", "email_skipped"]),
+        ]
 
     def __str__(self):
         return self.title
 
 
 class NotificationPreference(TimeStampedModel):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notification_prefs")
-    email_triggers = models.JSONField(default=list, blank=True, help_text=_("Triggers that also send email"))
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notification_prefs"
+    )
+    email_triggers = models.JSONField(
+        default=list, blank=True, help_text=_("Triggers that also send email")
+    )
     weekly_digest = models.BooleanField(default=True)
     push_enabled = models.BooleanField(default=False)
 

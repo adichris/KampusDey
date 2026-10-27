@@ -44,7 +44,11 @@ def test_buy_sell_end_to_end_on_phone(client, campus):
     response = client.post(reverse("listings:post_start", args=["buy-sell"]))
     listing = Listing.objects.filter(owner=user, status="draft").latest("pk")
     assert response.url == reverse("listings:wizard", args=[listing.pk, 1])
-    r = client.post(reverse("listings:photo_upload", args=[listing.pk]), {"photo": _jpeg()}, HTTP_HX_REQUEST="true")
+    r = client.post(
+        reverse("listings:photo_upload", args=[listing.pk]),
+        {"photo": _jpeg()},
+        HTTP_HX_REQUEST="true",
+    )
     assert r.status_code == 200
     photo = listing.photos.get()
     from apps.core.images import has_exif
@@ -54,14 +58,29 @@ def test_buy_sell_end_to_end_on_phone(client, campus):
     client.post(reverse("listings:wizard", args=[listing.pk, 1]))
     r = client.post(
         reverse("listings:wizard", args=[listing.pk, 2]),
-        {"title": "HP laptop 8GB RAM", "description": "Works well", "price": "1500", "price_period": "total",
-         "lat": "7.0012345", "lng": "-1.0012345", "d-category": category.pk, "d-condition": "used"},
+        {
+            "title": "HP laptop 8GB RAM",
+            "description": "Works well",
+            "price": "1500",
+            "price_period": "total",
+            "lat": "7.0012345",
+            "lng": "-1.0012345",
+            "d-category": category.pk,
+            "d-condition": "used",
+        },
     )
     assert r.status_code == 302, r.content
     listing.refresh_from_db()
     assert (listing.lat, listing.lng) != (7.0012345, -1.0012345)  # snapped
-    r = client.post(reverse("listings:wizard", args=[listing.pk, 3]),
-                    {"phone": "0241234567", "chat": "on", "contact_visibility": "public", "keep_campuses": [str(campus.pk)]})
+    r = client.post(
+        reverse("listings:wizard", args=[listing.pk, 3]),
+        {
+            "phone": "0241234567",
+            "chat": "on",
+            "contact_visibility": "public",
+            "keep_campuses": [str(campus.pk)],
+        },
+    )
     assert r.status_code == 302, r.content
     listing.refresh_from_db()
     assert listing.status == "active" and listing.seller_type == "student"
@@ -136,15 +155,21 @@ def test_location_snapping():
 
 def test_ranking_formula():
     now = timezone.now()
-    listing = f.ListingFactory(published_at=now - timedelta(days=7), taps_7d=2, likes_7d=1, views_7d=10, reports_count=1)
+    listing = f.ListingFactory(
+        published_at=now - timedelta(days=7), taps_7d=2, likes_7d=1, views_7d=10, reports_count=1
+    )
     expected = (
         1.0 * math.exp(-7 / 7)
         + 1.0 * min(math.log1p(3 * 2 + 2 * 1 + 0.2 * 10), 3.0)
         + 0.3 * (0 + 0)
         - 0.5 * 1
     )
-    assert services.compute_score(listing, now, photo_count=0, owner_verified=False) == pytest.approx(expected)
-    assert services.compute_score(listing, now, photo_count=3, owner_verified=True) == pytest.approx(expected + 0.6)
+    assert services.compute_score(
+        listing, now, photo_count=0, owner_verified=False
+    ) == pytest.approx(expected)
+    assert services.compute_score(
+        listing, now, photo_count=3, owner_verified=True
+    ) == pytest.approx(expected + 0.6)
 
 
 def test_lifecycle_transitions_time_travel():
@@ -226,12 +251,24 @@ def test_every_section_page_and_detail_render(client, campus, slug):
     if slug == "trips":
         SectionAvailability.objects.create(section="trips", enabled=True)
     factory_name = {
-        "rooms": "RoomDetailsFactory", "roommates": "RoommateDetailsFactory", "short-stays": "ShortStayDetailsFactory",
-        "buy-sell": "ItemDetailsFactory", "wanted": "WantedDetailsFactory", "free-leaving": "ItemDetailsFactory",
-        "services": "ServiceDetailsFactory", "jobs": "JobDetailsFactory", "job-requests": "JobRequestDetailsFactory",
-        "errands": "ErrandDetailsFactory", "food": "FoodDetailsFactory", "events": "EventDetailsFactory",
-        "notes": "NoteDetailsFactory", "study": "StudyDetailsFactory", "lost-found": "LostFoundDetailsFactory",
-        "trips": "TripDetailsFactory", "alerts": "AlertDetailsFactory", "ask": "QuestionDetailsFactory",
+        "rooms": "RoomDetailsFactory",
+        "roommates": "RoommateDetailsFactory",
+        "short-stays": "ShortStayDetailsFactory",
+        "buy-sell": "ItemDetailsFactory",
+        "wanted": "WantedDetailsFactory",
+        "free-leaving": "ItemDetailsFactory",
+        "services": "ServiceDetailsFactory",
+        "jobs": "JobDetailsFactory",
+        "job-requests": "JobRequestDetailsFactory",
+        "errands": "ErrandDetailsFactory",
+        "food": "FoodDetailsFactory",
+        "events": "EventDetailsFactory",
+        "notes": "NoteDetailsFactory",
+        "study": "StudyDetailsFactory",
+        "lost-found": "LostFoundDetailsFactory",
+        "trips": "TripDetailsFactory",
+        "alerts": "AlertDetailsFactory",
+        "ask": "QuestionDetailsFactory",
     }[slug]
     details = getattr(f, factory_name)(listing__section=slug)
     listing = details.listing
@@ -250,14 +287,22 @@ def test_section_filters_apply(client, campus):
     b = f.RoomDetailsFactory(gender="male").listing
     for item in (a, b):
         f.ListingCampusFactory(listing=item, campus=campus)
-    page = client.get(reverse("listings:section_campus", args=[campus.slug, "rooms"]), {"gender": "female"})
+    page = client.get(
+        reverse("listings:section_campus", args=[campus.slug, "rooms"]), {"gender": "female"}
+    )
     assert a.title.encode() in page.content and b.title.encode() not in page.content
 
 
 def test_disabled_section_hidden_everywhere(client, campus):
-    assert client.get(reverse("listings:section_campus", args=[campus.slug, "trips"])).status_code == 404
+    assert (
+        client.get(reverse("listings:section_campus", args=[campus.slug, "trips"])).status_code
+        == 404
+    )
     SectionAvailability.objects.create(section="jobs", campus=campus, enabled=False)
-    assert client.get(reverse("listings:section_campus", args=[campus.slug, "jobs"])).status_code == 404
+    assert (
+        client.get(reverse("listings:section_campus", args=[campus.slug, "jobs"])).status_code
+        == 404
+    )
     home = client.get(reverse("listings:campus_home", args=[campus.slug])).content.decode()
     assert f"/{campus.slug}/jobs/" not in home and f"/{campus.slug}/rooms/" in home
     client.force_login(f.UserFactory())
@@ -285,7 +330,9 @@ def test_boosted_slots_capped_and_labelled(campus):
     qs = selectors.visible_listings(None)
     assert len(selectors.boosted_slots(qs)) == config.BOOST_SLOTS_PER_PAGE
     now = timezone.now()
-    assert [x.pk for x in selectors.boosted_slots(qs, now=now)] == [x.pk for x in selectors.boosted_slots(qs, now=now)]
+    assert [x.pk for x in selectors.boosted_slots(qs, now=now)] == [
+        x.pk for x in selectors.boosted_slots(qs, now=now)
+    ]
 
 
 def test_search_logs_event_with_result_count(client, campus):
@@ -315,4 +362,6 @@ def test_service_worker_never_caches_tiles(client, db):
     js = client.get("/sw.js").content.decode()
     assets_line = next(line for line in js.splitlines() if line.startswith("const ASSETS"))
     assert "openstreetmap" not in assets_line and "{z}" not in js
-    assert "if (url.origin !== self.location.origin) return;" in js  # cross-origin (tiles) never handled
+    assert (
+        "if (url.origin !== self.location.origin) return;" in js
+    )  # cross-origin (tiles) never handled

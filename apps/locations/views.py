@@ -51,7 +51,11 @@ def nearest(request):
         return HttpResponse(_("Location not available."), status=400)
     # The device position is used once for this lookup and never stored.
     campuses = services.nearest_campuses(lat, lng)
-    return render(request, "locations/partials/nearest.html", {"campuses": campuses, "next": request.GET.get("next", "")})
+    return render(
+        request,
+        "locations/partials/nearest.html",
+        {"campuses": campuses, "next": request.GET.get("next", "")},
+    )
 
 
 def towns(request):
@@ -59,13 +63,19 @@ def towns(request):
     return render(
         request,
         "locations/partials/towns.html",
-        {"towns": Town.objects.filter(region=region).order_by("name"), "region": region, "next": request.GET.get("next", "")},
+        {
+            "towns": Town.objects.filter(region=region).order_by("name"),
+            "region": region,
+            "next": request.GET.get("next", ""),
+        },
     )
 
 
 def _safe_next(request, fallback="/"):
     target = request.POST.get("next") or request.GET.get("next") or ""
-    if target and url_has_allowed_host_and_scheme(target, {request.get_host()}, request.is_secure()):
+    if target and url_has_allowed_host_and_scheme(
+        target, {request.get_host()}, request.is_secure()
+    ):
         return target
     return fallback
 
@@ -115,4 +125,6 @@ def follow(request, pk):
     else:
         profile.followed_campuses.add(campus)
         following = True
-    return render(request, "locations/partials/follow_button.html", {"campus": campus, "following": following})
+    return render(
+        request, "locations/partials/follow_button.html", {"campus": campus, "following": following}
+    )

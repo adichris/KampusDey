@@ -6,45 +6,69 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('engagement', '0002_initial'),
-        ('locations', '0001_initial'),
+        ("engagement", "0002_initial"),
+        ("locations", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='savedsearch',
-            name='campus',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='locations.campus'),
+            model_name="savedsearch",
+            name="campus",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="locations.campus",
+            ),
         ),
         migrations.AddField(
-            model_name='savedsearch',
-            name='town',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='locations.town'),
+            model_name="savedsearch",
+            name="town",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="locations.town",
+            ),
         ),
         migrations.AddField(
-            model_name='savedsearch',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='saved_searches', to=settings.AUTH_USER_MODEL),
+            model_name="savedsearch",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="saved_searches",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddConstraint(
-            model_name='like',
-            constraint=models.UniqueConstraint(fields=('user', 'listing'), name='uniq_like'),
+            model_name="like",
+            constraint=models.UniqueConstraint(fields=("user", "listing"), name="uniq_like"),
         ),
         migrations.AddIndex(
-            model_name='report',
-            index=models.Index(fields=['content_type', 'object_id', 'status'], name='engagement__content_0860d2_idx'),
+            model_name="report",
+            index=models.Index(
+                fields=["content_type", "object_id", "status"],
+                name="engagement__content_0860d2_idx",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='review',
-            constraint=models.UniqueConstraint(condition=models.Q(('hostel__isnull', False)), fields=('reviewer', 'hostel'), name='uniq_review_hostel'),
+            model_name="review",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("hostel__isnull", False)),
+                fields=("reviewer", "hostel"),
+                name="uniq_review_hostel",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='review',
-            constraint=models.UniqueConstraint(condition=models.Q(('target_user__isnull', False)), fields=('reviewer', 'target_user'), name='uniq_review_user'),
+            model_name="review",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("target_user__isnull", False)),
+                fields=("reviewer", "target_user"),
+                name="uniq_review_user",
+            ),
         ),
     ]

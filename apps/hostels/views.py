@@ -18,15 +18,20 @@ from .models import Hostel, HostelPhoto, HostelRoomType
 
 
 class HostelForm(forms.ModelForm):
-    amenities = forms.MultipleChoiceField(choices=Hostel.AMENITIES, widget=forms.CheckboxSelectMultiple, required=False)
+    amenities = forms.MultipleChoiceField(
+        choices=Hostel.AMENITIES, widget=forms.CheckboxSelectMultiple, required=False
+    )
     lat = forms.FloatField(required=False, widget=forms.HiddenInput)
     lng = forms.FloatField(required=False, widget=forms.HiddenInput)
 
     class Meta:
         model = Hostel
         fields = ["name", "description", "rules", "amenities", "town", "campuses"]
-        widgets = {"description": forms.Textarea(attrs={"rows": 4}), "rules": forms.Textarea(attrs={"rows": 3}),
-                   "campuses": forms.SelectMultiple(attrs={"size": 4})}
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 4}),
+            "rules": forms.Textarea(attrs={"rows": 3}),
+            "campuses": forms.SelectMultiple(attrs={"size": 4}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -39,7 +44,15 @@ class HostelForm(forms.ModelForm):
 class RoomTypeForm(forms.ModelForm):
     class Meta:
         model = HostelRoomType
-        fields = ["name", "room_type", "gender", "price", "price_period", "total_rooms", "available_rooms"]
+        fields = [
+            "name",
+            "room_type",
+            "gender",
+            "price",
+            "price_period",
+            "total_rooms",
+            "available_rooms",
+        ]
 
     def clean(self):
         data = super().clean()
@@ -73,8 +86,11 @@ def manager(request):
 def edit_hostel(request, pk=None):
     _require_manager(request.user)
     hostel = _own(request, pk) if pk else None
-    form = HostelForm(request.POST or None, instance=hostel,
-                      initial={"town": request.location.effective_town} if not hostel else None)
+    form = HostelForm(
+        request.POST or None,
+        instance=hostel,
+        initial={"town": request.location.effective_town} if not hostel else None,
+    )
     if request.method == "POST" and form.is_valid():
         obj = form.save(commit=False)
         from apps.listings.services import ListingError, set_point
@@ -105,9 +121,14 @@ def manage(request, pk):
     return render(
         request,
         "hostels/manage.html",
-        {"hostel": hostel, "room_types": hostel.room_types.select_related("listing"),
-         "occupancy": services.occupancy(hostel), "stats": services.room_type_stats(hostel),
-         "photos": hostel.photos.all(), "form": RoomTypeForm()},
+        {
+            "hostel": hostel,
+            "room_types": hostel.room_types.select_related("listing"),
+            "occupancy": services.occupancy(hostel),
+            "stats": services.room_type_stats(hostel),
+            "photos": hostel.photos.all(),
+            "form": RoomTypeForm(),
+        },
     )
 
 
@@ -123,7 +144,9 @@ def room_type(request, pk, rt_pk=None):
         services.sync_room_type_listing(obj)
         messages.success(request, _("Room type saved."))
         return redirect("hostels:manage", pk=hostel.pk)
-    return render(request, "hostels/room_type.html", {"form": form, "hostel": hostel, "instance": instance})
+    return render(
+        request, "hostels/room_type.html", {"form": form, "hostel": hostel, "instance": instance}
+    )
 
 
 @login_required
@@ -150,7 +173,9 @@ def photo_upload(request, pk):
     photo = HostelPhoto(hostel=hostel, phash=phash, order=hostel.photos.count() + 1)
     photo.image.save(content.name, content, save=False)
     photo.save()
-    return render(request, "hostels/partials/photos.html", {"hostel": hostel, "photos": hostel.photos.all()})
+    return render(
+        request, "hostels/partials/photos.html", {"hostel": hostel, "photos": hostel.photos.all()}
+    )
 
 
 @login_required
@@ -160,20 +185,28 @@ def photo_delete(request, pk, photo_pk):
     photo = get_object_or_404(HostelPhoto, pk=photo_pk, hostel=hostel)
     photo.image.delete(save=False)
     photo.delete()
-    return render(request, "hostels/partials/photos.html", {"hostel": hostel, "photos": hostel.photos.all()})
+    return render(
+        request, "hostels/partials/photos.html", {"hostel": hostel, "photos": hostel.photos.all()}
+    )
 
 
 @login_required
 def inquiries(request, pk):
     hostel = _own(request, pk)
     conversations, taps = services.inquiries(hostel)
-    return render(request, "hostels/inquiries.html", {"hostel": hostel, "conversations": conversations, "taps": taps})
+    return render(
+        request,
+        "hostels/inquiries.html",
+        {"hostel": hostel, "conversations": conversations, "taps": taps},
+    )
 
 
 def detail(request, slug):
     from apps.engagement.services import can_review_hostel
 
-    hostel = get_object_or_404(Hostel.objects.select_related("town__region", "owner__profile"), slug=slug)
+    hostel = get_object_or_404(
+        Hostel.objects.select_related("town__region", "owner__profile"), slug=slug
+    )
     room_types = hostel.room_types.select_related("listing")
     listing = next((rt.listing for rt in room_types if rt.listing and rt.listing.is_visible), None)
     reviews = hostel.reviews.filter(status="visible").select_related("reviewer")
@@ -186,7 +219,9 @@ def detail(request, slug):
             "photos": hostel.photos.all(),
             "reviews": reviews[:30],
             "rating": reviews.aggregate(avg=Avg("rating"))["avg"],
-            "contact": buttons_for(listing, request.user) if listing else {"buttons": [], "login_required": False},
+            "contact": buttons_for(listing, request.user)
+            if listing
+            else {"buttons": [], "login_required": False},
             "can_review": can_review_hostel(request.user, hostel),
         },
     )

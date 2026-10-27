@@ -35,5 +35,7 @@ def quarterly_refresh():
     new = Campus.objects.filter(review_status=ReviewStatus.UNVERIFIED).count() - before
     if new > 0:
         for admin in User.objects.filter(is_superuser=True, is_active=True):
-            notify(admin, "campus_request", f"{new} new unverified campuses to review", url="/admin/")
+            notify(
+                admin, "campus_request", f"{new} new unverified campuses to review", url="/admin/"
+            )
     return new

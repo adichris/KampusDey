@@ -32,9 +32,13 @@ class KDLoginForm(TurnstileMixin, LoginForm):
 
 class OnboardingForm(forms.Form):
     display_name = forms.CharField(label=_("Display name"), max_length=60)
-    role = forms.ChoiceField(label=_("I am a…"), choices=Profile.Role.choices, widget=forms.RadioSelect)
+    role = forms.ChoiceField(
+        label=_("I am a…"), choices=Profile.Role.choices, widget=forms.RadioSelect
+    )
     seller_type = forms.ChoiceField(
-        label=_("I sell as a…"), choices=[("", "—")] + list(Profile.SellerType.choices), required=False
+        label=_("I sell as a…"),
+        choices=[("", "—")] + list(Profile.SellerType.choices),
+        required=False,
     )
     home_campus = forms.ModelChoiceField(
         label=_("My campus"), queryset=Campus.objects.none(), required=False

@@ -1,0 +1,54 @@
+# Optional Docker setup for later use. Local development uses a venv (see README).
+# Note: PostGIS is not required — the app stores points as lat/lng.
+x-app: &app
+  build: .
+  env_file: .env
+  environment:
+    DATABASE_URL: postgres://kampusdey:kampusdey@db:5432/kampusdey
+    REDIS_URL: redis://redis:6379/0
+    EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+    EMAIL_HOST: mailpit
+    EMAIL_PORT: "1025"
+    DJANGO_SETTINGS_MODULE: config.settings.dev
+  depends_on: [db, redis]
+
+services:
+  web:
+    <<: *app
+    command: sh -c "python manage.py migrate && python manage.py createcachetable && python manage.py runserver 0.0.0.0:8000"
+    ports: ["8000:8000"]
+  worker:
+    <<: *app
+    command: celery -A config worker -l info
+  beat:
+    <<: *app
+    command: celery -A config beat -l info
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: kampusdey
+      POSTGRES_PASSWORD: kampusdey
+      POSTGRES_DB: kampusdey
+    volumes: [pgdata:/var/lib/postgresql/data]
+  redis:
+    image: redis:7
+  mailpit:
+    image: axllent/mailpit
+    ports: ["8025:8025"]
+  umami:
+    profiles: [analytics]
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    environment:
+      DATABASE_URL: postgres://umami:umami@umami-db:5432/umami
+    ports: ["3000:3000"]
+    depends_on: [umami-db]
+  umami-db:
+    profiles: [analytics]
+    image: postgres:16
+    environment:
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+      POSTGRES_DB: umami
+
+volumes:
+  pgdata:

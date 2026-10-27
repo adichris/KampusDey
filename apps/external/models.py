@@ -34,9 +34,7 @@ class ExternalSource(TimeStampedModel):
     permission_note = models.TextField(
         blank=True, help_text=_("For partner feeds: record of the publisher's written permission")
     )
-    terms_reviewed = models.BooleanField(
-        _("I have reviewed the terms at terms_url"), default=False
-    )
+    terms_reviewed = models.BooleanField(_("I have reviewed the terms at terms_url"), default=False)
     approved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
@@ -125,24 +123,42 @@ class Place(ProvenanceMixin, GeoPointMixin, TimeStampedModel):
         REMOVED = "removed", _("Removed")
 
     # ProvenanceMixin.source is a char field; the registry FK is `external_source`.
-    external_source = models.ForeignKey(ExternalSource, on_delete=models.PROTECT, related_name="places")
+    external_source = models.ForeignKey(
+        ExternalSource, on_delete=models.PROTECT, related_name="places"
+    )
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, unique=True)
-    kind = models.CharField(max_length=16, choices=PlaceKind.choices, default=PlaceKind.OTHER, db_index=True)
-    town = models.ForeignKey("locations.Town", on_delete=models.SET_NULL, null=True, blank=True, related_name="places")
-    campuses = models.ManyToManyField("locations.Campus", through="PlaceCampus", related_name="places")
+    kind = models.CharField(
+        max_length=16, choices=PlaceKind.choices, default=PlaceKind.OTHER, db_index=True
+    )
+    town = models.ForeignKey(
+        "locations.Town", on_delete=models.SET_NULL, null=True, blank=True, related_name="places"
+    )
+    campuses = models.ManyToManyField(
+        "locations.Campus", through="PlaceCampus", related_name="places"
+    )
     address = models.CharField(max_length=300, blank=True)
     website = models.URLField(max_length=400, blank=True)
     opening_hours = models.CharField(max_length=300, blank=True)
     phone = models.CharField(max_length=40, blank=True)
-    description = models.TextField(blank=True, max_length=2000, help_text=_("Only set by a verified owner"))
+    description = models.TextField(
+        blank=True, max_length=2000, help_text=_("Only set by a verified owner")
+    )
     last_seen_at = models.DateTimeField(null=True, blank=True)
     missing_count = models.PositiveSmallIntegerField(default=0)
-    status = models.CharField(max_length=14, choices=Status.choices, default=Status.UNCLAIMED, db_index=True)
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="places"
+    status = models.CharField(
+        max_length=14, choices=Status.choices, default=Status.UNCLAIMED, db_index=True
     )
-    hostel = models.ForeignKey("hostels.Hostel", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="places",
+    )
+    hostel = models.ForeignKey(
+        "hostels.Hostel", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     reports_count = models.PositiveSmallIntegerField(default=0)
 
     objects = PlaceQuerySet.as_manager()
@@ -150,7 +166,9 @@ class Place(ProvenanceMixin, GeoPointMixin, TimeStampedModel):
     class Meta:
         ordering = ["name"]
         constraints = [
-            models.UniqueConstraint(fields=["external_source", "source_id"], name="uniq_place_source_id")
+            models.UniqueConstraint(
+                fields=["external_source", "source_id"], name="uniq_place_source_id"
+            )
         ]
 
     def __str__(self):
@@ -166,11 +184,15 @@ class Place(ProvenanceMixin, GeoPointMixin, TimeStampedModel):
 
 class PlaceCampus(models.Model):
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name="campus_links")
-    campus = models.ForeignKey("locations.Campus", on_delete=models.CASCADE, related_name="place_links")
+    campus = models.ForeignKey(
+        "locations.Campus", on_delete=models.CASCADE, related_name="place_links"
+    )
     distance_m = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
-        constraints = [models.UniqueConstraint(fields=["place", "campus"], name="uniq_place_campus")]
+        constraints = [
+            models.UniqueConstraint(fields=["place", "campus"], name="uniq_place_campus")
+        ]
 
     def __str__(self):
         return f"{self.place_id} ↔ {self.campus_id}"
@@ -191,10 +213,16 @@ class PlaceClaim(TimeStampedModel):
         REJECTED = "rejected", _("Rejected")
 
     place = models.ForeignKey(Place, on_delete=models.CASCADE, related_name="claims")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="place_claims")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="place_claims"
+    )
     proof_kind = models.CharField(max_length=14, choices=ProofKind.choices)
-    proof = models.FileField(storage=private_storage, upload_to=claim_proof_upload_to, null=True, blank=True)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True)
+    proof = models.FileField(
+        storage=private_storage, upload_to=claim_proof_upload_to, null=True, blank=True
+    )
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True
+    )
     reason = models.CharField(max_length=300, blank=True)
     reviewed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
@@ -221,7 +249,9 @@ class ExternalJob(TimeStampedModel):
         EXPIRED = "expired", _("Expired")
         HIDDEN = "hidden", _("Hidden")
 
-    external_source = models.ForeignKey(ExternalSource, on_delete=models.PROTECT, related_name="jobs")
+    external_source = models.ForeignKey(
+        ExternalSource, on_delete=models.PROTECT, related_name="jobs"
+    )
     source_id = models.CharField(max_length=60)
     title = models.CharField(max_length=250)
     company = models.CharField(max_length=200, blank=True)
@@ -234,13 +264,19 @@ class ExternalJob(TimeStampedModel):
     url = models.URLField(max_length=500)
     first_seen_at = models.DateTimeField(default=timezone.now)
     last_seen_at = models.DateTimeField(default=timezone.now)
-    status = models.CharField(max_length=8, choices=Status.choices, default=Status.ACTIVE, db_index=True)
+    status = models.CharField(
+        max_length=8, choices=Status.choices, default=Status.ACTIVE, db_index=True
+    )
 
     objects = ExternalJobQuerySet.as_manager()
 
     class Meta:
         ordering = ["-published_at"]
-        constraints = [models.UniqueConstraint(fields=["external_source", "source_id"], name="uniq_external_job")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["external_source", "source_id"], name="uniq_external_job"
+            )
+        ]
 
     def __str__(self):
         return self.title

@@ -6,28 +6,37 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('boosts', '0001_initial'),
-        ('listings', '0001_initial'),
+        ("boosts", "0001_initial"),
+        ("listings", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='boost',
-            name='listing',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='boosts', to='listings.listing'),
+            model_name="boost",
+            name="listing",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="boosts",
+                to="listings.listing",
+            ),
         ),
         migrations.AddField(
-            model_name='boost',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='boosts', to=settings.AUTH_USER_MODEL),
+            model_name="boost",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="boosts",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddIndex(
-            model_name='boost',
-            index=models.Index(fields=['starts_at', 'ends_at'], name='boosts_boos_starts__6e3363_idx'),
+            model_name="boost",
+            index=models.Index(
+                fields=["starts_at", "ends_at"], name="boosts_boos_starts__6e3363_idx"
+            ),
         ),
     ]

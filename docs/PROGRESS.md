@@ -1,26 +1,61 @@
 # KampusDey — Progress
 
-## Status (2026-10-26): build in progress, NOT yet runnable end to end
+## Status (2026-10-27)
 
-Written so far (all milestones' code is drafted, none formally accepted):
-- Foundation: settings split (`config/settings/{base,dev,test,prod}.py`), constance config, unfold sidebar, Celery + beat schedule, `.venv` with all deps, npm toolchain (Tailwind v4 + daisyUI 5, htmx, Alpine CSP, Leaflet, Inter) vendored via `npm run vendor`.
-- Models + initial migrations for all 17 apps; `migrate` and `seed_locations` run (16 regions, 22 starter campuses, no coordinates).
-- Services: accounts (permission rules, OTP, verification, deletion/export), locations (picker, GeoIP hint, importers for Wikidata/OSM/HDX/GTEC/MoH/Wikipedia, matching, merge, report), listings (wizard, snapping, auto-link, lifecycle, ranking, search), contacts (channel registry), boosts, engagement, chat, moderation rules engine, telemetry (buffer/flush/roll-ups), notifications, hostels, growth, external (source registry, OSM places, Remotive, claims).
-- Views, URLs, admin (unfold) for every app; cotton components; most page templates.
+All milestones M0–M14 are implemented in code and covered by tests. **261 tests pass** (offline,
+recorded sample responses only); `ruff check` and `ruff format --check` are clean;
+`makemigrations --check` reports no changes; `manage.py check --deploy` (prod settings) is clean.
+Coverage: 84% overall; services/selectors ≈ 85% combined (contacts 76%, locations 77%,
+notifications 74% individually).
 
-## Left to do (next session)
-1. Remaining templates: `external/` (around, place, claim, edit_place, partials/place_card), `growth/rent_check.html`, `pages/` (about, data_sources, safety, privacy, terms, offline, scam_alerts, `sw.js`), `errors/` (simple, 500), `partials/toast.html`, `emails/` (notifications/digest txt+html), admin templates (`admin/index.html` dashboard, locations review_queue/duplicates, sitesettings matrix + integration_change_form).
-2. PWA icons `static/img/icon-192.png` / `icon-512.png`; `npm run build:css`.
-3. Run `manage.py check`, `runserver`, fix errors; `seed_demo` command.
-4. Tests (factories for every model, `tests/fixtures/sources/` recorded responses, key behaviours in §9), `ruff check`/`format`.
-5. Makefile + `make.ps1`, `.env.example`, README, ARCHITECTURE/OPERATIONS/DATA_SOURCES docs, Dockerfile/compose (kept for later), CI.
-6. git init done; nothing committed yet.
+Verified by hand in the browser at 375 px: first-visit "Where are you?" sheet, campus home with
+feeds and section chips, listing page with sticky contact bar, sign-in, post picker (Trips hidden),
+wizard step 2 with Leaflet map and OSM attribution — no console or CSP errors.
+
+| Milestone | State | Notes |
+|---|---|---|
+| M0 Foundation & theming | done | venv instead of Docker/uv (user request); brand themes + 11 daisyUI themes; no-flash theme script |
+| M1 Locations | done | picker, campus switcher, follow, campus requests, GeoIP hint, `update_geolite2` |
+| M1.5 Real location data | done (offline-tested) | importers for Wikidata, OSM, HDX, GTEC, MoH, Wikipedia; review queue, duplicates, merge, report. **Real import not yet run** — needs internet + HDX download |
+| M2 Accounts & verification | done | allauth (mandatory verification), Google optional, staff TOTP, Turnstile, OTP behind runtime switch, encrypted secrets |
+| M3 Listing core | done | wizard with drafts, EXIF stripping, WebP renditions, pHash, snapping, auto-link, phone reveal |
+| M4 All sections | done | 18 sections, per-campus availability matrix, trips off by default |
+| M5 Discovery & maps | done | feeds, filters, sorts incl. distance, search with facets, boosted rotation, Nearby with rings |
+| M6 Lifecycle & boosts | done | time-travel tests for every transition, one-tap signed links, boost limits |
+| M7 Engagement | done | masked comments, likes/saved, reviews, reports, saved-search alerts, share |
+| M8 Chat, notifications, PWA | done | aliases, polling, scam banner, blocks, batched email, web push, service worker |
+| M9 Hostel Manager | done | availability stepper drives taken/active |
+| M9.5 External content | done (offline-tested) | source registry, OSM places, claim → Hostel, Remotive tab. **Sources still `pending_review`** |
+| M10 Moderation & safety | done | rules engine, queue, CSP (nonce, no unsafe-inline), ratelimit, axes, auditlog |
+| M11 Telemetry | done | buffer + flush, dedupe, bot filter, roll-ups, retention, admin dashboard |
+| M12 Growth & SEO | done | referrals, digest, rent check, spotlight, sitemaps, OG, JSON-LD |
+| M13 Admin & ops | done | unfold sidebar/dashboard, constance groups, integration test actions, OPERATIONS.md |
+| M14 Hardening | partly | prod settings, Dockerfile, backup script, CI. See known gaps |
 
 ## Decisions
-- **No Docker locally** (user request): Python venv + pip (`requirements*.txt`) instead of uv; SQLite default DB, PostgreSQL via `DATABASE_URL`.
-- **No PostGIS/GDAL on this machine**: points stored as `lat`/`lng` floats; distances via haversine/SQL math (`apps/core/geo.py`); region boundaries as GeoJSON with pure-Python point-in-polygon.
-- **No Redis required**: DB cache backend; Celery runs eager without a broker; `manage.py run_periodic [--loop]` replaces beat; telemetry buffer falls back to a `PendingEvent` table.
-- Full-text search uses PostgreSQL `SearchVector` when on Postgres, `icontains` on SQLite. Trigram similarity and pHash implemented in Python (no pg_trgm / imagehash dependency).
-- Notifications implemented in-house instead of django-notifications-hq.
+- **No Docker locally** (user request): Python venv + pip (`requirements*.txt`) instead of uv;
+  `make.ps1` mirrors the Makefile for Windows. Dockerfile/compose kept for later.
+- **No PostGIS/GDAL**: points stored as `lat`/`lng`; haversine/SQL distance (`apps/core/geo.py`);
+  GeoJSON boundaries with pure-Python point-in-polygon. Swapping to PostGIS later only touches `geo`.
+- **SQLite default, PostgreSQL via `DATABASE_URL`**; full-text search uses `SearchVector` on
+  PostgreSQL and `icontains` on SQLite. Trigram similarity and pHash implemented in Python.
+- **No Redis required**: DB cache; Celery eager without a broker; `manage.py run_periodic --loop`
+  replaces beat; telemetry buffer falls back to a `PendingEvent` table.
+- Notifications built in-house instead of django-notifications-hq.
 - Tailwind built with npm `@tailwindcss/cli` + `daisyui` (allowed fallback in §3).
-- Integration secrets cached only in-process (never in the shared cache) so they stay encrypted at rest; auditlog excludes secret fields and remote addresses.
+- Integration secrets cached only in-process; auditlog excludes secret fields and remote addresses.
+- External-content FKs named `external_source` (avoids clashing with the provenance `source` field).
+- Remotive category slugs mapped to Remotive's display names (`CATEGORY_ALIASES`).
+- Test fixtures in `tests/fixtures/sources/` are synthetic, shape-only samples (clearly labelled),
+  not recorded real responses — no real-world data is invented in the database.
+- Message admin is intentionally not registered: admins read conversations only through reports.
+
+## Known gaps / next steps
+1. Run the real imports with internet: download HDX COD-AB into `data/raw/hdx/`, save GTEC/MoH
+   lists into `data/raw/`, then `make import-locations`; check the Sunyani acceptance criteria.
+2. Approve the OSM and Remotive sources in the admin after reading the terms, then `make import-external`.
+3. Playwright smoke tests (M14) not written — `playwright` wheels for Python 3.15 were not checked.
+4. Lighthouse mobile audit (M14) not run.
+5. SMS provider adapters are stubs (out of scope per §12).
+6. Raise coverage on `contacts`, `locations` and `notifications` services above 80% each.
+7. Commits were grouped (not one per milestone) because the build happened in one pass.

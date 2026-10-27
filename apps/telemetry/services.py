@@ -63,7 +63,8 @@ def build_payload(kind, request=None, user=None, listing=None, meta=None, campus
         "user_id": getattr(user, "pk", None),
         "session_hash": session_hash(_session_key(request)) if request is not None else "",
         "campus_id": getattr(campus, "pk", None),
-        "town_id": getattr(town, "pk", None) or (getattr(listing, "town_id", None) if listing else None),
+        "town_id": getattr(town, "pk", None)
+        or (getattr(listing, "town_id", None) if listing else None),
         "section": getattr(listing, "section", "") or meta.pop("section", ""),
         "meta": meta,
         "created_at": timezone.now().isoformat(),
@@ -73,11 +74,17 @@ def build_payload(kind, request=None, user=None, listing=None, meta=None, campus
 def record(kind, request=None, user=None, listing=None, meta=None, campus=None, town=None) -> bool:
     """Queue an event. Never blocks the request on the events table; returns False if skipped."""
     try:
-        if request is not None and is_bot(request.META.get("HTTP_USER_AGENT")) and kind in ("view", "search"):
+        if (
+            request is not None
+            and is_bot(request.META.get("HTTP_USER_AGENT"))
+            and kind in ("view", "search")
+        ):
             return False
         payload = build_payload(kind, request, user, listing, meta, campus, town)
         if kind == "view" and listing is not None:
-            key = f"kd:view:{payload['session_hash']}:{listing.pk}:{timezone.localdate().isoformat()}"
+            key = (
+                f"kd:view:{payload['session_hash']}:{listing.pk}:{timezone.localdate().isoformat()}"
+            )
             if not cache.add(key, 1, DEDUPE_TTL):
                 return False
         push(payload)
@@ -129,7 +136,9 @@ def flush(max_items: int = 5000) -> int:
         except Exception:
             logger.exception("flush from redis failed")
     with transaction.atomic():
-        pending = list(PendingEvent.objects.select_for_update(skip_locked=True).order_by("pk")[:max_items])
+        pending = list(
+            PendingEvent.objects.select_for_update(skip_locked=True).order_by("pk")[:max_items]
+        )
         if pending:
             Event.objects.bulk_create([_to_event(p.payload) for p in pending], batch_size=500)
             PendingEvent.objects.filter(pk__in=[p.pk for p in pending]).delete()
@@ -147,7 +156,9 @@ def rollup(day: date | None = None) -> dict:
     end = start + timedelta(days=1)
     events = Event.objects.filter(created_at__gte=start, created_at__lt=end)
 
-    per_listing: dict[int, dict] = defaultdict(lambda: {"views": 0, "taps": 0, "likes": 0, "shares": 0, "taps_by_channel": {}})
+    per_listing: dict[int, dict] = defaultdict(
+        lambda: {"views": 0, "taps": 0, "likes": 0, "shares": 0, "taps_by_channel": {}}
+    )
     for row in events.filter(listing__isnull=False).values("listing_id", "kind", "meta"):
         stats = per_listing[row["listing_id"]]
         if row["kind"] == "view":
@@ -167,11 +178,19 @@ def rollup(day: date | None = None) -> dict:
         .values_list("listing_id")
         .annotate(n=Count("id"))
     )
-    existing_ids = set(Listing.objects.filter(pk__in=set(per_listing) | set(comment_counts)).values_list("pk", flat=True))
+    existing_ids = set(
+        Listing.objects.filter(pk__in=set(per_listing) | set(comment_counts)).values_list(
+            "pk", flat=True
+        )
+    )
     for listing_id in existing_ids:
-        stats = per_listing.get(listing_id, {"views": 0, "taps": 0, "likes": 0, "shares": 0, "taps_by_channel": {}})
+        stats = per_listing.get(
+            listing_id, {"views": 0, "taps": 0, "likes": 0, "shares": 0, "taps_by_channel": {}}
+        )
         DailyListingStats.objects.update_or_create(
-            listing_id=listing_id, date=day, defaults={**stats, "comments": comment_counts.get(listing_id, 0)}
+            listing_id=listing_id,
+            date=day,
+            defaults={**stats, "comments": comment_counts.get(listing_id, 0)},
         )
 
     per_campus: dict[int, dict] = defaultdict(lambda: defaultdict(int))
@@ -191,7 +210,9 @@ def rollup(day: date | None = None) -> dict:
         elif kind == "post":
             stats["posts"] += 1
     for campus_id, stats in per_campus.items():
-        DailyCampusStats.objects.update_or_create(campus_id=campus_id, date=day, defaults=dict(stats))
+        DailyCampusStats.objects.update_or_create(
+            campus_id=campus_id, date=day, defaults=dict(stats)
+        )
 
     update_rolling_counters()
     deleted = cleanup_raw()
@@ -205,12 +226,16 @@ def update_rolling_counters() -> int:
     since = timezone.now() - timedelta(days=7)
     counts = defaultdict(lambda: {"view": 0, "tap": 0, "like": 0})
     for row in (
-        Event.objects.filter(created_at__gte=since, listing__isnull=False, kind__in=["view", "tap", "like"])
+        Event.objects.filter(
+            created_at__gte=since, listing__isnull=False, kind__in=["view", "tap", "like"]
+        )
         .values("listing_id", "kind")
         .annotate(n=Count("id"))
     ):
         counts[row["listing_id"]][row["kind"]] = row["n"]
-    Listing.objects.exclude(pk__in=list(counts)).filter(views_7d__gt=0).update(views_7d=0, taps_7d=0, likes_7d=0)
+    Listing.objects.exclude(pk__in=list(counts)).filter(views_7d__gt=0).update(
+        views_7d=0, taps_7d=0, likes_7d=0
+    )
     batch = []
     for listing in Listing.objects.filter(pk__in=list(counts)):
         c = counts[listing.pk]

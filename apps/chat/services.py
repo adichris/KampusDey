@@ -7,7 +7,12 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from apps.accounts.services import alias_for, can_chat, can_message_first_time, daily_message_limit_reached
+from apps.accounts.services import (
+    alias_for,
+    can_chat,
+    can_message_first_time,
+    daily_message_limit_reached,
+)
 
 from .models import Block, Conversation, Message
 
@@ -21,7 +26,12 @@ def is_blocked(a, b) -> bool:
 
 
 def listing_campus(listing):
-    link = listing.campus_links.filter(is_excluded=False).select_related("campus").order_by("distance_m").first()
+    link = (
+        listing.campus_links.filter(is_excluded=False)
+        .select_related("campus")
+        .order_by("distance_m")
+        .first()
+    )
     return link.campus if link else None
 
 
@@ -47,7 +57,9 @@ def start_conversation(user, listing) -> Conversation:
     )
 
 
-def send_message(conversation: Conversation, sender, body: str, kind: str = Message.Kind.TEXT) -> Message:
+def send_message(
+    conversation: Conversation, sender, body: str, kind: str = Message.Kind.TEXT
+) -> Message:
     from apps.moderation.services import check_message
     from apps.notifications.services import notify
 
@@ -63,12 +75,18 @@ def send_message(conversation: Conversation, sender, body: str, kind: str = Mess
     if not body:
         raise ChatError(_("Write a message first."))
     if kind == Message.Kind.TEXT and daily_message_limit_reached(sender):
-        raise ChatError(_("New accounts can send a limited number of messages per day. Try again tomorrow."))
+        raise ChatError(
+            _("New accounts can send a limited number of messages per day. Try again tomorrow.")
+        )
     verdict = check_message(body)
     if verdict.blocked:
         raise ChatError(verdict.message)
     message = Message.objects.create(
-        conversation=conversation, sender=sender, body=body[:2000], kind=kind, has_scam_warning=verdict.warn
+        conversation=conversation,
+        sender=sender,
+        body=body[:2000],
+        kind=kind,
+        has_scam_warning=verdict.warn,
     )
     conversation.last_message_at = message.created_at
     conversation.save(update_fields=["last_message_at", "updated_at"])
@@ -86,7 +104,11 @@ def share_contact(conversation: Conversation, sender, kind: str) -> Message:
     """Post a `shared_contact` message with the sender's chosen channel."""
     from apps.contacts.services import default_card
 
-    card = conversation.listing.contact_card if sender.pk == conversation.owner_id else default_card(sender)
+    card = (
+        conversation.listing.contact_card
+        if sender.pk == conversation.owner_id
+        else default_card(sender)
+    )
     channel = card.channel(kind) if card else None
     value = channel.value if channel and channel.value else ""
     if not value and kind in ("phone", "whatsapp") and sender.phone:
@@ -102,12 +124,21 @@ def block(user, conversation: Conversation) -> Block:
     item, _created = Block.objects.get_or_create(blocker=user, blocked=other)
     conversation.is_blocked = True
     conversation.save(update_fields=["is_blocked", "updated_at"])
-    Message.objects.create(conversation=conversation, sender=None, kind=Message.Kind.SYSTEM, body=_("Conversation blocked."))
+    Message.objects.create(
+        conversation=conversation,
+        sender=None,
+        kind=Message.Kind.SYSTEM,
+        body=_("Conversation blocked."),
+    )
     return item
 
 
 def mark_read(conversation: Conversation, user) -> int:
-    return conversation.messages.exclude(sender=user).filter(read_at__isnull=True).update(read_at=timezone.now())
+    return (
+        conversation.messages.exclude(sender=user)
+        .filter(read_at__isnull=True)
+        .update(read_at=timezone.now())
+    )
 
 
 def inbox(user):

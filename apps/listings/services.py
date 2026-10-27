@@ -72,7 +72,10 @@ def autolink_campuses(listing: Listing) -> list[ListingCampus]:
     existing = {link.campus_id: link for link in listing.campus_links.all()}
     if listing.has_point:
         found = geo.nearby(
-            Campus.objects.visible().with_point(), listing.lat, listing.lng, config.CAMPUS_AUTOLINK_RADIUS_M
+            Campus.objects.visible().with_point(),
+            listing.lat,
+            listing.lng,
+            config.CAMPUS_AUTOLINK_RADIUS_M,
         )
         found_ids = set()
         for campus in found:
@@ -106,7 +109,9 @@ def update_campus_links(listing: Listing, keep_ids, add_ids):
             if listing.has_point and campus.has_point:
                 dist = int(geo.haversine_m(listing.lat, listing.lng, campus.lat, campus.lng))
             ListingCampus.objects.update_or_create(
-                listing=listing, campus=campus, defaults={"is_manual": True, "is_excluded": False, "distance_m": dist}
+                listing=listing,
+                campus=campus,
+                defaults={"is_manual": True, "is_excluded": False, "distance_m": dist},
             )
 
 
@@ -201,7 +206,9 @@ def publish(listing: Listing, request=None) -> Listing:
     listing.seller_type = profile.effective_seller_type if profile else ""
     listing.published_at = listing.published_at or timezone.now()
     listing.expires_at = compute_expires_at(listing)
-    needs_review = verdict.review or approved_post_count(listing.owner) < config.NEW_SELLER_REVIEW_COUNT
+    needs_review = (
+        verdict.review or approved_post_count(listing.owner) < config.NEW_SELLER_REVIEW_COUNT
+    )
     if needs_review:
         listing.status = Listing.Status.PENDING_REVIEW
     else:
@@ -353,14 +360,19 @@ def run_lifecycle(now=None) -> dict:
             listing.status = Listing.Status.NEEDS_CHECK
             listing.status_changed_at = now
             listing.needs_check_sent_at = now
-            listing.save(update_fields=["status", "status_changed_at", "needs_check_sent_at", "updated_at"])
+            listing.save(
+                update_fields=["status", "status_changed_at", "needs_check_sent_at", "updated_at"]
+            )
             notify(
                 listing.owner,
                 "still_available",
                 _("Is “%(title)s” still available?") % {"title": listing.title},
                 _("Tap to confirm, or mark it as taken."),
                 url=reverse("listings:check", args=[listing.slug]),
-                extra={"confirm_url": check_url(listing, "confirm"), "taken_url": check_url(listing, "taken")},
+                extra={
+                    "confirm_url": check_url(listing, "confirm"),
+                    "taken_url": check_url(listing, "taken"),
+                },
             )
             stats["needs_check"] += 1
 
@@ -409,7 +421,10 @@ def recompute_scores() -> int:
     for listing in qs.iterator(chunk_size=500):
         profile = getattr(listing.owner, "profile", None)
         listing.score = compute_score(
-            listing, now, photo_count=listing.n_photos, owner_verified=bool(profile and profile.is_verified)
+            listing,
+            now,
+            photo_count=listing.n_photos,
+            owner_verified=bool(profile and profile.is_verified),
         )
         batch.append(listing)
         if len(batch) >= 500:

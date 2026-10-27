@@ -30,7 +30,10 @@ class ModerationItemAdmin(KDModelAdmin):
         target = obj.target
         if target is None:
             return "—"
-        url = reverse(f"admin:{obj.content_type.app_label}_{obj.content_type.model}_change", args=[obj.object_id])
+        url = reverse(
+            f"admin:{obj.content_type.app_label}_{obj.content_type.model}_change",
+            args=[obj.object_id],
+        )
         return format_html('<a href="{}">{}</a>', url, str(target)[:60])
 
     @admin.action(description=_("Approve selected"))
@@ -64,7 +67,15 @@ class ScamAlertAdmin(KDModelAdmin):
 
 @admin.register(PriceRangeSuggestion)
 class PriceRangeSuggestionAdmin(KDModelAdmin):
-    list_display = ["category_name", "category_kind", "suggested_min", "suggested_max", "samples", "accepted", "created_at"]
+    list_display = [
+        "category_name",
+        "category_kind",
+        "suggested_min",
+        "suggested_max",
+        "samples",
+        "accepted",
+        "created_at",
+    ]
     list_filter = ["category_kind", "accepted"]
     actions = ["accept"]
 
@@ -74,7 +85,9 @@ class PriceRangeSuggestionAdmin(KDModelAdmin):
 
         for s in queryset.filter(accepted=False):
             model = ItemCategory if s.category_kind == "item" else ServiceCategory
-            model.objects.filter(pk=s.category_id).update(min_price=s.suggested_min, max_price=s.suggested_max)
+            model.objects.filter(pk=s.category_id).update(
+                min_price=s.suggested_min, max_price=s.suggested_max
+            )
             s.accepted = True
             s.save(update_fields=["accepted"])
         messages.success(request, _("Accepted."))

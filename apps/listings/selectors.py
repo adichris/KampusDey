@@ -20,7 +20,9 @@ CARD_PREFETCH = Prefetch("photos", queryset=ListingPhoto.objects.order_by("order
 
 
 def base_queryset():
-    return Listing.objects.select_related("town", "area", "owner__profile").prefetch_related(CARD_PREFETCH)
+    return Listing.objects.select_related("town", "area", "owner__profile").prefetch_related(
+        CARD_PREFETCH
+    )
 
 
 def visible_listings(viewer=None, sections=None):
@@ -68,7 +70,9 @@ def sort_listings(qs, sort: str, point=None):
     if sort == "distance" and point:
         from django.db.models import F
 
-        return annotate_point_distance(qs, point).order_by(F("distance_m").asc(nulls_last=True), "-score")
+        return annotate_point_distance(qs, point).order_by(
+            F("distance_m").asc(nulls_last=True), "-score"
+        )
     return qs.order_by("-score", "-published_at")
 
 
@@ -86,9 +90,9 @@ def boosted_slots(qs, limit=None, now=None, exclude_ids=()):
     """Up to BOOST_SLOTS_PER_PAGE boosted listings, rotated per 10-minute window."""
     limit = config.BOOST_SLOTS_PER_PAGE if limit is None else limit
     now = now or timezone.now()
-    boosted = qs.filter(
-        Exists(Boost.objects.active(now).filter(listing=OuterRef("pk")))
-    ).exclude(pk__in=list(exclude_ids))
+    boosted = qs.filter(Exists(Boost.objects.active(now).filter(listing=OuterRef("pk")))).exclude(
+        pk__in=list(exclude_ids)
+    )
     items = list(boosted.order_by("pk")[:200])
     window = int(now.timestamp() // 600)
     random.Random(window).shuffle(items)
@@ -100,10 +104,18 @@ def home_feeds(location, viewer, enabled_slugs, point=None):
     boosted = boosted_slots(qs)
     boosted_ids = {b.pk for b in boosted}
     since = timezone.now() - timedelta(days=1)
-    new_today = list(qs.filter(published_at__gte=since).exclude(pk__in=boosted_ids).order_by("-published_at")[:12])
+    new_today = list(
+        qs.filter(published_at__gte=since)
+        .exclude(pk__in=boosted_ids)
+        .order_by("-published_at")[:12]
+    )
     near_point = point or (location.point if location else None)
     if near_point:
-        near = list(with_distance(qs.exclude(pk__in=boosted_ids), near_point).order_by("distance_m", "-score")[:12])
+        near = list(
+            with_distance(qs.exclude(pk__in=boosted_ids), near_point).order_by(
+                "distance_m", "-score"
+            )[:12]
+        )
     else:
         near = list(qs.exclude(pk__in=boosted_ids).order_by("-score")[:12])
     return {"boosted": boosted, "near": near, "new_today": new_today}
@@ -111,7 +123,9 @@ def home_feeds(location, viewer, enabled_slugs, point=None):
 
 def related_listings(listing, viewer=None, limit=6):
     qs = visible_listings(viewer, [listing.section]).exclude(pk=listing.pk)
-    campus_ids = list(listing.campus_links.filter(is_excluded=False).values_list("campus_id", flat=True))
+    campus_ids = list(
+        listing.campus_links.filter(is_excluded=False).values_list("campus_id", flat=True)
+    )
     if campus_ids:
         qs = qs.filter(campus_links__campus_id__in=campus_ids).distinct()
     else:

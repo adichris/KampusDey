@@ -20,4 +20,6 @@ class Command(BaseCommand):
                 updates[name] = encrypt(value)
         if updates:
             IntegrationSettings.objects.filter(pk=obj.pk).update(**updates)
-        self.stdout.write(self.style.SUCCESS(f"Re-encrypted {len(updates)} secrets (prefix {PREFIX})"))
+        self.stdout.write(
+            self.style.SUCCESS(f"Re-encrypted {len(updates)} secrets (prefix {PREFIX})")
+        )

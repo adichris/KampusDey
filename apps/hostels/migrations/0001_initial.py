@@ -5,65 +5,135 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Hostel',
+            name="Hostel",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('lat', models.FloatField(blank=True, null=True, verbose_name='latitude')),
-                ('lng', models.FloatField(blank=True, null=True, verbose_name='longitude')),
-                ('name', models.CharField(max_length=140)),
-                ('slug', models.SlugField(max_length=160, unique=True)),
-                ('description', models.TextField(blank=True, max_length=4000)),
-                ('rules', models.TextField(blank=True, max_length=2000)),
-                ('amenities', models.JSONField(blank=True, default=list)),
-                ('is_verified', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("lat", models.FloatField(blank=True, null=True, verbose_name="latitude")),
+                ("lng", models.FloatField(blank=True, null=True, verbose_name="longitude")),
+                ("name", models.CharField(max_length=140)),
+                ("slug", models.SlugField(max_length=160, unique=True)),
+                ("description", models.TextField(blank=True, max_length=4000)),
+                ("rules", models.TextField(blank=True, max_length=2000)),
+                ("amenities", models.JSONField(blank=True, default=list)),
+                ("is_verified", models.BooleanField(default=False)),
             ],
             options={
-                'ordering': ['name'],
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='HostelPhoto',
+            name="HostelPhoto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('image', models.ImageField(height_field='height', upload_to=apps.listings.models.listing_photo_upload_to, width_field='width')),
-                ('order', models.PositiveSmallIntegerField(default=0)),
-                ('width', models.PositiveIntegerField(blank=True, null=True)),
-                ('height', models.PositiveIntegerField(blank=True, null=True)),
-                ('phash', models.CharField(blank=True, db_index=True, max_length=16)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                (
+                    "image",
+                    models.ImageField(
+                        height_field="height",
+                        upload_to=apps.listings.models.listing_photo_upload_to,
+                        width_field="width",
+                    ),
+                ),
+                ("order", models.PositiveSmallIntegerField(default=0)),
+                ("width", models.PositiveIntegerField(blank=True, null=True)),
+                ("height", models.PositiveIntegerField(blank=True, null=True)),
+                ("phash", models.CharField(blank=True, db_index=True, max_length=16)),
             ],
             options={
-                'ordering': ['order', 'id'],
-                'abstract': False,
+                "ordering": ["order", "id"],
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='HostelRoomType',
+            name="HostelRoomType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('name', models.CharField(max_length=80)),
-                ('room_type', models.CharField(choices=[('single', 'Single room'), ('2_in_1', '2 in 1'), ('3_in_1', '3 in 1'), ('4_in_1', '4 in 1'), ('self_contained', 'Self-contained'), ('chamber_hall', 'Chamber & hall')], default='single', max_length=16)),
-                ('gender', models.CharField(choices=[('male', 'Male'), ('female', 'Female'), ('mixed', 'Mixed / any')], default='mixed', max_length=8)),
-                ('price', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('price_period', models.CharField(choices=[('total', 'total'), ('per_year', 'per year'), ('per_semester', 'per semester'), ('per_month', 'per month'), ('per_night', 'per night'), ('per_hour', 'per hour')], default='per_year', max_length=14)),
-                ('total_rooms', models.PositiveSmallIntegerField(default=1)),
-                ('available_rooms', models.PositiveSmallIntegerField(default=1)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("name", models.CharField(max_length=80)),
+                (
+                    "room_type",
+                    models.CharField(
+                        choices=[
+                            ("single", "Single room"),
+                            ("2_in_1", "2 in 1"),
+                            ("3_in_1", "3 in 1"),
+                            ("4_in_1", "4 in 1"),
+                            ("self_contained", "Self-contained"),
+                            ("chamber_hall", "Chamber & hall"),
+                        ],
+                        default="single",
+                        max_length=16,
+                    ),
+                ),
+                (
+                    "gender",
+                    models.CharField(
+                        choices=[("male", "Male"), ("female", "Female"), ("mixed", "Mixed / any")],
+                        default="mixed",
+                        max_length=8,
+                    ),
+                ),
+                ("price", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "price_period",
+                    models.CharField(
+                        choices=[
+                            ("total", "total"),
+                            ("per_year", "per year"),
+                            ("per_semester", "per semester"),
+                            ("per_month", "per month"),
+                            ("per_night", "per night"),
+                            ("per_hour", "per hour"),
+                        ],
+                        default="per_year",
+                        max_length=14,
+                    ),
+                ),
+                ("total_rooms", models.PositiveSmallIntegerField(default=1)),
+                ("available_rooms", models.PositiveSmallIntegerField(default=1)),
             ],
             options={
-                'ordering': ['price'],
+                "ordering": ["price"],
             },
         ),
     ]

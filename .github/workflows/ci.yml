@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_USER: kampusdey
+          POSTGRES_PASSWORD: kampusdey
+          POSTGRES_DB: kampusdey
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      TEST_DATABASE_URL: postgres://kampusdey:kampusdey@localhost:5432/kampusdey
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: pip install -r requirements-dev.txt
+      - run: npm ci || npm install
+      - run: npm run vendor && npm run build:css
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Migrations are committed
+        run: python manage.py makemigrations --check --dry-run
+      - name: Tests (PostgreSQL)
+        run: pytest --create-db --cov --cov-report=term

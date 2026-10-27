@@ -34,7 +34,9 @@ def tap(request, pk, kind):
         raise Http404
     record("tap", request=request, listing=listing, meta={"channel": kind})
     if isinstance(handler, PhoneHandler):
-        return render(request, "contacts/partials/phone_revealed.html", {"number": handler.number(listing)})
+        return render(
+            request, "contacts/partials/phone_revealed.html", {"number": handler.number(listing)}
+        )
     target = handler.target(listing, request.user)
     if request.htmx:
         response = HttpResponse(status=204)
@@ -45,7 +47,10 @@ def tap(request, pk, kind):
 
 class RelayForm(forms.Form):
     body = forms.CharField(
-        label=gettext_lazy("Message"), widget=forms.Textarea(attrs={"rows": 5}), max_length=2000, min_length=10
+        label=gettext_lazy("Message"),
+        widget=forms.Textarea(attrs={"rows": 5}),
+        max_length=2000,
+        min_length=10,
     )
 
 

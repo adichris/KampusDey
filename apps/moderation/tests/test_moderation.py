@@ -13,8 +13,12 @@ pytestmark = pytest.mark.django_db
 def _draft(**kw):
     owner = kw.pop("owner", None) or f.UserFactory()
     f.ListingFactory.create_batch(3, owner=owner, section="services")
-    listing = f.ListingFactory(owner=owner, status="draft", published_at=None, approved_at=None, **kw)
-    f.ItemDetailsFactory(listing=listing, category=kw.pop("category", None) or f.ItemCategoryFactory())
+    listing = f.ListingFactory(
+        owner=owner, status="draft", published_at=None, approved_at=None, **kw
+    )
+    f.ItemDetailsFactory(
+        listing=listing, category=kw.pop("category", None) or f.ItemCategoryFactory()
+    )
     return listing
 
 
@@ -121,7 +125,9 @@ def test_price_range_suggestions_need_30_samples():
 def test_scam_alert_board_shows_only_published(client):
     from django.utils import timezone
 
-    f.ScamAlertFactory(name="Shown Scammer", is_published=True, confirmed_at=timezone.now(), evidence_note="SECRET")
+    f.ScamAlertFactory(
+        name="Shown Scammer", is_published=True, confirmed_at=timezone.now(), evidence_note="SECRET"
+    )
     f.ScamAlertFactory(name="Unconfirmed Person")
     html = client.get("/scam-alerts/").content.decode()
     assert "Shown Scammer" in html and "Unconfirmed Person" not in html and "SECRET" not in html
@@ -130,7 +136,11 @@ def test_scam_alert_board_shows_only_published(client):
 def test_csp_header_on_key_pages(client):
     response = client.get("/")
     csp = response["Content-Security-Policy"]
-    assert "script-src 'self' 'nonce-" in csp and "unsafe-inline" not in csp and "unsafe-eval" not in csp
+    assert (
+        "script-src 'self' 'nonce-" in csp
+        and "unsafe-inline" not in csp
+        and "unsafe-eval" not in csp
+    )
     html = response.content.decode()
     import re
 

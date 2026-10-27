@@ -44,15 +44,37 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     add_form = KDUserCreationForm
     change_password_form = AdminPasswordChangeForm
     ordering = ["-date_joined"]
-    list_display = ["email", "display_name", "phone_verified", "is_staff", "is_active", "date_joined"]
+    list_display = [
+        "email",
+        "display_name",
+        "phone_verified",
+        "is_staff",
+        "is_active",
+        "date_joined",
+    ]
     list_filter = ["is_staff", "is_active", "phone_verified", "is_anonymised"]
     search_fields = ["email", "display_name", "phone"]
     readonly_fields = ["date_joined", "last_login", "alias_number"]
     inlines = [ProfileInline]
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        (_("Profile"), {"fields": ("display_name", "phone", "phone_verified", "theme", "alias_number", "onboarded")}),
-        (_("Permissions"), {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
+        (
+            _("Profile"),
+            {
+                "fields": (
+                    "display_name",
+                    "phone",
+                    "phone_verified",
+                    "theme",
+                    "alias_number",
+                    "onboarded",
+                )
+            },
+        ),
+        (
+            _("Permissions"),
+            {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
+        ),
         (_("Dates"), {"fields": ("last_login", "date_joined")}),
     )
     add_fieldsets = ((None, {"classes": ("wide",), "fields": ("email", "password1", "password2")}),)
@@ -60,8 +82,23 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 
 @admin.register(Profile)
 class ProfileAdmin(KDModelAdmin):
-    list_display = ["user", "role", "seller_type", "home_campus", "is_ambassador", "verified_student", "verified_landlord"]
-    list_filter = ["role", "seller_type", "is_ambassador", "verified_student", "verified_landlord", "verified_agent"]
+    list_display = [
+        "user",
+        "role",
+        "seller_type",
+        "home_campus",
+        "is_ambassador",
+        "verified_student",
+        "verified_landlord",
+    ]
+    list_filter = [
+        "role",
+        "seller_type",
+        "is_ambassador",
+        "verified_student",
+        "verified_landlord",
+        "verified_agent",
+    ]
     search_fields = ["user__email", "user__display_name", "referral_code"]
     autocomplete_fields = ["user", "home_campus", "home_town"]
     filter_horizontal = ["followed_campuses"]

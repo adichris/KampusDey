@@ -6,51 +6,75 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('chat', '0001_initial'),
-        ('listings', '0001_initial'),
+        ("chat", "0001_initial"),
+        ("listings", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='conversation',
-            name='listing',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='conversations', to='listings.listing'),
+            model_name="conversation",
+            name="listing",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="conversations",
+                to="listings.listing",
+            ),
         ),
         migrations.AddField(
-            model_name='conversation',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='owned_conversations', to=settings.AUTH_USER_MODEL),
+            model_name="conversation",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="owned_conversations",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='conversation',
-            name='starter',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='started_conversations', to=settings.AUTH_USER_MODEL),
+            model_name="conversation",
+            name="starter",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="started_conversations",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='message',
-            name='conversation',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='chat.conversation'),
+            model_name="message",
+            name="conversation",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="messages",
+                to="chat.conversation",
+            ),
         ),
         migrations.AddField(
-            model_name='message',
-            name='sender',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="message",
+            name="sender",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddConstraint(
-            model_name='block',
-            constraint=models.UniqueConstraint(fields=('blocker', 'blocked'), name='uniq_block'),
+            model_name="block",
+            constraint=models.UniqueConstraint(fields=("blocker", "blocked"), name="uniq_block"),
         ),
         migrations.AddConstraint(
-            model_name='conversation',
-            constraint=models.UniqueConstraint(fields=('listing', 'starter'), name='uniq_conversation'),
+            model_name="conversation",
+            constraint=models.UniqueConstraint(
+                fields=("listing", "starter"), name="uniq_conversation"
+            ),
         ),
         migrations.AddIndex(
-            model_name='message',
-            index=models.Index(fields=['conversation', 'created_at'], name='chat_messag_convers_3154fc_idx'),
+            model_name="message",
+            index=models.Index(
+                fields=["conversation", "created_at"], name="chat_messag_convers_3154fc_idx"
+            ),
         ),
     ]

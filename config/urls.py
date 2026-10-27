@@ -31,7 +31,9 @@ urlpatterns = [
     path("manifest.webmanifest", page_views.manifest, name="manifest"),
     path("sw.js", page_views.service_worker, name="service_worker"),
     path("robots.txt", page_views.robots, name="robots"),
-    path("sitemap.xml", sitemap, {"sitemaps": SITEMAPS}, name="django.contrib.sitemaps.views.sitemap"),
+    path(
+        "sitemap.xml", sitemap, {"sitemaps": SITEMAPS}, name="django.contrib.sitemaps.views.sitemap"
+    ),
     path("", include("apps.pages.urls")),
     path("<slug:campus_slug>/around/", external_views.around, name="around"),
     path("<slug:campus_slug>/rent-check/", growth_views.rent_check, name="rent_check"),

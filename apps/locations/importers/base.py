@@ -35,7 +35,9 @@ class Summary:
         self.counts[key] = self.counts.get(key, 0) + n
 
     def log(self, ok=True):
-        ImportLog.objects.create(command=self.command, source=self.source, summary=self.counts, ok=ok)
+        ImportLog.objects.create(
+            command=self.command, source=self.source, summary=self.counts, ok=ok
+        )
         return self
 
     def lines(self):
@@ -70,7 +72,10 @@ def provenance(source: str, source_id: str, source_url: str = "", confidence: fl
 
 def stage(source: str, kind: str, source_id: str, raw: dict) -> SourceRecord:
     record, created = SourceRecord.objects.get_or_create(
-        source=source, kind=kind, source_id=source_id, defaults={"raw": raw, "retrieved_at": timezone.now()}
+        source=source,
+        kind=kind,
+        source_id=source_id,
+        defaults={"raw": raw, "retrieved_at": timezone.now()},
     )
     if not created and record.raw != raw:
         record.raw = raw
@@ -87,7 +92,15 @@ def link_record(record: SourceRecord, obj, method: str, score: float):
     record.matched_object_id = obj.pk
     record.match_method = method
     record.match_score = score
-    record.save(update_fields=["matched_content_type", "matched_object_id", "match_method", "match_score", "updated_at"])
+    record.save(
+        update_fields=[
+            "matched_content_type",
+            "matched_object_id",
+            "match_method",
+            "match_score",
+            "updated_at",
+        ]
+    )
 
 
 def save_if_changed(obj, changed: list[str], retrieved=True) -> bool:
@@ -122,12 +135,18 @@ def match_institution(name: str, wikidata_id: str | None = None, region=None, po
     norm = normalise_name(name)
     candidates = list(Institution.objects.prefetch_related("campuses__town__region"))
     for inst in candidates:
-        if normalise_name(inst.name) == norm or (inst.short_name and normalise_name(inst.short_name) == norm):
+        if normalise_name(inst.name) == norm or (
+            inst.short_name and normalise_name(inst.short_name) == norm
+        ):
             return Match(inst, "name_exact", 0.9)
     best, best_score = None, 0.0
     for inst in candidates:
         score = trigram_similarity(norm, normalise_name(inst.name))
-        if score >= TRIGRAM_MATCH and score > best_score and _near_or_same_region(inst, region, point):
+        if (
+            score >= TRIGRAM_MATCH
+            and score > best_score
+            and _near_or_same_region(inst, region, point)
+        ):
             best, best_score = inst, score
     if best:
         return Match(best, "trigram", 0.7)
@@ -141,7 +160,11 @@ def _near_or_same_region(inst, region, point) -> bool:
     for campus in campuses:
         if region is not None and campus.town.region_id == region.pk:
             return True
-        if point and campus.has_point and geo.haversine_m(point[0], point[1], campus.lat, campus.lng) <= NEAR_M:
+        if (
+            point
+            and campus.has_point
+            and geo.haversine_m(point[0], point[1], campus.lat, campus.lng) <= NEAR_M
+        ):
             return True
     return region is None and point is None
 
@@ -160,7 +183,11 @@ def match_campus(name: str, point=None, region=None) -> Match:
         if score < TRIGRAM_MATCH or score <= best_score:
             continue
         same_region = region is not None and campus.town.region_id == region.pk
-        near = point and campus.has_point and geo.haversine_m(point[0], point[1], campus.lat, campus.lng) <= NEAR_M
+        near = (
+            point
+            and campus.has_point
+            and geo.haversine_m(point[0], point[1], campus.lat, campus.lng) <= NEAR_M
+        )
         if same_region or near:
             best, best_score = campus, score
     if best:
@@ -176,7 +203,9 @@ def nearest_town(lat: float, lng: float, max_m: float = TOWN_MAX_DISTANCE_M):
 def find_town_by_name(name: str, region=None):
     if not name:
         return None
-    norm = normalise_name(name.replace(" Municipal District", "").replace(" Municipal", "").replace(" District", ""))
+    norm = normalise_name(
+        name.replace(" Municipal District", "").replace(" Municipal", "").replace(" District", "")
+    )
     qs = Town.objects.select_related("region")
     if region is not None:
         qs = qs.filter(region=region)

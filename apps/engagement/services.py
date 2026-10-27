@@ -29,7 +29,9 @@ def toggle_like(user, listing: Listing, request=None) -> bool:
         raise EngagementError(decision.reason)
     deleted, _ = Like.objects.filter(user=user, listing=listing).delete()
     if deleted:
-        Listing.objects.filter(pk=listing.pk, likes_count__gt=0).update(likes_count=F("likes_count") - 1)
+        Listing.objects.filter(pk=listing.pk, likes_count__gt=0).update(
+            likes_count=F("likes_count") - 1
+        )
         record("unlike", request=request, user=user, listing=listing)
         return False
     try:
@@ -73,9 +75,17 @@ def add_comment(user, listing: Listing, body: str, parent: Comment | None = None
     Listing.objects.filter(pk=listing.pk).update(comments_count=F("comments_count") + 1)
     url = listing.get_absolute_url() + "#comments"
     if user.pk != listing.owner_id:
-        notify(listing.owner, "comment", _("New question on “%(t)s”") % {"t": listing.title}, comment.body[:120], url)
+        notify(
+            listing.owner,
+            "comment",
+            _("New question on “%(t)s”") % {"t": listing.title},
+            comment.body[:120],
+            url,
+        )
     if parent is not None and parent.author_id != user.pk:
-        notify(parent.author, "reply", _("Someone replied to your question"), comment.body[:120], url)
+        notify(
+            parent.author, "reply", _("Someone replied to your question"), comment.body[:120], url
+        )
     return comment
 
 
@@ -122,7 +132,9 @@ def add_review(user, rating: int, body: str = "", hostel=None, target_user=None)
     if not 1 <= rating <= 5:
         raise EngagementError(_("Choose 1 to 5 stars."))
     review, _created = Review.objects.update_or_create(
-        reviewer=user, hostel=hostel, target_user=target_user,
+        reviewer=user,
+        hostel=hostel,
+        target_user=target_user,
         defaults={"rating": rating, "body": mask_contacts(body)},
     )
     return review
@@ -140,7 +152,11 @@ def report(reporter, target, reason: str, details: str = "") -> Report:
     if existing:
         return existing
     item = Report.objects.create(
-        content_type=ct, object_id=target.pk, reporter=reporter, reason=reason, details=mask_contacts(details)
+        content_type=ct,
+        object_id=target.pk,
+        reporter=reporter,
+        reason=reason,
+        details=mask_contacts(details),
     )
     handle_new_report(item)
     return item
@@ -152,11 +168,19 @@ def report(reporter, target, reason: str, details: str = "") -> Report:
 IGNORED_PARAMS = {"page", "view", "csrfmiddlewaretoken"}
 
 
-def save_search(user, section: str, params: QueryDict | dict, campus=None, town=None) -> SavedSearch:
-    clean = {k: v for k, v in dict(params).items() if k not in IGNORED_PARAMS and v not in ("", None, [])}
+def save_search(
+    user, section: str, params: QueryDict | dict, campus=None, town=None
+) -> SavedSearch:
+    clean = {
+        k: v for k, v in dict(params).items() if k not in IGNORED_PARAMS and v not in ("", None, [])
+    }
     clean = {k: (v[0] if isinstance(v, list) and len(v) == 1 else v) for k, v in clean.items()}
     item, _created = SavedSearch.objects.get_or_create(
-        user=user, section=section, campus=campus, town=None if campus else town, params=clean,
+        user=user,
+        section=section,
+        campus=campus,
+        town=None if campus else town,
+        params=clean,
         defaults={"last_notified_at": timezone.now()},
     )
     if not item.is_active:
@@ -196,7 +220,9 @@ def run_saved_search_alerts(now=None) -> int:
 
     now = now or timezone.now()
     sent = 0
-    for saved in SavedSearch.objects.filter(is_active=True).select_related("user", "campus", "town"):
+    for saved in SavedSearch.objects.filter(is_active=True).select_related(
+        "user", "campus", "town"
+    ):
         since = saved.last_notified_at or saved.created_at
         matches = list(matches_for(saved, since)[:10])
         if matches:
@@ -204,7 +230,8 @@ def run_saved_search_alerts(now=None) -> int:
             notify(
                 saved.user,
                 "saved_search",
-                _("%(n)s new %(section)s matching your alert") % {"n": len(matches), "section": section},
+                _("%(n)s new %(section)s matching your alert")
+                % {"n": len(matches), "section": section},
                 ", ".join(m.title for m in matches[:3]),
                 url=matches[0].get_absolute_url() if len(matches) == 1 else "/saved/",
             )

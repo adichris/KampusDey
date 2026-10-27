@@ -122,12 +122,18 @@ def adopt_guest_location(request, user):
 
 
 def campuses_by_region(query: str = ""):
-    qs = Campus.objects.visible().select_related("town__region").order_by("town__region__name", "name")
+    qs = (
+        Campus.objects.visible()
+        .select_related("town__region")
+        .order_by("town__region__name", "name")
+    )
     if query:
         from django.db.models import Q
 
         qs = qs.filter(
-            Q(name__icontains=query) | Q(short_name__icontains=query) | Q(town__name__icontains=query)
+            Q(name__icontains=query)
+            | Q(short_name__icontains=query)
+            | Q(town__name__icontains=query)
         )
     groups: dict[str, list[Campus]] = {}
     for campus in qs[:300]:
@@ -149,7 +155,11 @@ def campuses_within(lat: float, lng: float, radius_m: float):
 
 def region_for_point(lat: float, lng: float) -> Region | None:
     candidates = Region.objects.filter(
-        boundary__isnull=False, min_lat__lte=lat, max_lat__gte=lat, min_lng__lte=lng, max_lng__gte=lng
+        boundary__isnull=False,
+        min_lat__lte=lat,
+        max_lat__gte=lat,
+        min_lng__lte=lng,
+        max_lng__gte=lng,
     )
     for region in candidates:
         if geo.geometry_contains(region.boundary, lat, lng):
@@ -230,7 +240,9 @@ def reject_campus_request(req: CampusRequest):
     req.status = CampusRequest.Status.REJECTED
     req.save(update_fields=["status", "updated_at"])
     if req.requester:
-        notify(req.requester, "campus_request", _("We couldn't add %(name)s yet") % {"name": req.name})
+        notify(
+            req.requester, "campus_request", _("We couldn't add %(name)s yet") % {"name": req.name}
+        )
 
 
 def _unique_slug(model, value):

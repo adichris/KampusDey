@@ -5,7 +5,9 @@ from apps.external.services import SourceNotRunnable, run_source
 
 
 class Command(BaseCommand):
-    help = "Run every approved + enabled external source once (make import-external). Needs internet."
+    help = (
+        "Run every approved + enabled external source once (make import-external). Needs internet."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--source", help="Only this source slug")
@@ -21,6 +23,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"{source.slug}: skipped ({exc})")
                 continue
             self.stdout.write(
-                f"{source.slug}: {run.status} created={run.created} updated={run.updated} removed={run.removed}"
+                f"{source.slug}: {run.status} created={run.created} "
+                f"updated={run.updated} removed={run.removed}"
                 + (f" error={run.error}" if run.error else "")
             )

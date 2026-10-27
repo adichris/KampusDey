@@ -34,7 +34,14 @@ class ReportAdmin(KDModelAdmin):
     list_display = ["target_link", "reason", "reporter", "status", "created_at"]
     list_filter = ["status", "reason", "content_type"]
     search_fields = ["details", "reporter__email"]
-    readonly_fields = ["content_type", "object_id", "reporter", "reason", "details", "conversation_messages"]
+    readonly_fields = [
+        "content_type",
+        "object_id",
+        "reporter",
+        "reason",
+        "details",
+        "conversation_messages",
+    ]
     actions = ["mark_actioned", "dismiss"]
 
     @admin.display(description=_("Target"))
@@ -42,7 +49,10 @@ class ReportAdmin(KDModelAdmin):
         target = obj.target
         if target is None:
             return "—"
-        url = reverse(f"admin:{obj.content_type.app_label}_{obj.content_type.model}_change", args=[obj.object_id])
+        url = reverse(
+            f"admin:{obj.content_type.app_label}_{obj.content_type.model}_change",
+            args=[obj.object_id],
+        )
         return format_html('<a href="{}">{}</a>', url, str(target)[:60])
 
     @admin.display(description=_("Conversation (reported)"))
@@ -51,7 +61,11 @@ class ReportAdmin(KDModelAdmin):
         if obj.content_type.model != "conversation" or obj.target is None:
             return "—"
         rows = [
-            format_html("<p><b>{}</b>: {}</p>", obj.target.alias_for(m.sender) if m.sender else "system", m.body)
+            format_html(
+                "<p><b>{}</b>: {}</p>",
+                obj.target.alias_for(m.sender) if m.sender else "system",
+                m.body,
+            )
             for m in obj.target.messages.order_by("created_at")[:200]
         ]
         return format_html("".join(str(r) for r in rows)) if rows else "—"
@@ -75,8 +89,9 @@ class ReportAdmin(KDModelAdmin):
             report.save()
             target = report.target
             if isinstance(target, Listing):
-                open_count = Report.objects.filter(content_type=report.content_type, object_id=report.object_id,
-                                                   status="open").count()
+                open_count = Report.objects.filter(
+                    content_type=report.content_type, object_id=report.object_id, status="open"
+                ).count()
                 Listing.objects.filter(pk=target.pk).update(reports_count=open_count)
         messages.success(request, _("Dismissed."))
 

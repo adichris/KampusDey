@@ -21,7 +21,9 @@ class Hostel(GeoPointMixin, TimeStampedModel):
         ("dstv", _("TV room")),
     ]
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="hostels")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="hostels"
+    )
     name = models.CharField(max_length=140)
     slug = models.SlugField(max_length=160, unique=True)
     description = models.TextField(blank=True, max_length=4000)
@@ -64,7 +66,11 @@ class HostelRoomType(TimeStampedModel):
     total_rooms = models.PositiveSmallIntegerField(default=1)
     available_rooms = models.PositiveSmallIntegerField(default=1)
     listing = models.OneToOneField(
-        Listing, on_delete=models.SET_NULL, null=True, blank=True, related_name="hostel_room_type_link"
+        Listing,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="hostel_room_type_link",
     )
 
     class Meta:

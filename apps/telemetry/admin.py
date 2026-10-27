@@ -28,7 +28,16 @@ class DailyListingStatsAdmin(ReadOnly):
 
 @admin.register(DailyCampusStats)
 class DailyCampusStatsAdmin(ReadOnly):
-    list_display = ["campus", "date", "signups", "posts", "views", "taps", "searches", "zero_result_searches"]
+    list_display = [
+        "campus",
+        "date",
+        "signups",
+        "posts",
+        "views",
+        "taps",
+        "searches",
+        "zero_result_searches",
+    ]
     list_filter = ["campus"]
     date_hierarchy = "date"
 

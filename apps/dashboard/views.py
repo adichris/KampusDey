@@ -31,11 +31,17 @@ def home(request):
         listings = listings.filter(status=status)
     since = timezone.localdate() - timedelta(days=7)
     week = DailyListingStats.objects.filter(listing__owner=request.user, date__gte=since).aggregate(
-        views=Sum("views"), taps=Sum("taps"), likes=Sum("likes"), shares=Sum("shares"), comments=Sum("comments")
+        views=Sum("views"),
+        taps=Sum("taps"),
+        likes=Sum("likes"),
+        shares=Sum("shares"),
+        comments=Sum("comments"),
     )
     now = timezone.now()
     for item in listings:
-        item.active_boost = next((b for b in item.boosts.all() if b.starts_at <= now < b.ends_at), None)
+        item.active_boost = next(
+            (b for b in item.boosts.all() if b.starts_at <= now < b.ends_at), None
+        )
     return render(
         request,
         "dashboard/home.html",

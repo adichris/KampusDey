@@ -27,7 +27,9 @@ class ExternalSourceAdmin(KDModelAdmin):
 
     @admin.display(description=_("Terms"))
     def terms(self, obj):
-        return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>', obj.terms_url, obj.terms_url)
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener">{}</a>', obj.terms_url, obj.terms_url
+        )
 
     @admin.action(description=_("Approve (requires 'I have reviewed the terms')"))
     def approve(self, request, queryset):
@@ -47,7 +49,10 @@ class ExternalSourceAdmin(KDModelAdmin):
         for source in queryset:
             try:
                 run = run_source(source)
-                messages.info(request, f"{source}: {run.status} (+{run.created}/~{run.updated}/-{run.removed})")
+                messages.info(
+                    request,
+                    f"{source}: {run.status} (+{run.created}/~{run.updated}/-{run.removed})",
+                )
             except SourceNotRunnable as exc:
                 messages.warning(request, f"{source}: {exc}")
 
@@ -56,7 +61,16 @@ class ExternalSourceAdmin(KDModelAdmin):
 class ExternalRunAdmin(KDModelAdmin):
     list_display = ["source", "started_at", "status", "created", "updated", "removed"]
     list_filter = ["source", "status"]
-    readonly_fields = ["source", "started_at", "finished_at", "status", "created", "updated", "removed", "error"]
+    readonly_fields = [
+        "source",
+        "started_at",
+        "finished_at",
+        "status",
+        "created",
+        "updated",
+        "removed",
+        "error",
+    ]
 
 
 class PlaceCampusInline(KDTabularInline):
@@ -66,7 +80,16 @@ class PlaceCampusInline(KDTabularInline):
 
 @admin.register(Place)
 class PlaceAdmin(KDModelAdmin):
-    list_display = ["name", "kind", "town", "status", "owner", "osm_link", "reports_count", "last_seen_at"]
+    list_display = [
+        "name",
+        "kind",
+        "town",
+        "status",
+        "owner",
+        "osm_link",
+        "reports_count",
+        "last_seen_at",
+    ]
     list_filter = ["kind", "status", "external_source", "campus_links__campus"]
     search_fields = ["name", "source_id"]
     autocomplete_fields = ["town", "owner", "hostel"]
@@ -75,7 +98,13 @@ class PlaceAdmin(KDModelAdmin):
 
     @admin.display(description=_("OSM"))
     def osm_link(self, obj):
-        return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>', obj.source_url, obj.source_id) if obj.source_url else "—"
+        return (
+            format_html(
+                '<a href="{}" target="_blank" rel="noopener">{}</a>', obj.source_url, obj.source_id
+            )
+            if obj.source_url
+            else "—"
+        )
 
     def save_model(self, request, obj, form, change):
         if change:
@@ -98,7 +127,9 @@ class PlaceAdmin(KDModelAdmin):
         keep = items[0]
         for drop in items[1:]:
             for link in drop.campus_links.all():
-                PlaceCampus.objects.get_or_create(place=keep, campus=link.campus, defaults={"distance_m": link.distance_m})
+                PlaceCampus.objects.get_or_create(
+                    place=keep, campus=link.campus, defaults={"distance_m": link.distance_m}
+                )
             drop.status = Place.Status.HIDDEN
             drop.admin_locked = True
             drop.save(update_fields=["status", "admin_locked"])

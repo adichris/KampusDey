@@ -6,7 +6,9 @@ from apps.core.models import TimeStampedModel
 
 
 class ContactCard(TimeStampedModel):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="contact_cards")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="contact_cards"
+    )
     label = models.CharField(_("label"), max_length=60, default=_("Personal"))
     preferred_time = models.CharField(_("best time to contact"), max_length=80, blank=True)
     is_default = models.BooleanField(default=False)
@@ -37,7 +39,9 @@ class ContactChannel(TimeStampedModel):
 
     class Meta:
         ordering = ["order", "id"]
-        constraints = [models.UniqueConstraint(fields=["card", "kind"], name="uniq_card_channel_kind")]
+        constraints = [
+            models.UniqueConstraint(fields=["card", "kind"], name="uniq_card_channel_kind")
+        ]
 
     def __str__(self):
         return f"{self.get_kind_display()} on {self.card_id}"

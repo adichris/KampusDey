@@ -1,8 +1,8 @@
 """Run periodic jobs without Celery beat (handy on Windows / without Redis).
 
-    python manage.py run_periodic            # every scheduled task once
-    python manage.py run_periodic --loop     # keep running, honouring each interval
-    python manage.py run_periodic telemetry.flush listings.recompute_scores
+python manage.py run_periodic            # every scheduled task once
+python manage.py run_periodic --loop     # keep running, honouring each interval
+python manage.py run_periodic telemetry.flush listings.recompute_scores
 """
 
 import time
@@ -27,7 +27,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("tasks", nargs="*", help="Task names (default: all scheduled)")
-        parser.add_argument("--loop", action="store_true", help="Run forever on each task's interval")
+        parser.add_argument(
+            "--loop", action="store_true", help="Run forever on each task's interval"
+        )
 
     def handle(self, *args, **opts):
         schedule = settings.CELERY_BEAT_SCHEDULE

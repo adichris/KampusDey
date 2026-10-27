@@ -32,7 +32,17 @@ def _throttle(host: str, min_interval: float):
     _LAST_CALL[host] = time.monotonic()
 
 
-def fetch(url, *, method="GET", params=None, data=None, headers=None, min_interval=2.0, retries=4, timeout=200):
+def fetch(
+    url,
+    *,
+    method="GET",
+    params=None,
+    data=None,
+    headers=None,
+    min_interval=2.0,
+    retries=4,
+    timeout=200,
+):
     from urllib.parse import urlparse
 
     host = urlparse(url).netloc
@@ -42,7 +52,9 @@ def fetch(url, *, method="GET", params=None, data=None, headers=None, min_interv
     for attempt in range(1, retries + 1):
         _throttle(host, min_interval)
         try:
-            resp = requests.request(method, url, params=params, data=data, headers=hdrs, timeout=timeout)
+            resp = requests.request(
+                method, url, params=params, data=data, headers=hdrs, timeout=timeout
+            )
         except requests.RequestException as exc:
             logger.warning("fetch %s failed (%s), attempt %s", url, exc, attempt)
         else:

@@ -81,7 +81,9 @@ class SectionAvailability(TimeStampedModel):
         constraints = [
             models.UniqueConstraint(fields=["section", "campus"], name="uniq_section_campus"),
             models.UniqueConstraint(
-                fields=["section"], condition=models.Q(campus__isnull=True), name="uniq_section_global"
+                fields=["section"],
+                condition=models.Q(campus__isnull=True),
+                name="uniq_section_global",
             ),
         ]
 

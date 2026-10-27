@@ -183,7 +183,10 @@ CELERY_TASK_EAGER_PROPAGATES = False
 CELERY_TIMEZONE = "Africa/Accra"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_BEAT_SCHEDULE = {
-    "ranking-every-15-min": {"task": "listings.recompute_scores", "schedule": timedelta(minutes=15)},
+    "ranking-every-15-min": {
+        "task": "listings.recompute_scores",
+        "schedule": timedelta(minutes=15),
+    },
     "lifecycle-hourly": {"task": "listings.run_lifecycle", "schedule": timedelta(hours=1)},
     "telemetry-flush-every-minute": {"task": "telemetry.flush", "schedule": timedelta(seconds=60)},
     "telemetry-rollup-nightly": {"task": "telemetry.rollup", "schedule": crontab(hour=1, minute=5)},
@@ -420,12 +423,12 @@ LOGGING = {
 # ---------------------------------------------------------------------------
 # django-unfold admin
 # ---------------------------------------------------------------------------
-from .unfold import UNFOLD  # noqa: E402
+from .unfold import UNFOLD  # noqa: E402, F401
 
 # ---------------------------------------------------------------------------
 # django-constance (admin-editable settings)
 # ---------------------------------------------------------------------------
-from .constance import (  # noqa: E402
+from .constance import (  # noqa: E402, F401
     CONSTANCE_ADDITIONAL_FIELDS,
     CONSTANCE_CONFIG,
     CONSTANCE_CONFIG_FIELDSETS,

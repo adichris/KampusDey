@@ -36,6 +36,10 @@ SERVICE_CATEGORIES = [
 
 def seed_categories():
     for order, (name, icon) in enumerate(ITEM_CATEGORIES):
-        ItemCategory.objects.get_or_create(slug=slugify(name), defaults={"name": name, "icon": icon, "order": order})
+        ItemCategory.objects.get_or_create(
+            slug=slugify(name), defaults={"name": name, "icon": icon, "order": order}
+        )
     for order, (name, icon) in enumerate(SERVICE_CATEGORIES):
-        ServiceCategory.objects.get_or_create(slug=slugify(name), defaults={"name": name, "icon": icon, "order": order})
+        ServiceCategory.objects.get_or_create(
+            slug=slugify(name), defaults={"name": name, "icon": icon, "order": order}
+        )

@@ -64,7 +64,9 @@ class RoomsFilter(BaseListingFilter):
 
 
 class RoommatesFilter(df.FilterSet):
-    post_kind = _choice("roommatedetails__post_kind", RoommateDetails.Kind.choices, _("Looking for"))
+    post_kind = _choice(
+        "roommatedetails__post_kind", RoommateDetails.Kind.choices, _("Looking for")
+    )
     gender = _choice("roommatedetails__gender_pref", Gender.choices, _("Gender"))
 
     class Meta:
@@ -78,16 +80,20 @@ class ShortStaysFilter(BaseListingFilter):
 
 class ItemsFilter(StudentsOnlyMixin, BaseListingFilter):
     category = df.ModelChoiceFilter(
-        field_name="itemdetails__category", queryset=ItemCategory.objects.filter(is_active=True),
-        label=_("Category"), empty_label=_("Any"),
+        field_name="itemdetails__category",
+        queryset=ItemCategory.objects.filter(is_active=True),
+        label=_("Category"),
+        empty_label=_("Any"),
     )
     condition = _choice("itemdetails__condition", Condition.choices, _("Condition"))
 
 
 class FreeFilter(StudentsOnlyMixin, df.FilterSet):
     category = df.ModelChoiceFilter(
-        field_name="itemdetails__category", queryset=ItemCategory.objects.filter(is_active=True),
-        label=_("Category"), empty_label=_("Any"),
+        field_name="itemdetails__category",
+        queryset=ItemCategory.objects.filter(is_active=True),
+        label=_("Category"),
+        empty_label=_("Any"),
     )
 
     class Meta:
@@ -97,8 +103,10 @@ class FreeFilter(StudentsOnlyMixin, df.FilterSet):
 
 class WantedFilter(df.FilterSet):
     category = df.ModelChoiceFilter(
-        field_name="wanteddetails__category", queryset=ItemCategory.objects.filter(is_active=True),
-        label=_("Category"), empty_label=_("Any"),
+        field_name="wanteddetails__category",
+        queryset=ItemCategory.objects.filter(is_active=True),
+        label=_("Category"),
+        empty_label=_("Any"),
     )
 
     class Meta:
@@ -108,8 +116,10 @@ class WantedFilter(df.FilterSet):
 
 class ServicesFilter(StudentsOnlyMixin, df.FilterSet):
     service_type = df.ModelChoiceFilter(
-        field_name="servicedetails__service_type", queryset=ServiceCategory.objects.filter(is_active=True),
-        label=_("Service"), empty_label=_("Any"),
+        field_name="servicedetails__service_type",
+        queryset=ServiceCategory.objects.filter(is_active=True),
+        label=_("Service"),
+        empty_label=_("Any"),
     )
 
     class Meta:
@@ -134,8 +144,12 @@ class FoodFilter(df.FilterSet):
 
 
 class EventsFilter(df.FilterSet):
-    starts_after = df.DateFilter(field_name="eventdetails__starts_at", lookup_expr="date__gte", label=_("From"),
-                                 widget=forms.DateInput(attrs={"type": "date"}))
+    starts_after = df.DateFilter(
+        field_name="eventdetails__starts_at",
+        lookup_expr="date__gte",
+        label=_("From"),
+        widget=forms.DateInput(attrs={"type": "date"}),
+    )
 
     class Meta:
         model = Listing
@@ -143,14 +157,18 @@ class EventsFilter(df.FilterSet):
 
 
 class NotesFilter(BaseListingFilter):
-    course_code = df.CharFilter(field_name="notedetails__course_code", lookup_expr="icontains", label=_("Course code"))
+    course_code = df.CharFilter(
+        field_name="notedetails__course_code", lookup_expr="icontains", label=_("Course code")
+    )
     format = _choice("notedetails__format", NoteDetails.Format.choices, _("Format"))
 
 
 class StudyFilter(df.FilterSet):
     kind = _choice("studydetails__kind", StudyDetails.Kind.choices, _("Looking for"))
     mode = _choice("studydetails__mode", StudyDetails.Mode.choices, _("Mode"))
-    course_code = df.CharFilter(field_name="studydetails__course_code", lookup_expr="icontains", label=_("Course code"))
+    course_code = df.CharFilter(
+        field_name="studydetails__course_code", lookup_expr="icontains", label=_("Course code")
+    )
 
     class Meta:
         model = Listing
@@ -166,8 +184,11 @@ class LostFoundFilter(df.FilterSet):
 
 
 class TripsFilter(df.FilterSet):
-    destination = df.CharFilter(field_name="tripdetails__destination_town__name", lookup_expr="icontains",
-                                label=_("Destination"))
+    destination = df.CharFilter(
+        field_name="tripdetails__destination_town__name",
+        lookup_expr="icontains",
+        label=_("Destination"),
+    )
 
     class Meta:
         model = Listing
@@ -175,7 +196,9 @@ class TripsFilter(df.FilterSet):
 
 
 class AlertsFilter(df.FilterSet):
-    alert_type = _choice("alertdetails__alert_type", AlertDetails.AlertType.choices, _("Alert type"))
+    alert_type = _choice(
+        "alertdetails__alert_type", AlertDetails.AlertType.choices, _("Alert type")
+    )
 
     class Meta:
         model = Listing

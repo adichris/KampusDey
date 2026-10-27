@@ -4,7 +4,7 @@ import pytest
 from PIL import Image
 
 from apps.core import geo
-from apps.core.images import clean_image, has_exif, hamming
+from apps.core.images import clean_image, hamming, has_exif
 from apps.core.templatetags.kd import ghs
 from apps.core.text import mask_contacts, normalise_name, trigram_similarity
 from apps.core.utils import is_bot, session_hash
@@ -30,8 +30,13 @@ def test_snap_moves_point_onto_grid_and_is_stable():
 
 
 def test_point_in_polygon_with_hole():
-    poly = {"type": "Polygon", "coordinates": [
-        [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]], [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]]]}
+    poly = {
+        "type": "Polygon",
+        "coordinates": [
+            [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]],
+            [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]],
+        ],
+    }
     assert geo.geometry_contains(poly, 2, 2)
     assert not geo.geometry_contains(poly, 5, 5)
     assert not geo.geometry_contains(poly, 20, 2)
@@ -51,7 +56,10 @@ def test_distance_expression_matches_python():
 
 
 def test_normalise_name():
-    assert normalise_name("Univ. of Energy & Natural Resources") == "university of energy and natural resources"
+    assert (
+        normalise_name("Univ. of Energy & Natural Resources")
+        == "university of energy and natural resources"
+    )
     assert normalise_name("NMTC, Sunyani") == "nurses and midwifery training college sunyani"
     assert normalise_name("Sunyani Tech. Univ") == "sunyani technical university"
 
@@ -81,7 +89,10 @@ def test_mask_contacts(text):
 
 
 def test_mask_keeps_normal_text():
-    assert mask_contacts("Is the room still available? Price 1200 ok") == "Is the room still available? Price 1200 ok"
+    assert (
+        mask_contacts("Is the room still available? Price 1200 ok")
+        == "Is the room still available? Price 1200 ok"
+    )
 
 
 def _jpeg_with_gps():

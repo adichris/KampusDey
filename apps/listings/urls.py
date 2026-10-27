@@ -12,7 +12,9 @@ urlpatterns = [
     path("post/<int:pk>/step/<int:step>/", views.wizard, name="wizard"),
     path("post/<int:pk>/photos/", views.photo_upload, name="photo_upload"),
     path("post/<int:pk>/photos/<int:photo_id>/delete/", views.photo_delete, name="photo_delete"),
-    path("post/<int:pk>/photos/<int:photo_id>/<str:direction>/", views.photo_move, name="photo_move"),
+    path(
+        "post/<int:pk>/photos/<int:photo_id>/<str:direction>/", views.photo_move, name="photo_move"
+    ),
     path("post/<int:pk>/delete/", views.delete_draft, name="delete_draft"),
     path("l/check/<str:token>/", views.one_tap, name="one_tap"),
     path("l/<slug:slug>/", views.detail, name="detail"),

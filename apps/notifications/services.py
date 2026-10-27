@@ -23,7 +23,15 @@ def prefs_for(user) -> NotificationPreference:
     return prefs
 
 
-def notify(user, trigger: str, title: str, body: str = "", url: str = "", extra: dict | None = None, push=True):
+def notify(
+    user,
+    trigger: str,
+    title: str,
+    body: str = "",
+    url: str = "",
+    extra: dict | None = None,
+    push=True,
+):
     if user is None or not user.is_active:
         return None
     note = Notification.objects.create(
@@ -77,7 +85,11 @@ def send_email_batch(now=None) -> int:
             Notification.objects.filter(pk__in=[n.pk for n in notes]).update(email_skipped=True)
             continue
         context = {"user": user, "notes": notes, "SITE_URL": settings.SITE_URL}
-        subject = notes[0].title if len(notes) == 1 else _("%(n)s new updates on KampusDey") % {"n": len(notes)}
+        subject = (
+            notes[0].title
+            if len(notes) == 1
+            else _("%(n)s new updates on KampusDey") % {"n": len(notes)}
+        )
         text = render_to_string("emails/notifications.txt", context)
         html = render_to_string("emails/notifications.html", context)
         msg = EmailMultiAlternatives(f"[KampusDey] {subject}", text, to=[user.email])
@@ -93,4 +105,6 @@ def send_email_batch(now=None) -> int:
 
 
 def mark_all_read(user) -> int:
-    return Notification.objects.filter(recipient=user, read_at__isnull=True).update(read_at=timezone.now())
+    return Notification.objects.filter(recipient=user, read_at__isnull=True).update(
+        read_at=timezone.now()
+    )

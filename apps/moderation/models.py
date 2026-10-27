@@ -27,7 +27,9 @@ class BannedTerm(TimeStampedModel):
 
     class Meta:
         ordering = ["term"]
-        constraints = [models.UniqueConstraint(fields=["term", "applies_to"], name="uniq_banned_term")]
+        constraints = [
+            models.UniqueConstraint(fields=["term", "applies_to"], name="uniq_banned_term")
+        ]
 
     def __str__(self):
         return self.term
@@ -44,7 +46,9 @@ class ModerationItem(TimeStampedModel):
     target = GenericForeignKey("content_type", "object_id")
     reason = models.CharField(max_length=300)
     auto = models.BooleanField(default=True)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True)
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True
+    )
     reviewed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
@@ -76,7 +80,9 @@ class ScamAlert(TimeStampedModel):
 class PriceRangeSuggestion(TimeStampedModel):
     """Monthly suggestion from KampusDey's own listings; never applied automatically."""
 
-    category_kind = models.CharField(max_length=10, choices=[("item", "Item"), ("service", "Service")])
+    category_kind = models.CharField(
+        max_length=10, choices=[("item", "Item"), ("service", "Service")]
+    )
     category_id = models.PositiveBigIntegerField()
     category_name = models.CharField(max_length=80)
     suggested_min = models.DecimalField(max_digits=12, decimal_places=2)

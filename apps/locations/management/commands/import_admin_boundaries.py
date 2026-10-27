@@ -10,7 +10,9 @@ HDX_DIR = http.RAW_DIR / "hdx"
 
 
 def _latest(pattern_key):
-    files = sorted(HDX_DIR.glob(f"*{pattern_key}*.geojson")) + sorted(HDX_DIR.glob(f"*{pattern_key}*.json"))
+    files = sorted(HDX_DIR.glob(f"*{pattern_key}*.geojson")) + sorted(
+        HDX_DIR.glob(f"*{pattern_key}*.json")
+    )
     return files[-1] if files else None
 
 
@@ -31,5 +33,9 @@ class Command(ImportCommand):
             )
         districts_path = opts.get("districts") or _latest("adm2")
         regions = http.load_json(regions_path)
-        districts = http.load_json(districts_path) if districts_path and Path(districts_path).exists() else None
+        districts = (
+            http.load_json(districts_path)
+            if districts_path and Path(districts_path).exists()
+            else None
+        )
         self.report(pipeline.import_admin_boundaries(regions, districts))

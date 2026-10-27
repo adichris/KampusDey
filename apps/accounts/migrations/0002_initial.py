@@ -6,43 +6,70 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('accounts', '0001_initial'),
-        ('locations', '0001_initial'),
+        ("accounts", "0001_initial"),
+        ("locations", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='profile',
-            name='followed_campuses',
-            field=models.ManyToManyField(blank=True, related_name='followers', to='locations.campus'),
+            model_name="profile",
+            name="followed_campuses",
+            field=models.ManyToManyField(
+                blank=True, related_name="followers", to="locations.campus"
+            ),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='home_campus',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='locations.campus'),
+            model_name="profile",
+            name="home_campus",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="locations.campus",
+            ),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='home_town',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='locations.town'),
+            model_name="profile",
+            name="home_town",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="locations.town",
+            ),
         ),
         migrations.AddField(
-            model_name='profile',
-            name='user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL),
+            model_name="profile",
+            name="user",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="profile",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='verificationrequest',
-            name='reviewed_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to=settings.AUTH_USER_MODEL),
+            model_name="verificationrequest",
+            name="reviewed_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='verificationrequest',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='verification_requests', to=settings.AUTH_USER_MODEL),
+            model_name="verificationrequest",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="verification_requests",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

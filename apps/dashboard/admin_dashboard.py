@@ -54,12 +54,16 @@ def dashboard_callback(request, context):
     )
     by_section = {
         str(SECTIONS[row["section"]].label): row["n"]
-        for row in Listing.objects.filter(status__in=Listing.VISIBLE_STATUSES).values("section").annotate(n=Count("id"))
+        for row in Listing.objects.filter(status__in=Listing.VISIBLE_STATUSES)
+        .values("section")
+        .annotate(n=Count("id"))
         if row["section"] in SECTIONS
     }
     searches = Counter()
     zero = Counter()
-    for meta in Event.objects.filter(kind="search", created_at__gte=since30).values_list("meta", flat=True)[:20000]:
+    for meta in Event.objects.filter(kind="search", created_at__gte=since30).values_list(
+        "meta", flat=True
+    )[:20000]:
         q = (meta or {}).get("query", "").strip().lower()
         if not q:
             continue
@@ -69,7 +73,9 @@ def dashboard_callback(request, context):
     context.update(
         {
             "kpis": kpis,
-            "active_listings": Listing.objects.filter(status__in=Listing.VISIBLE_STATUSES, is_hidden=False).count(),
+            "active_listings": Listing.objects.filter(
+                status__in=Listing.VISIBLE_STATUSES, is_hidden=False
+            ).count(),
             "chart_campus": json.dumps(
                 {
                     "labels": [r["campus__short_name"] or r["campus__name"] for r in by_campus],
@@ -80,30 +86,69 @@ def dashboard_callback(request, context):
                 }
             ),
             "chart_region": json.dumps(
-                {"labels": [r["town__region__name"] for r in by_region],
-                 "datasets": [{"label": str(_("Active listings")), "data": [r["n"] for r in by_region]}]}
+                {
+                    "labels": [r["town__region__name"] for r in by_region],
+                    "datasets": [
+                        {"label": str(_("Active listings")), "data": [r["n"] for r in by_region]}
+                    ],
+                }
             ),
             "chart_section": json.dumps(
-                {"labels": list(by_section), "datasets": [{"label": str(_("Active listings")), "data": list(by_section.values())}]}
+                {
+                    "labels": list(by_section),
+                    "datasets": [
+                        {"label": str(_("Active listings")), "data": list(by_section.values())}
+                    ],
+                }
             ),
             "top_searches": searches.most_common(15),
             "zero_searches": zero.most_common(15),
             "queues": [
-                (_("Moderation"), ModerationItem.objects.filter(status="pending").count(), "admin:moderation_moderationitem_changelist"),
-                (_("Reports"), Report.objects.filter(status="open").count(), "admin:engagement_report_changelist"),
-                (_("Verification requests"), VerificationRequest.objects.filter(status="pending").count(), "admin:accounts_verificationrequest_changelist"),
-                (_("Campus requests"), CampusRequest.objects.filter(status="pending").count(), "admin:locations_campusrequest_changelist"),
-                (_("Place claims"), PlaceClaim.objects.filter(status="pending").count(), "admin:external_placeclaim_changelist"),
+                (
+                    _("Moderation"),
+                    ModerationItem.objects.filter(status="pending").count(),
+                    "admin:moderation_moderationitem_changelist",
+                ),
+                (
+                    _("Reports"),
+                    Report.objects.filter(status="open").count(),
+                    "admin:engagement_report_changelist",
+                ),
+                (
+                    _("Verification requests"),
+                    VerificationRequest.objects.filter(status="pending").count(),
+                    "admin:accounts_verificationrequest_changelist",
+                ),
+                (
+                    _("Campus requests"),
+                    CampusRequest.objects.filter(status="pending").count(),
+                    "admin:locations_campusrequest_changelist",
+                ),
+                (
+                    _("Place claims"),
+                    PlaceClaim.objects.filter(status="pending").count(),
+                    "admin:external_placeclaim_changelist",
+                ),
             ],
             "location_tiles": [
-                (_("Unverified campuses"), Campus.objects.filter(review_status="unverified").count()),
+                (
+                    _("Unverified campuses"),
+                    Campus.objects.filter(review_status="unverified").count(),
+                ),
                 (_("Campuses without points"), Campus.objects.filter(lat__isnull=True).count()),
                 (_("Unverified areas"), Area.objects.filter(review_status="unverified").count()),
-                (_("Flagged institutions"), Institution.objects.filter(gtec_status__in=["expired", "unaccredited"]).count()),
+                (
+                    _("Flagged institutions"),
+                    Institution.objects.filter(gtec_status__in=["expired", "unaccredited"]).count(),
+                ),
             ],
             "external_tiles": [
                 (_("Places"), Place.objects.visible().count()),
-                (_("Unclaimed / claimed"), f"{Place.objects.filter(status='unclaimed').count()} / {Place.objects.filter(status='claimed').count()}"),
+                (
+                    _("Unclaimed / claimed"),
+                    f"{Place.objects.filter(status='unclaimed').count()} / "
+                    f"{Place.objects.filter(status='claimed').count()}",
+                ),
                 (_("Pending claims"), PlaceClaim.objects.filter(status="pending").count()),
                 (_("Active remote jobs"), ExternalJob.objects.visible().count()),
             ],

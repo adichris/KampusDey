@@ -19,11 +19,19 @@ class Event(models.Model):
         POST = "post", _("Post published")
 
     kind = models.CharField(max_length=8, choices=Kind.choices)
-    listing = models.ForeignKey("listings.Listing", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    listing = models.ForeignKey(
+        "listings.Listing", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     session_hash = models.CharField(max_length=64, blank=True)
-    campus = models.ForeignKey("locations.Campus", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
-    town = models.ForeignKey("locations.Town", on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+    campus = models.ForeignKey(
+        "locations.Campus", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    town = models.ForeignKey(
+        "locations.Town", on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     section = models.CharField(max_length=20, blank=True)
     meta = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
@@ -40,7 +48,9 @@ class Event(models.Model):
 
 
 class DailyListingStats(models.Model):
-    listing = models.ForeignKey("listings.Listing", on_delete=models.CASCADE, related_name="daily_stats")
+    listing = models.ForeignKey(
+        "listings.Listing", on_delete=models.CASCADE, related_name="daily_stats"
+    )
     date = models.DateField()
     views = models.PositiveIntegerField(default=0)
     taps = models.PositiveIntegerField(default=0)
@@ -59,7 +69,9 @@ class DailyListingStats(models.Model):
 
 
 class DailyCampusStats(models.Model):
-    campus = models.ForeignKey("locations.Campus", on_delete=models.CASCADE, related_name="daily_stats")
+    campus = models.ForeignKey(
+        "locations.Campus", on_delete=models.CASCADE, related_name="daily_stats"
+    )
     date = models.DateField()
     signups = models.PositiveIntegerField(default=0)
     posts = models.PositiveIntegerField(default=0)

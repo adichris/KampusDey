@@ -41,7 +41,9 @@ def like(request, pk):
     except services.EngagementError as exc:
         return _toast(HttpResponse(status=204), exc, "error")
     listing.refresh_from_db(fields=["likes_count"])
-    response = render(request, "engagement/partials/like.html", {"listing": listing, "liked": liked})
+    response = render(
+        request, "engagement/partials/like.html", {"listing": listing, "liked": liked}
+    )
     return _toast(response, _("Saved") if liked else _("Removed from saved"))
 
 
@@ -85,15 +87,21 @@ def share(request, pk):
 
 class ReportForm(forms.Form):
     reason = forms.ChoiceField(choices=Report.Reason.choices, widget=forms.RadioSelect)
-    details = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False, max_length=1000)
+    details = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3}), required=False, max_length=1000
+    )
 
     def __init__(self, *args, kind="listing", **kwargs):
         super().__init__(*args, **kwargs)
         place_reasons = {"closed", "wrong_location", "not_real"}
         if kind == "place":
-            self.fields["reason"].choices = [c for c in Report.Reason.choices if c[0] in place_reasons | {"other"}]
+            self.fields["reason"].choices = [
+                c for c in Report.Reason.choices if c[0] in place_reasons | {"other"}
+            ]
         else:
-            self.fields["reason"].choices = [c for c in Report.Reason.choices if c[0] not in place_reasons]
+            self.fields["reason"].choices = [
+                c for c in Report.Reason.choices if c[0] not in place_reasons
+            ]
 
 
 @ratelimit(key="ip", rate="20/h", method="POST", block=True)
@@ -102,15 +110,21 @@ def report(request, kind, pk):
         raise Http404
     model = ContentType.objects.get_by_natural_key(*REPORTABLE[kind]).model_class()
     target = get_object_or_404(model, pk=pk)
-    if kind == "conversation" and not (request.user.is_authenticated and target.has_participant(request.user)):
+    if kind == "conversation" and not (
+        request.user.is_authenticated and target.has_participant(request.user)
+    ):
         raise Http404
     if not request.user.is_authenticated:
         return render(request, "engagement/partials/login_to_report.html")
     form = ReportForm(request.POST or None, kind=kind)
     if request.method == "POST" and form.is_valid():
-        services.report(request.user, target, form.cleaned_data["reason"], form.cleaned_data["details"])
+        services.report(
+            request.user, target, form.cleaned_data["reason"], form.cleaned_data["details"]
+        )
         return render(request, "engagement/partials/report_done.html")
-    return render(request, "engagement/partials/report_form.html", {"form": form, "kind": kind, "pk": pk})
+    return render(
+        request, "engagement/partials/report_form.html", {"form": form, "kind": kind, "pk": pk}
+    )
 
 
 @login_required
@@ -120,7 +134,10 @@ def saved(request):
     return render(
         request,
         "engagement/saved.html",
-        {"listings": saved_listings(request.user)[:100], "searches": SavedSearch.objects.filter(user=request.user, is_active=True)},
+        {
+            "listings": saved_listings(request.user)[:100],
+            "searches": SavedSearch.objects.filter(user=request.user, is_active=True),
+        },
     )
 
 
@@ -132,7 +149,11 @@ def save_search(request):
     section = request.POST.get("section", "")
     campus = Campus.objects.filter(pk=request.POST.get("campus") or 0).first()
     town = Town.objects.filter(pk=request.POST.get("town") or 0).first()
-    params = {k: v for k, v in request.POST.items() if k not in ("section", "campus", "town", "csrfmiddlewaretoken")}
+    params = {
+        k: v
+        for k, v in request.POST.items()
+        if k not in ("section", "campus", "town", "csrfmiddlewaretoken")
+    }
     services.save_search(request.user, section, params, campus=campus, town=town)
     response = HttpResponse(f'<span class="badge badge-success">{_("Alert saved")}</span>')
     return _toast(response, _("We'll tell you about new matches every day."))
@@ -148,8 +169,12 @@ def delete_saved_search(request, pk):
 
 
 class ReviewForm(forms.Form):
-    rating = forms.TypedChoiceField(choices=[(i, "★" * i) for i in range(5, 0, -1)], coerce=int, widget=forms.RadioSelect)
-    body = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False, max_length=1000)
+    rating = forms.TypedChoiceField(
+        choices=[(i, "★" * i) for i in range(5, 0, -1)], coerce=int, widget=forms.RadioSelect
+    )
+    body = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3}), required=False, max_length=1000
+    )
 
 
 @login_required
@@ -169,8 +194,11 @@ def review(request, kind, pk):
     if request.method == "POST" and form.is_valid():
         try:
             services.add_review(
-                request.user, form.cleaned_data["rating"], form.cleaned_data["body"],
-                hostel=target if kind == "hostel" else None, target_user=target if kind == "user" else None,
+                request.user,
+                form.cleaned_data["rating"],
+                form.cleaned_data["body"],
+                hostel=target if kind == "hostel" else None,
+                target_user=target if kind == "user" else None,
             )
             messages.success(request, _("Thanks for your review."))
         except services.EngagementError as exc:

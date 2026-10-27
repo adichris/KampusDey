@@ -53,18 +53,25 @@ def _term_matches(term: BannedTerm, text: str) -> bool:
             return re.search(term.term, text, re.I) is not None
         except re.error:
             return False
-    return re.search(r"(?<!\w)" + re.escape(term.term.lower()) + r"(?!\w)", text.lower()) is not None
+    return (
+        re.search(r"(?<!\w)" + re.escape(term.term.lower()) + r"(?!\w)", text.lower()) is not None
+    )
 
 
 def banned_matches(text: str, applies_to: str) -> list[BannedTerm]:
-    terms = BannedTerm.objects.filter(is_active=True, applies_to__in=[applies_to, BannedTerm.AppliesTo.ALL])
+    terms = BannedTerm.objects.filter(
+        is_active=True, applies_to__in=[applies_to, BannedTerm.AppliesTo.ALL]
+    )
     return [t for t in terms if _term_matches(t, text or "")]
 
 
 def apply_terms(verdict: Verdict, text: str, applies_to: str) -> Verdict:
     for term in banned_matches(text, applies_to):
         if term.action == BannedTerm.Action.BLOCK:
-            verdict.block(_("This post contains content that isn't allowed on KampusDey."), f"banned term: {term.term}")
+            verdict.block(
+                _("This post contains content that isn't allowed on KampusDey."),
+                f"banned term: {term.term}",
+            )
         elif term.action == BannedTerm.Action.REVIEW:
             verdict.send_to_review(f"term needs review: {term.term}")
         else:
@@ -93,8 +100,10 @@ def check_listing(listing) -> Verdict:
         ):
             verdict.send_to_review(f"price outside {category.name} range")
 
-    others = Listing.objects.filter(section=listing.section).exclude(pk=listing.pk).exclude(
-        status__in=[Listing.Status.DRAFT, Listing.Status.ARCHIVED]
+    others = (
+        Listing.objects.filter(section=listing.section)
+        .exclude(pk=listing.pk)
+        .exclude(status__in=[Listing.Status.DRAFT, Listing.Status.ARCHIVED])
     )
     for other in others.filter(owner=listing.owner).only("title"):
         if trigram_similarity(listing.title, other.title) >= DUPLICATE_TITLE_SIMILARITY:
@@ -112,7 +121,11 @@ def check_listing(listing) -> Verdict:
     if phashes:
         from apps.listings.models import ListingPhoto
 
-        foreign = ListingPhoto.objects.exclude(listing=listing).exclude(listing__owner=listing.owner).exclude(phash="")
+        foreign = (
+            ListingPhoto.objects.exclude(listing=listing)
+            .exclude(listing__owner=listing.owner)
+            .exclude(phash="")
+        )
         for other_hash, other_listing in foreign.values_list("phash", "listing_id")[:5000]:
             if any(hamming(h, other_hash) <= DUPLICATE_PHASH_DISTANCE for h in phashes):
                 verdict.send_to_review(f"photo matches listing #{other_listing}")
@@ -127,10 +140,15 @@ def photo_is_duplicate(listing, phash: str) -> bool:
 
     if not phash:
         return False
-    qs = ListingPhoto.objects.filter(listing__owner=listing.owner).exclude(listing=listing).exclude(
-        listing__status__in=[Listing.Status.ARCHIVED, Listing.Status.DRAFT]
+    qs = (
+        ListingPhoto.objects.filter(listing__owner=listing.owner)
+        .exclude(listing=listing)
+        .exclude(listing__status__in=[Listing.Status.ARCHIVED, Listing.Status.DRAFT])
     )
-    return any(hamming(phash, other) <= DUPLICATE_PHASH_DISTANCE for other in qs.values_list("phash", flat=True))
+    return any(
+        hamming(phash, other) <= DUPLICATE_PHASH_DISTANCE
+        for other in qs.values_list("phash", flat=True)
+    )
 
 
 def check_comment(body: str) -> Verdict:
@@ -144,7 +162,9 @@ def check_message(body: str) -> Verdict:
 def queue_for_review(obj, reason: str, auto: bool = True) -> ModerationItem:
     ct = ContentType.objects.get_for_model(obj)
     item, _created = ModerationItem.objects.get_or_create(
-        content_type=ct, object_id=obj.pk, status=ModerationItem.Status.PENDING,
+        content_type=ct,
+        object_id=obj.pk,
+        status=ModerationItem.Status.PENDING,
         defaults={"reason": reason[:300], "auto": auto},
     )
     return item
@@ -225,9 +245,9 @@ def suggest_price_ranges(min_samples: int = 30) -> int:
         for category in model.objects.filter(is_active=True):
             prices = sorted(
                 p
-                for p in Listing.objects.filter(**{path: category}, **{f"{price_field}__isnull": False}).values_list(
-                    price_field, flat=True
-                )
+                for p in Listing.objects.filter(
+                    **{path: category}, **{f"{price_field}__isnull": False}
+                ).values_list(price_field, flat=True)
                 if p is not None and p > 0
             )
             if len(prices) < min_samples:
@@ -235,8 +255,12 @@ def suggest_price_ranges(min_samples: int = 30) -> int:
             lo = prices[int(0.05 * (len(prices) - 1))]
             hi = prices[int(0.95 * (len(prices) - 1))]
             PriceRangeSuggestion.objects.create(
-                category_kind=kind, category_id=category.pk, category_name=category.name,
-                suggested_min=lo, suggested_max=hi, samples=len(prices),
+                category_kind=kind,
+                category_id=category.pk,
+                category_name=category.name,
+                suggested_min=lo,
+                suggested_max=hi,
+                samples=len(prices),
             )
             created += 1
     return created

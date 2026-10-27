@@ -58,7 +58,9 @@ def sync_room_type_listing(room_type: HostelRoomType) -> Listing:
         },
     )
     for campus in hostel.campuses.all():
-        ListingCampus.objects.get_or_create(listing=listing, campus=campus, defaults={"is_manual": True})
+        ListingCampus.objects.get_or_create(
+            listing=listing, campus=campus, defaults={"is_manual": True}
+        )
     if hostel.lat is not None:
         from apps.listings.services import autolink_campuses
 
@@ -141,8 +143,10 @@ def inquiries(hostel: Hostel):
     from apps.telemetry.models import Event
 
     listing_ids = list(hostel.room_types.exclude(listing=None).values_list("listing_id", flat=True))
-    conversations = Conversation.objects.filter(listing_id__in=listing_ids).select_related("listing").order_by(
-        "-last_message_at"
+    conversations = (
+        Conversation.objects.filter(listing_id__in=listing_ids)
+        .select_related("listing")
+        .order_by("-last_message_at")
     )
     taps = Event.objects.filter(kind="tap", listing_id__in=listing_ids).order_by("-created_at")[:50]
     return conversations, taps

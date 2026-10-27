@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -15,43 +14,98 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Conversation',
+            name="Conversation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('starter_alias', models.CharField(max_length=60)),
-                ('owner_alias', models.CharField(max_length=60)),
-                ('last_message_at', models.DateTimeField(blank=True, db_index=True, null=True)),
-                ('is_blocked', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("starter_alias", models.CharField(max_length=60)),
+                ("owner_alias", models.CharField(max_length=60)),
+                ("last_message_at", models.DateTimeField(blank=True, db_index=True, null=True)),
+                ("is_blocked", models.BooleanField(default=False)),
             ],
             options={
-                'ordering': ['-last_message_at', '-created_at'],
+                "ordering": ["-last_message_at", "-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='Message',
+            name="Message",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('body', models.TextField(max_length=2000)),
-                ('kind', models.CharField(choices=[('text', 'Text'), ('shared_contact', 'Shared contact'), ('system', 'System')], default='text', max_length=16)),
-                ('has_scam_warning', models.BooleanField(default=False)),
-                ('read_at', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                ("body", models.TextField(max_length=2000)),
+                (
+                    "kind",
+                    models.CharField(
+                        choices=[
+                            ("text", "Text"),
+                            ("shared_contact", "Shared contact"),
+                            ("system", "System"),
+                        ],
+                        default="text",
+                        max_length=16,
+                    ),
+                ),
+                ("has_scam_warning", models.BooleanField(default=False)),
+                ("read_at", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                'ordering': ['created_at', 'id'],
+                "ordering": ["created_at", "id"],
             },
         ),
         migrations.CreateModel(
-            name='Block',
+            name="Block",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='created at')),
-                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='updated at')),
-                ('blocked', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='blocks_received', to=settings.AUTH_USER_MODEL)),
-                ('blocker', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='blocks_made', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="created at"
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True, verbose_name="updated at")),
+                (
+                    "blocked",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="blocks_received",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "blocker",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="blocks_made",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

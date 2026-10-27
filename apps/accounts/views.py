@@ -10,7 +10,14 @@ from django_ratelimit.decorators import ratelimit
 from apps.locations.services import set_location
 
 from . import services
-from .forms import DeleteAccountForm, OnboardingForm, OTPForm, PhoneForm, ProfileForm, VerificationForm
+from .forms import (
+    DeleteAccountForm,
+    OnboardingForm,
+    OTPForm,
+    PhoneForm,
+    ProfileForm,
+    VerificationForm,
+)
 from .middleware import PHONE_GATE_SESSION_KEY
 from .models import Profile, User
 
@@ -74,8 +81,12 @@ def profile(request):
 @login_required
 def edit_profile(request):
     prof = services.ensure_profile(request.user)
-    form = ProfileForm(request.POST or None, request.FILES or None, instance=prof,
-                       initial={"display_name": request.user.display_name})
+    form = ProfileForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=prof,
+        initial={"display_name": request.user.display_name},
+    )
     if request.method == "POST" and form.is_valid():
         avatar = form.cleaned_data.get("avatar")
         obj = form.save(commit=False)
@@ -144,8 +155,16 @@ def phone(request):
                 messages.success(request, _("Phone number verified."))
                 return redirect("accounts:profile")
     pending = request.user.phone_otps.filter(used_at__isnull=True).first()
-    return render(request, "accounts/phone.html", {"phone_form": phone_form, "otp_form": otp_form, "pending": pending,
-                                                   "required": services.phone_required()})
+    return render(
+        request,
+        "accounts/phone.html",
+        {
+            "phone_form": phone_form,
+            "otp_form": otp_form,
+            "pending": pending,
+            "required": services.phone_required(),
+        },
+    )
 
 
 @login_required
@@ -187,10 +206,17 @@ def public_profile(request, pk):
 
     user = get_object_or_404(User.objects.select_related("profile"), pk=pk, is_active=True)
     listings = visible_listings(request.user).filter(owner=user)[:24]
-    reviews = Review.objects.filter(target_user=user, status="visible").select_related("reviewer")[:20]
+    reviews = Review.objects.filter(target_user=user, status="visible").select_related("reviewer")[
+        :20
+    ]
     return render(
         request,
         "accounts/public_profile.html",
-        {"person": user, "profile": getattr(user, "profile", None) or Profile(user=user), "listings": listings,
-         "reviews": reviews, "can_review": can_review_user(request.user, user)},
+        {
+            "person": user,
+            "profile": getattr(user, "profile", None) or Profile(user=user),
+            "listings": listings,
+            "reviews": reviews,
+            "can_review": can_review_user(request.user, user),
+        },
     )

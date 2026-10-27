@@ -41,11 +41,20 @@ def test_missing_geolite_db_causes_no_errors(client, db):
 
 def test_campus_request_flow(client, db):
     region = f.RegionFactory()
-    client.post(reverse("locations:request"), {"name": "New Nursing Training College", "town_name": "Newtown",
-                                               "region": region.pk, "email": "a@example.test"})
+    client.post(
+        reverse("locations:request"),
+        {
+            "name": "New Nursing Training College",
+            "town_name": "Newtown",
+            "region": region.pk,
+            "email": "a@example.test",
+        },
+    )
     req = CampusRequest.objects.get()
     campus = approve_campus_request(req)
-    assert campus.kind == "nursing_midwifery" and campus.town.name == "Newtown" and campus.lat is None
+    assert (
+        campus.kind == "nursing_midwifery" and campus.town.name == "Newtown" and campus.lat is None
+    )
     assert req.status == "added"
 
 

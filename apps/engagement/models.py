@@ -9,7 +9,9 @@ from apps.core.models import TimeStampedModel
 
 
 class Like(TimeStampedModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes"
+    )
     listing = models.ForeignKey("listings.Listing", on_delete=models.CASCADE, related_name="likes")
 
     class Meta:
@@ -20,9 +22,15 @@ class Like(TimeStampedModel):
 
 
 class Comment(TimeStampedModel):
-    listing = models.ForeignKey("listings.Listing", on_delete=models.CASCADE, related_name="comments")
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments")
-    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="replies")
+    listing = models.ForeignKey(
+        "listings.Listing", on_delete=models.CASCADE, related_name="comments"
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments"
+    )
+    parent = models.ForeignKey(
+        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="replies"
+    )
     body = models.TextField(max_length=1000, help_text=_("Stored masked"))
     is_owner_reply = models.BooleanField(default=False)
     is_hidden = models.BooleanField(default=False)
@@ -39,22 +47,38 @@ class Review(TimeStampedModel):
         VISIBLE = "visible", _("Visible")
         HIDDEN = "hidden", _("Hidden")
 
-    reviewer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reviews_given")
-    hostel = models.ForeignKey("hostels.Hostel", on_delete=models.CASCADE, null=True, blank=True, related_name="reviews")
-    target_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="reviews_received"
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reviews_given"
     )
-    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    hostel = models.ForeignKey(
+        "hostels.Hostel", on_delete=models.CASCADE, null=True, blank=True, related_name="reviews"
+    )
+    target_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="reviews_received",
+    )
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
     body = models.TextField(max_length=1000, blank=True)
     status = models.CharField(max_length=8, choices=Status.choices, default=Status.VISIBLE)
 
     class Meta:
         ordering = ["-created_at"]
         constraints = [
-            models.UniqueConstraint(fields=["reviewer", "hostel"], name="uniq_review_hostel",
-                                    condition=models.Q(hostel__isnull=False)),
-            models.UniqueConstraint(fields=["reviewer", "target_user"], name="uniq_review_user",
-                                    condition=models.Q(target_user__isnull=False)),
+            models.UniqueConstraint(
+                fields=["reviewer", "hostel"],
+                name="uniq_review_hostel",
+                condition=models.Q(hostel__isnull=False),
+            ),
+            models.UniqueConstraint(
+                fields=["reviewer", "target_user"],
+                name="uniq_review_user",
+                condition=models.Q(target_user__isnull=False),
+            ),
         ]
 
     def __str__(self):
@@ -82,10 +106,14 @@ class Report(TimeStampedModel):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveBigIntegerField()
     target = GenericForeignKey("content_type", "object_id")
-    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="reports_made")
+    reporter = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="reports_made"
+    )
     reason = models.CharField(max_length=16, choices=Reason.choices)
     details = models.TextField(blank=True, max_length=1000)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN, db_index=True)
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.OPEN, db_index=True
+    )
     handled_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
@@ -99,7 +127,9 @@ class Report(TimeStampedModel):
 
 
 class SavedSearch(TimeStampedModel):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_searches")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="saved_searches"
+    )
     params = models.JSONField(default=dict, blank=True)
     campus = models.ForeignKey("locations.Campus", on_delete=models.CASCADE, null=True, blank=True)
     town = models.ForeignKey("locations.Town", on_delete=models.CASCADE, null=True, blank=True)

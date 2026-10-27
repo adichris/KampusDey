@@ -12,7 +12,14 @@ class ConversationAdmin(KDModelAdmin):
     list_display = ["listing", "starter_alias", "owner_alias", "last_message_at", "is_blocked"]
     list_filter = ["is_blocked"]
     search_fields = ["listing__title", "starter_alias", "owner_alias"]
-    readonly_fields = ["listing", "starter", "owner", "starter_alias", "owner_alias", "last_message_at"]
+    readonly_fields = [
+        "listing",
+        "starter",
+        "owner",
+        "starter_alias",
+        "owner_alias",
+        "last_message_at",
+    ]
 
     def has_add_permission(self, request):
         return False

@@ -51,7 +51,9 @@ def home(request):
 
 
 def campus_home(request, campus_slug):
-    campus = get_object_or_404(Campus.objects.visible().select_related("town__region"), slug=campus_slug)
+    campus = get_object_or_404(
+        Campus.objects.visible().select_related("town__region"), slug=campus_slug
+    )
     return _home(request, LocationContext(campus=campus), landing=campus)
 
 
@@ -84,7 +86,9 @@ def _home(request, location, landing=None):
 # Section pages
 # ---------------------------------------------------------------------------
 def section_campus(request, campus_slug, section):
-    campus = get_object_or_404(Campus.objects.visible().select_related("town__region"), slug=campus_slug)
+    campus = get_object_or_404(
+        Campus.objects.visible().select_related("town__region"), slug=campus_slug
+    )
     return _section(request, LocationContext(campus=campus), section)
 
 
@@ -107,7 +111,9 @@ def _section(request, location, section_slug):
     point = _point_from_request(request, location)
     view_mode = request.GET.get("view", "list")
     page_number = request.GET.get("page") or 1
-    boosted = selectors.boosted_slots(qs) if str(page_number) == "1" and sort == "recommended" else []
+    boosted = (
+        selectors.boosted_slots(qs) if str(page_number) == "1" and sort == "recommended" else []
+    )
     ordered = selectors.sort_listings(qs.exclude(pk__in=[b.pk for b in boosted]), sort, point)
     if point and sort != "distance":
         ordered = selectors.annotate_point_distance(ordered, point)  # for display only
@@ -128,7 +134,11 @@ def _section(request, location, section_slug):
             if service:
                 from .models import ServiceCategory
 
-                slug = ServiceCategory.objects.filter(pk=service).values_list("slug", flat=True).first()
+                slug = (
+                    ServiceCategory.objects.filter(pk=service)
+                    .values_list("slug", flat=True)
+                    .first()
+                )
             other_places = list(service_places(location.campus, slug)[:12])
         else:
             other_places = list(accommodation_places(location.campus)[:12])
@@ -165,8 +175,15 @@ def _remote_jobs(request, location, section):
     return render(
         request,
         "listings/remote_jobs.html",
-        {"section": section, "page_location": location, "page": page, "source": source,
-         "categories": categories, "tab": "remote", "sections": enabled_sections(location.campus)},
+        {
+            "section": section,
+            "page_location": location,
+            "page": page,
+            "source": source,
+            "categories": categories,
+            "tab": "remote",
+            "sections": enabled_sections(location.campus),
+        },
     )
 
 
@@ -174,7 +191,9 @@ def section_redirect(request, section):
     """/s/<section>/ → the section page for the current campus/town."""
     location = request.location
     if location.campus:
-        return redirect("listings:section_campus", campus_slug=location.campus.slug, section=section)
+        return redirect(
+            "listings:section_campus", campus_slug=location.campus.slug, section=section
+        )
     if location.town:
         return redirect("listings:section_town", town_slug=location.town.slug, section=section)
     messages.info(request, _("Choose your campus first."))
@@ -217,13 +236,21 @@ def nearby(request):
     if point:
         from apps.core import geo
 
-        qs = selectors.visible_listings(request.user, [section] if section else [s.slug for s in sections])
-        qs = geo.nearby(qs.filter(lat__isnull=False), point[0], point[1], max_radius).order_by("distance_m")
+        qs = selectors.visible_listings(
+            request.user, [section] if section else [s.slug for s in sections]
+        )
+        qs = geo.nearby(qs.filter(lat__isnull=False), point[0], point[1], max_radius).order_by(
+            "distance_m"
+        )
         listings = list(qs[:60])
         items = [
             {
-                "id": item.pk, "title": item.title, "url": item.get_absolute_url(), "lat": item.lat,
-                "lng": item.lng, "approx": item.is_sensitive,
+                "id": item.pk,
+                "title": item.title,
+                "url": item.get_absolute_url(),
+                "lat": item.lat,
+                "lng": item.lng,
+                "approx": item.is_sensitive,
                 "info": f"{item.card_info} · {round(item.distance_m)} m",
             }
             for item in listings
@@ -231,8 +258,15 @@ def nearby(request):
     return render(
         request,
         "listings/nearby.html",
-        {"point": point, "items": items, "listings": listings, "radii": ",".join(map(str, radii)),
-         "sections": sections, "active_section": section, "from_device": bool(request.GET.get("lat"))},
+        {
+            "point": point,
+            "items": items,
+            "listings": listings,
+            "radii": ",".join(map(str, radii)),
+            "sections": sections,
+            "active_section": section,
+            "from_device": bool(request.GET.get("lat")),
+        },
     )
 
 
@@ -241,8 +275,11 @@ def nearby(request):
 # ---------------------------------------------------------------------------
 def _get_visible_listing(request, slug):
     listing = get_object_or_404(
-        Listing.objects.select_related("owner__profile", "town__region", "area", "contact_card").prefetch_related(
-            Prefetch("photos", queryset=ListingPhoto.objects.order_by("order", "id")), "contact_card__channels"
+        Listing.objects.select_related(
+            "owner__profile", "town__region", "area", "contact_card"
+        ).prefetch_related(
+            Prefetch("photos", queryset=ListingPhoto.objects.order_by("order", "id")),
+            "contact_card__channels",
         ),
         slug=slug,
     )
@@ -264,7 +301,10 @@ def detail(request, slug):
     listing, is_owner = _get_visible_listing(request, slug)
     if not is_owner:
         record("view", request=request, listing=listing)
-    liked = request.user.is_authenticated and Like.objects.filter(user=request.user, listing=listing).exists()
+    liked = (
+        request.user.is_authenticated
+        and Like.objects.filter(user=request.user, listing=listing).exists()
+    )
     from apps.boosts.services import boosts_left, can_boost
 
     context = {
@@ -294,7 +334,9 @@ def post_picker(request):
     if not location.is_set:
         messages.info(request, _("Choose your campus or town first."))
         return redirect(f"{reverse('locations:picker_page')}?next={reverse('listings:post')}")
-    drafts = Listing.objects.filter(owner=request.user, status=Listing.Status.DRAFT).order_by("-updated_at")[:5]
+    drafts = Listing.objects.filter(owner=request.user, status=Listing.Status.DRAFT).order_by(
+        "-updated_at"
+    )[:5]
     return render(
         request,
         "listings/post_picker.html",
@@ -322,8 +364,12 @@ def post_start(request, section):
 
 def _owned_draft(request, pk):
     listing = get_object_or_404(Listing, pk=pk, owner=request.user)
-    if listing.status not in (Listing.Status.DRAFT, Listing.Status.ACTIVE, Listing.Status.PENDING_REVIEW,
-                              Listing.Status.NEEDS_CHECK):
+    if listing.status not in (
+        Listing.Status.DRAFT,
+        Listing.Status.ACTIVE,
+        Listing.Status.PENDING_REVIEW,
+        Listing.Status.NEEDS_CHECK,
+    ):
         raise Http404
     return listing
 
@@ -334,7 +380,12 @@ def wizard(request, pk, step):
     section = listing.section_obj
     if step not in (1, 2, 3):
         raise Http404
-    ctx = {"listing": listing, "section": section, "step": step, "is_edit": listing.status != Listing.Status.DRAFT}
+    ctx = {
+        "listing": listing,
+        "section": section,
+        "step": step,
+        "is_edit": listing.status != Listing.Status.DRAFT,
+    }
 
     if step == 1:
         if request.method == "POST":
@@ -346,12 +397,15 @@ def wizard(request, pk, step):
     details_form_cls = DETAILS_FORMS[listing.section]
     if step == 2:
         common = CommonForm(request.POST or None, instance=listing, section=section)
-        details_form = details_form_cls(request.POST or None, request.FILES or None, instance=listing.details,
-                                        prefix="d")
+        details_form = details_form_cls(
+            request.POST or None, request.FILES or None, instance=listing.details, prefix="d"
+        )
         if request.method == "POST" and common.is_valid() and details_form.is_valid():
             try:
                 obj = common.save(commit=False)
-                services.set_point(obj, common.cleaned_data.get("lat"), common.cleaned_data.get("lng"))
+                services.set_point(
+                    obj, common.cleaned_data.get("lat"), common.cleaned_data.get("lng")
+                )
                 obj.wizard_step = max(obj.wizard_step, 3)
                 obj.save()
                 services.save_details(obj, details_form)
@@ -378,11 +432,17 @@ def wizard(request, pk, step):
         data = form.cleaned_data
         apply_contact_step(card, data)
         listing.contact_card = card
-        listing.contact_visibility = "members" if listing.is_need_food else data["contact_visibility"]
+        listing.contact_visibility = (
+            "members" if listing.is_need_food else data["contact_visibility"]
+        )
         listing.hide_number = data["hide_number"]
-        listing.save(update_fields=["contact_card", "contact_visibility", "hide_number", "updated_at"])
+        listing.save(
+            update_fields=["contact_card", "contact_visibility", "hide_number", "updated_at"]
+        )
         services.update_campus_links(
-            listing, data.get("keep_campuses"), [data["add_campus"].pk] if data.get("add_campus") else []
+            listing,
+            data.get("keep_campuses"),
+            [data["add_campus"].pk] if data.get("add_campus") else [],
         )
         if "save_draft" in request.POST:
             messages.success(request, _("Draft saved."))
@@ -422,7 +482,11 @@ def photo_upload(request, pk):
         services.add_photo(listing, upload)
     except services.ListingError as exc:
         return HttpResponse(str(exc), status=400)
-    return render(request, "listings/partials/photo_list.html", {"listing": listing, "photos": listing.photos.all()})
+    return render(
+        request,
+        "listings/partials/photo_list.html",
+        {"listing": listing, "photos": listing.photos.all()},
+    )
 
 
 @login_required
@@ -432,7 +496,11 @@ def photo_delete(request, pk, photo_id):
     photo = get_object_or_404(ListingPhoto, pk=photo_id, listing=listing)
     photo.image.delete(save=False)
     photo.delete()
-    return render(request, "listings/partials/photo_list.html", {"listing": listing, "photos": listing.photos.all()})
+    return render(
+        request,
+        "listings/partials/photo_list.html",
+        {"listing": listing, "photos": listing.photos.all()},
+    )
 
 
 @login_required
@@ -446,7 +514,11 @@ def photo_move(request, pk, photo_id, direction):
         if 0 <= j < len(ids):
             ids[i], ids[j] = ids[j], ids[i]
             services.reorder_photos(listing, ids)
-    return render(request, "listings/partials/photo_list.html", {"listing": listing, "photos": listing.photos.all()})
+    return render(
+        request,
+        "listings/partials/photo_list.html",
+        {"listing": listing, "photos": listing.photos.all()},
+    )
 
 
 @login_required
@@ -468,7 +540,12 @@ def one_tap(request, token):
     try:
         listing, action = services.read_check_token(token)
     except (signing.BadSignature, signing.SignatureExpired, Listing.DoesNotExist):
-        return render(request, "errors/simple.html", {"title": _("This link has expired"), "code": 410}, status=410)
+        return render(
+            request,
+            "errors/simple.html",
+            {"title": _("This link has expired"), "code": 410},
+            status=410,
+        )
     if request.method == "POST":
         if action == "confirm":
             services.confirm_available(listing)
@@ -476,7 +553,9 @@ def one_tap(request, token):
         else:
             services.mark_taken(listing)
             message = _("Marked as taken. Congratulations!")
-        return render(request, "listings/one_tap_done.html", {"listing": listing, "message": message})
+        return render(
+            request, "listings/one_tap_done.html", {"listing": listing, "message": message}
+        )
     # GET shows a confirmation button so link scanners can't change anything.
     return render(request, "listings/one_tap.html", {"listing": listing, "action": action})
 
@@ -484,8 +563,12 @@ def one_tap(request, token):
 @login_required
 def check(request, slug):
     listing = get_object_or_404(Listing, slug=slug, owner=request.user)
-    return render(request, "listings/check.html", {
-        "listing": listing,
-        "confirm_token": services.check_token(listing, "confirm"),
-        "taken_token": services.check_token(listing, "taken"),
-    })
+    return render(
+        request,
+        "listings/check.html",
+        {
+            "listing": listing,
+            "confirm_token": services.check_token(listing, "confirm"),
+            "taken_token": services.check_token(listing, "taken"),
+        },
+    )

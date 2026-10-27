@@ -62,4 +62,9 @@ class HostelSitemap(Sitemap):
         return obj.updated_at
 
 
-SITEMAPS = {"campuses": CampusSitemap, "sections": SectionSitemap, "listings": ListingSitemap, "hostels": HostelSitemap}
+SITEMAPS = {
+    "campuses": CampusSitemap,
+    "sections": SectionSitemap,
+    "listings": ListingSitemap,
+    "hostels": HostelSitemap,
+}

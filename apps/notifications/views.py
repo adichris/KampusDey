@@ -13,10 +13,17 @@ from .models import Notification, Trigger
 
 class PreferenceForm(forms.Form):
     email_triggers = forms.MultipleChoiceField(
-        label=gettext_lazy("Email me about"), choices=Trigger.choices, widget=forms.CheckboxSelectMultiple, required=False
+        label=gettext_lazy("Email me about"),
+        choices=Trigger.choices,
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
     )
-    weekly_digest = forms.BooleanField(label=gettext_lazy("Weekly 'new near you' digest"), required=False)
-    push_enabled = forms.BooleanField(label=gettext_lazy("Push notifications on this device"), required=False)
+    weekly_digest = forms.BooleanField(
+        label=gettext_lazy("Weekly 'new near you' digest"), required=False
+    )
+    push_enabled = forms.BooleanField(
+        label=gettext_lazy("Push notifications on this device"), required=False
+    )
 
 
 @login_required
@@ -41,8 +48,11 @@ def preferences(request):
     prefs = services.prefs_for(request.user)
     form = PreferenceForm(
         request.POST or None,
-        initial={"email_triggers": prefs.email_triggers, "weekly_digest": prefs.weekly_digest,
-                 "push_enabled": prefs.push_enabled},
+        initial={
+            "email_triggers": prefs.email_triggers,
+            "weekly_digest": prefs.weekly_digest,
+            "push_enabled": prefs.push_enabled,
+        },
     )
     if request.method == "POST" and form.is_valid():
         prefs.email_triggers = form.cleaned_data["email_triggers"]

@@ -8,14 +8,36 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.admin_base import KDModelAdmin, KDTabularInline
 
 from .importers.pipeline import merge_campuses, merge_institutions, possible_duplicates
-from .models import Area, Campus, CampusRequest, District, ImportLog, Institution, Region, ReviewStatus, SourceRecord, Town
+from .models import (
+    Area,
+    Campus,
+    CampusRequest,
+    District,
+    ImportLog,
+    Institution,
+    Region,
+    ReviewStatus,
+    SourceRecord,
+    Town,
+)
 from .services import approve_campus_request, reject_campus_request
 from .signals import lock_changed_fields
 
 PROVENANCE = (
     _("Provenance"),
-    {"fields": ("source", "source_id", "source_url", "retrieved_at", "licence", "confidence", "review_status",
-                "admin_locked", "locked_fields")},
+    {
+        "fields": (
+            "source",
+            "source_id",
+            "source_url",
+            "retrieved_at",
+            "licence",
+            "confidence",
+            "review_status",
+            "admin_locked",
+            "locked_fields",
+        )
+    },
 )
 
 
@@ -43,7 +65,11 @@ class LockingAdmin(KDModelAdmin):
     @admin.display(description=_("Source"))
     def source_link(self, obj):
         if obj.source_url:
-            return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>', obj.source_url, obj.get_source_display())
+            return format_html(
+                '<a href="{}" target="_blank" rel="noopener">{}</a>',
+                obj.source_url,
+                obj.get_source_display(),
+            )
         return obj.get_source_display()
 
     @admin.display(description=_("Map"))
@@ -52,9 +78,11 @@ class LockingAdmin(KDModelAdmin):
             return "—"
         lat, lng = f"{obj.lat:.5f}", f"{obj.lng:.5f}"
         return format_html(
-            '<a href="https://www.openstreetmap.org/?mlat={0}&mlon={1}#map=16/{0}/{1}" target="_blank" rel="noopener">'
+            '<a href="https://www.openstreetmap.org/?mlat={0}&mlon={1}#map=16/{0}/{1}" '
+            'target="_blank" rel="noopener">'
             "{0}, {1} ↗</a>",
-            lat, lng,
+            lat,
+            lng,
         )
 
 
@@ -94,7 +122,15 @@ class CampusInline(KDTabularInline):
 
 @admin.register(Institution)
 class InstitutionAdmin(LockingAdmin):
-    list_display = ["name", "short_name", "kind", "gtec_status", "source_link", "confidence", "review_status"]
+    list_display = [
+        "name",
+        "short_name",
+        "kind",
+        "gtec_status",
+        "source_link",
+        "confidence",
+        "review_status",
+    ]
     list_filter = ["review_status", "gtec_status", "kind", "source"]
     search_fields = ["name", "short_name", "wikidata_id"]
     inlines = [CampusInline]
@@ -114,22 +150,43 @@ class InstitutionAdmin(LockingAdmin):
 
 @admin.register(Campus)
 class CampusAdmin(LockingAdmin):
-    list_display = ["name", "short_name", "town", "kind", "mini_map", "source_link", "confidence", "review_status", "is_active"]
+    list_display = [
+        "name",
+        "short_name",
+        "town",
+        "kind",
+        "mini_map",
+        "source_link",
+        "confidence",
+        "review_status",
+        "is_active",
+    ]
     list_filter = ["review_status", "kind", "is_active", "source", "town__region"]
     search_fields = ["name", "short_name", "town__name"]
     autocomplete_fields = ["institution", "town"]
     readonly_fields = ["retrieved_at", "mini_map"]
     actions = ["verify", "reject", "merge_into_first"]
     fieldsets = (
-        (None, {"fields": ("institution", "name", "short_name", "slug", "kind", "town", "is_active")}),
+        (
+            None,
+            {"fields": ("institution", "name", "short_name", "slug", "kind", "town", "is_active")},
+        ),
         (_("Location"), {"fields": ("lat", "lng", "mini_map", "osm_id")}),
         PROVENANCE,
     )
 
     def get_urls(self):
         return [
-            path("review-queue/", self.admin_site.admin_view(self.review_queue), name="locations_review_queue"),
-            path("duplicates/", self.admin_site.admin_view(self.duplicates_view), name="locations_duplicates"),
+            path(
+                "review-queue/",
+                self.admin_site.admin_view(self.review_queue),
+                name="locations_review_queue",
+            ),
+            path(
+                "duplicates/",
+                self.admin_site.admin_view(self.duplicates_view),
+                name="locations_duplicates",
+            ),
         ] + super().get_urls()
 
     def review_queue(self, request):
@@ -137,8 +194,12 @@ class CampusAdmin(LockingAdmin):
             **self.admin_site.each_context(request),
             "title": _("Locations review queue"),
             "institutions": Institution.objects.filter(review_status=ReviewStatus.UNVERIFIED)[:200],
-            "campuses": Campus.objects.filter(review_status=ReviewStatus.UNVERIFIED).select_related("town")[:200],
-            "areas": Area.objects.filter(review_status=ReviewStatus.UNVERIFIED).select_related("campus")[:200],
+            "campuses": Campus.objects.filter(review_status=ReviewStatus.UNVERIFIED).select_related(
+                "town"
+            )[:200],
+            "areas": Area.objects.filter(review_status=ReviewStatus.UNVERIFIED).select_related(
+                "campus"
+            )[:200],
             "flagged": Institution.objects.filter(gtec_status__in=["expired", "unaccredited"]),
         }
         return render(request, "admin/locations/review_queue.html", ctx)
@@ -150,8 +211,11 @@ class CampusAdmin(LockingAdmin):
             merge_campuses(keep, drop)
             messages.success(request, _("Merged."))
             return redirect(reverse("admin:locations_duplicates"))
-        ctx = {**self.admin_site.each_context(request), "title": _("Possible duplicate campuses"),
-               "pairs": possible_duplicates()[:100]}
+        ctx = {
+            **self.admin_site.each_context(request),
+            "title": _("Possible duplicate campuses"),
+            "pairs": possible_duplicates()[:100],
+        }
         return render(request, "admin/locations/duplicates.html", ctx)
 
     @admin.action(description=_("Merge into… (keep the oldest selected; moves areas and listings)"))

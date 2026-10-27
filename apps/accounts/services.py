@@ -215,7 +215,10 @@ def delete_account(user: User):
             photo.image.delete(save=False)
             photo.delete()
     Listing.objects.filter(owner=user).update(
-        status=Listing.Status.ARCHIVED, contact_card=None, description="", title=_("Removed listing")
+        status=Listing.Status.ARCHIVED,
+        contact_card=None,
+        description="",
+        title=_("Removed listing"),
     )
     Message.objects.filter(sender=user).update(body=_("[message removed]"))
     ContactCard.objects.filter(owner=user).delete()

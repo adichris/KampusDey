@@ -15,15 +15,19 @@ BLOCK_TERMS = [(r"counterfeit|fake\s+(certificate|transcript|degree)", True)]
 def seed_banned_terms():
     for term in WARN_TERMS:
         BannedTerm.objects.get_or_create(
-            term=term, applies_to=BannedTerm.AppliesTo.MESSAGE, defaults={"action": BannedTerm.Action.WARN}
+            term=term,
+            applies_to=BannedTerm.AppliesTo.MESSAGE,
+            defaults={"action": BannedTerm.Action.WARN},
         )
     for term, is_regex in REVIEW_TERMS:
         BannedTerm.objects.get_or_create(
-            term=term, applies_to=BannedTerm.AppliesTo.ALL,
+            term=term,
+            applies_to=BannedTerm.AppliesTo.ALL,
             defaults={"action": BannedTerm.Action.REVIEW, "is_regex": is_regex},
         )
     for term, is_regex in BLOCK_TERMS:
         BannedTerm.objects.get_or_create(
-            term=term, applies_to=BannedTerm.AppliesTo.ALL,
+            term=term,
+            applies_to=BannedTerm.AppliesTo.ALL,
             defaults={"action": BannedTerm.Action.BLOCK, "is_regex": is_regex},
         )

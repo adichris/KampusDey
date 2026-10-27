@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.text import slugify
 
-from apps.locations.models import Campus, Institution, Region, ReviewStatus, Source, Town
+from apps.locations.models import Campus, Institution, Region, ReviewStatus, Town
 
 FIXTURES = Path(settings.BASE_DIR) / "fixtures"
 
@@ -34,15 +34,26 @@ class Command(BaseCommand):
             inst = Institution.objects.filter(name__iexact=row["name"]).first()
             if inst is None:
                 inst = Institution.objects.create(
-                    slug=slugify(row["name"]), name=row["name"], short_name=row["short_name"],
-                    kind=row["kind"], confidence=0.8,
+                    slug=slugify(row["name"]),
+                    name=row["name"],
+                    short_name=row["short_name"],
+                    kind=row["kind"],
+                    confidence=0.8,
                 )
             slug = slugify(row["short_name"] or row["name"])
-            campus = Campus.objects.filter(slug=slug).first() or Campus.objects.filter(institution=inst).first()
+            campus = (
+                Campus.objects.filter(slug=slug).first()
+                or Campus.objects.filter(institution=inst).first()
+            )
             if campus is None:
                 Campus.objects.create(
-                    slug=slug, institution=inst, name=row["name"], short_name=row["short_name"],
-                    kind=row["kind"], town=town, confidence=0.8,
+                    slug=slug,
+                    institution=inst,
+                    name=row["name"],
+                    short_name=row["short_name"],
+                    kind=row["kind"],
+                    town=town,
+                    confidence=0.8,
                 )
         from apps.external.seed import seed_sources
         from apps.listings.seed import seed_categories

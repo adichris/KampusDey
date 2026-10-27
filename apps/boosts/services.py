@@ -18,7 +18,9 @@ class BoostRefused(Exception):
 
 def boosts_used_this_week(user, now=None) -> int:
     now = now or timezone.now()
-    return Boost.objects.filter(user=user, created_at__gte=now - timedelta(days=7), used_bonus=False).count()
+    return Boost.objects.filter(
+        user=user, created_at__gte=now - timedelta(days=7), used_bonus=False
+    ).count()
 
 
 def boosts_left(user, now=None) -> int:
@@ -94,7 +96,9 @@ def notify_ended(now=None) -> int:
 
     now = now or timezone.now()
     count = 0
-    for item in Boost.objects.filter(ends_at__lte=now, end_notified=False).select_related("listing", "user"):
+    for item in Boost.objects.filter(ends_at__lte=now, end_notified=False).select_related(
+        "listing", "user"
+    ):
         notify(
             item.user,
             "boost_ended",
