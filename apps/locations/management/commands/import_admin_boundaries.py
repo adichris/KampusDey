@@ -9,11 +9,15 @@ from ._importcmd import ImportCommand
 HDX_DIR = http.RAW_DIR / "hdx"
 
 
-def _latest(pattern_key):
-    files = sorted(HDX_DIR.glob(f"*{pattern_key}*.geojson")) + sorted(
-        HDX_DIR.glob(f"*{pattern_key}*.json")
-    )
-    return files[-1] if files else None
+def _latest(level: str):
+    """Newest HDX file for admin level "1" or "2" (adm1/admin1 names; skips the _em variant)."""
+    files = [
+        f
+        for pattern in (f"*adm{level}*", f"*admin{level}*")
+        for f in HDX_DIR.glob(pattern)
+        if f.suffix in (".geojson", ".json") and "_em" not in f.stem
+    ]
+    return sorted(set(files))[-1] if files else None
 
 
 class Command(ImportCommand):
@@ -24,14 +28,14 @@ class Command(ImportCommand):
         parser.add_argument("--districts", help="GeoJSON file with admin2 districts")
 
     def handle(self, *args, **opts):
-        regions_path = opts.get("from_file") or _latest("adm1")
+        regions_path = opts.get("from_file") or _latest("1")
         if not regions_path:
             raise CommandError(
                 "No admin1 GeoJSON found. Download COD-AB from "
                 "https://data.humdata.org/m/dataset/cod-ab-gha into data/raw/hdx/ "
                 "(file name containing 'adm1', optional 'adm2' file for districts)."
             )
-        districts_path = opts.get("districts") or _latest("adm2")
+        districts_path = opts.get("districts") or _latest("2")
         regions = http.load_json(regions_path)
         districts = (
             http.load_json(districts_path)

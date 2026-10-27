@@ -1,4 +1,4 @@
 {% load i18n %}
-<button class="btn btn-sm {% if following %}btn-primary{% else %}btn-outline{% endif %}" hx-post="{% url 'locations:follow' campus.pk %}" hx-swap="outerHTML">
-  {% if following %}{% translate "Following" %}{% else %}{% translate "Follow" %}{% endif %}
+<button class="btn btn-sm tap {% if following %}btn-ghost bg-primary-content/15 text-primary-content border-0{% else %}btn-secondary{% endif %}" hx-post="{% url 'locations:follow' campus.pk %}" hx-swap="outerHTML" aria-pressed="{% if following %}true{% else %}false{% endif %}">
+  {% if following %}{% icon "check" "size-4" %} {% translate "Following" %}{% else %}{% icon "plus" "size-4" %} {% translate "Follow" %}{% endif %}
 </button>

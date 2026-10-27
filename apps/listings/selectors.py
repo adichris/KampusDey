@@ -187,3 +187,10 @@ def saved_listings(user):
 
 def owner_listings(user):
     return base_queryset().filter(owner=user).exclude(status=Listing.Status.ARCHIVED, title="")
+
+
+def section_counts(location, viewer, enabled_slugs) -> dict[str, int]:
+    """Live listings per section for the current campus/town (home page tiles)."""
+    qs = for_location(visible_listings(viewer, enabled_slugs), location)
+    rows = qs.order_by().values("section").annotate(n=Count("id", distinct=True))
+    return {row["section"]: row["n"] for row in rows}

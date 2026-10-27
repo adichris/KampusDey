@@ -242,3 +242,104 @@ def test_no_network_in_tests(monkeypatch):
     monkeypatch.setattr(requests, "request", boom)
     with pytest.raises(AssertionError):
         http.fetch("https://example.test")
+
+
+def test_osm_departments_and_offices_do_not_become_campuses(regions):
+    from apps.locations.importers.pipeline import looks_like_institution
+
+    assert looks_like_institution("Fixtureton Nursing and Midwifery Training College")
+    assert looks_like_institution("Accra Business School")
+    for name in (
+        "Department of Physics",
+        "British Council Ghana",
+        "Association of African Universities",
+        "Volta Hall",
+        "Balme Library",
+    ):
+        assert not looks_like_institution(name), name
+    pipeline.import_admin_boundaries(load("hdx_adm1.geojson"))
+    pipeline.import_osm_towns(load("overpass_towns.json"))
+    data = {
+        "elements": [
+            {
+                "type": "node",
+                "id": 9,
+                "lat": 7.3,
+                "lon": -2.3,
+                "tags": {"amenity": "university", "name": "Department of Testing"},
+            }
+        ]
+    }
+    assert pipeline.import_osm_campuses(data).counts == {"skipped_not_an_institution": 1}
+
+
+def test_report_flags_points_far_from_town(regions):
+    town = f.TownFactory(lat=7.3, lng=-2.3)
+    f.CampusFactory(name="Far Away Campus", town=town, lat=7.7, lng=-2.0)
+    f.CampusFactory(name="Close Campus", town=town, lat=7.31, lng=-2.3)
+    names = [row[0] for row in pipeline.points_far_from_town()]
+    assert names == ["Far Away Campus"]
+
+
+def test_hdx_lowercase_properties_and_region_alias(db):
+    north_east = f.RegionFactory(name="North East", slug="north-east")
+    data = {
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {"adm1_name": "Northern East", "adm1_pcode": "GH09"},
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [[[0, 10], [1, 10], [1, 11], [0, 11], [0, 10]]],
+                },
+            }
+        ]
+    }
+    pipeline.import_admin_boundaries(data)
+    north_east.refresh_from_db()
+    assert north_east.hdx_pcode == "GH09" and north_east.boundary
+
+
+def test_same_name_different_sources_stay_separate(regions):
+    pipeline.import_admin_boundaries(load("hdx_adm1.geojson"))
+    towns = {
+        "elements": [
+            {
+                "type": "node",
+                "id": 1,
+                "lat": 7.1,
+                "lon": -2.9,
+                "tags": {"place": "town", "name": "Twinville"},
+            },
+            {
+                "type": "node",
+                "id": 2,
+                "lat": 7.9,
+                "lon": -2.1,
+                "tags": {"place": "town", "name": "Twinville"},
+            },
+        ]
+    }
+    pipeline.import_osm_towns(towns)
+    pipeline.import_osm_towns(towns)
+    assert Town.objects.filter(name="Twinville").count() == 2
+    rows = {
+        "results": {
+            "bindings": [
+                {
+                    "item": {"value": f"http://www.wikidata.org/entity/{q}"},
+                    "itemLabel": {"value": "Twin University"},
+                    "coords": {"value": point},
+                }
+                for q, point in (("Q801", "Point(-2.9 7.1)"), ("Q802", "Point(-2.1 7.9)"))
+            ]
+        }
+    }
+    pipeline.import_wikidata_institutions(rows)
+    before = list(Institution.objects.order_by("pk").values_list("wikidata_id", "retrieved_at"))
+    pipeline.import_wikidata_institutions(rows)
+    assert sorted(Institution.objects.values_list("wikidata_id", flat=True)) == ["Q801", "Q802"]
+    assert (
+        list(Institution.objects.order_by("pk").values_list("wikidata_id", "retrieved_at"))
+        == before
+    )

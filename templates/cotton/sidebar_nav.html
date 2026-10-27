@@ -1,21 +1,36 @@
 {% load i18n %}
-<aside class="hidden lg:flex lg:flex-col w-60 shrink-0 sticky top-0 h-screen border-r border-base-300 bg-base-100 p-4 gap-1" aria-label="{% translate 'Main navigation' %}">
-  <a href="/" class="flex items-center gap-2 font-extrabold text-xl text-primary mb-4 px-2">{% icon "school" "size-7" %} KampusDey</a>
-  {% with name=request.resolver_match.url_name %}
-  <a href="/" class="btn btn-ghost justify-start {% if name == 'home' %}btn-active{% endif %}">{% icon "house" %} {% translate "Home" %}</a>
-  <a href="{% url 'listings:nearby' %}" class="btn btn-ghost justify-start {% if name == 'nearby' %}btn-active{% endif %}">{% icon "map" %} {% translate "Nearby" %}</a>
-  <a href="{% url 'listings:search' %}" class="btn btn-ghost justify-start {% if name == 'search' %}btn-active{% endif %}">{% icon "search" %} {% translate "Search" %}</a>
-  <a href="{% url 'chat:inbox' %}" class="btn btn-ghost justify-start {% if name == 'inbox' %}btn-active{% endif %}">{% icon "message-circle" %} {% translate "Chats" %}</a>
-  <a href="{% url 'engagement:saved' %}" class="btn btn-ghost justify-start">{% icon "heart" %} {% translate "Saved" %}</a>
-  <a href="{% url 'dashboard:home' %}" class="btn btn-ghost justify-start">{% icon "chart-column" %} {% translate "My listings" %}</a>
-  <a href="{% url 'accounts:profile' %}" class="btn btn-ghost justify-start {% if name == 'profile' %}btn-active{% endif %}">{% icon "user" %} {% translate "Profile" %}</a>
+<aside class="hidden lg:flex lg:flex-col w-64 shrink-0 sticky top-0 h-screen border-r border-base-300 bg-base-100 px-4 py-5 gap-1" aria-label="{% translate 'Main navigation' %}">
+  <a href="/" class="flex items-center gap-2 font-extrabold text-xl text-primary mb-5 px-2">
+    <span class="rounded-box bg-primary text-primary-content p-1.5">{% icon "school" "size-6" %}</span> KampusDey
+  </a>
+  {% with name=request.resolver_match.url_name ns=request.resolver_match.namespace %}
+  <ul class="menu w-full p-0 gap-0.5 text-[15px]">
+    <li><a href="/" class="{% if name == 'home' or name == 'campus_home' or name == 'town_home' %}bg-primary/10 text-primary font-semibold{% endif %}">{% icon "house" %} {% translate "Home" %}</a></li>
+    <li><a href="{% url 'listings:nearby' %}" class="{% if name == 'nearby' %}bg-primary/10 text-primary font-semibold{% endif %}">{% icon "map" %} {% translate "Nearby" %}</a></li>
+    <li><a href="{% url 'listings:search' %}" class="{% if name == 'search' %}bg-primary/10 text-primary font-semibold{% endif %}">{% icon "search" %} {% translate "Search" %}</a></li>
+    <li><a href="{% url 'chat:inbox' %}" class="{% if ns == 'chat' %}bg-primary/10 text-primary font-semibold{% endif %}">{% icon "message-circle" %} {% translate "Chats" %}
+      {% if user.is_authenticated %}<span hx-get="{% url 'chat:unread_badge' %}" hx-trigger="load, every 30s" hx-swap="innerHTML"></span>{% endif %}</a></li>
+    <li><a href="{% url 'engagement:saved' %}" class="{% if name == 'saved' %}bg-primary/10 text-primary font-semibold{% endif %}">{% icon "heart" %} {% translate "Saved" %}</a></li>
+    <li><a href="{% url 'dashboard:home' %}" class="{% if ns == 'dashboard' %}bg-primary/10 text-primary font-semibold{% endif %}">{% icon "chart-column" %} {% translate "My listings" %}</a></li>
+    <li><a href="{% url 'accounts:profile' %}" class="{% if ns == 'accounts' %}bg-primary/10 text-primary font-semibold{% endif %}">{% icon "user" %} {% translate "Profile" %}</a></li>
+  </ul>
   {% endwith %}
-  <a href="{% url 'listings:post' %}" class="btn btn-primary mt-4">{% icon "plus" %} {% translate "Post" %}</a>
-  <div class="mt-auto text-xs opacity-70 flex flex-wrap gap-2 px-2">
-    <a class="link" href="{% url 'pages:safety' %}">{% translate "Safety" %}</a>
-    <a class="link" href="{% url 'pages:scam_alerts' %}">{% translate "Scam alerts" %}</a>
-    <a class="link" href="{% url 'pages:about' %}">{% translate "About" %}</a>
-    <a class="link" href="{% url 'pages:privacy' %}">{% translate "Privacy" %}</a>
-    <a class="link" href="{% url 'pages:terms' %}">{% translate "Terms" %}</a>
+  <a href="{% url 'listings:post' %}" class="btn btn-primary mt-4 shadow-sm">{% icon "plus" %} {% translate "Post for free" %}</a>
+
+  {% if location.is_set %}
+  <div class="mt-5 rounded-box bg-base-200 p-3 text-sm">
+    <p class="text-xs uppercase tracking-wide opacity-60 font-semibold">{% translate "Your campus" %}</p>
+    <p class="font-semibold truncate mt-0.5">{% if location.campus %}{{ location.campus.name }}{% else %}{{ location.effective_town.name }}{% endif %}</p>
+    <button type="button" class="link link-primary text-xs mt-1" data-open-dialog="location-sheet">{% translate "Change campus" %}</button>
+  </div>
+  {% endif %}
+
+  <div class="mt-auto text-xs opacity-70 flex flex-wrap gap-x-3 gap-y-1 px-2">
+    <a class="link link-hover" href="{% url 'pages:safety' %}">{% translate "Safety" %}</a>
+    <a class="link link-hover" href="{% url 'pages:scam_alerts' %}">{% translate "Scam alerts" %}</a>
+    <a class="link link-hover" href="{% url 'pages:about' %}">{% translate "About" %}</a>
+    <a class="link link-hover" href="{% url 'pages:data_sources' %}">{% translate "Data sources" %}</a>
+    <a class="link link-hover" href="{% url 'pages:privacy' %}">{% translate "Privacy" %}</a>
+    <a class="link link-hover" href="{% url 'pages:terms' %}">{% translate "Terms" %}</a>
   </div>
 </aside>

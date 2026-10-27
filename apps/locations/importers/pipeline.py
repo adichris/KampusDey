@@ -37,6 +37,8 @@ from ..models import (
 )
 from . import http
 from .base import (
+    TOWN_MAX_DISTANCE_M,
+    Match,
     Summary,
     apply_fields,
     find_town_by_name,
@@ -88,11 +90,11 @@ out center tags;"""
 OSM_TOWN_QUERY = """[out:json][timeout:180];
 area["ISO3166-1"="GH"][admin_level=2]->.gh;
 node["place"~"^(city|town)$"](area.gh);
-out tags;"""
+out body;"""  # body (not just tags): node coordinates are needed
 
 OSM_AREA_QUERY = """[out:json][timeout:60];
 node["place"~"^(suburb|neighbourhood|quarter|village|hamlet)$"]["name"](around:{radius},{lat},{lon});
-out tags;"""
+out body;"""  # body (not just tags): node coordinates are needed
 
 
 def unique_slug(model, value: str) -> str:
@@ -118,8 +120,21 @@ def region_for_point(lat, lng):
 # ---------------------------------------------------------------------------
 # HDX admin boundaries
 # ---------------------------------------------------------------------------
+# HDX spellings that differ from the 16 official region names we seed.
+REGION_ALIASES = {"northern east": "north east"}
+
+
 def _region_key(name: str) -> str:
-    return normalise_name(re.sub(r"\bregion\b", "", name or "", flags=re.I))
+    key = normalise_name(re.sub(r"\bregion\b", "", name or "", flags=re.I))
+    return REGION_ALIASES.get(key, key)
+
+
+def _prop(props: dict, *keys: str) -> str:
+    """HDX has used both `ADM1_EN`/`ADM1_PCODE` and `adm1_name`/`adm1_pcode` styles."""
+    for key in keys:
+        if props.get(key):
+            return props[key]
+    return ""
 
 
 @transaction.atomic
@@ -131,8 +146,8 @@ def import_admin_boundaries(
     by_pcode = {}
     for feature in regions_geojson.get("features", []):
         props = feature.get("properties", {})
-        name = props.get("ADM1_EN") or props.get("admin1Name_en") or props.get("name")
-        pcode = props.get("ADM1_PCODE") or props.get("admin1Pcode") or ""
+        name = _prop(props, "ADM1_EN", "adm1_name", "admin1Name_en", "name")
+        pcode = _prop(props, "ADM1_PCODE", "adm1_pcode", "admin1Pcode")
         region = regions.get(_region_key(name))
         if region is None:
             summary.inc("regions_unmatched")
@@ -158,9 +173,9 @@ def import_admin_boundaries(
         by_pcode[pcode] = region
     for feature in (districts_geojson or {}).get("features", []):
         props = feature.get("properties", {})
-        name = props.get("ADM2_EN") or props.get("name")
-        pcode = props.get("ADM2_PCODE") or ""
-        region = by_pcode.get(props.get("ADM1_PCODE"))
+        name = _prop(props, "ADM2_EN", "adm2_name", "name")
+        pcode = _prop(props, "ADM2_PCODE", "adm2_pcode")
+        region = by_pcode.get(_prop(props, "ADM1_PCODE", "adm1_pcode"))
         if not (name and pcode and region):
             summary.inc("districts_skipped")
             continue
@@ -217,11 +232,13 @@ def import_osm_towns(data: dict) -> Summary:
         if region is None:
             summary.inc("skipped_no_region")
             continue
-        town = (
-            Town.objects.filter(source=Source.OSM, source_id=source_id).first()
-            or find_town_by_name(name, region)
-            or Town(region=region, name=name, slug=unique_slug(Town, f"{name}-{region.slug}"))
-        )
+        town = Town.objects.filter(source=Source.OSM, source_id=source_id).first()
+        if town is None:
+            town = find_town_by_name(name, region)
+            if town is not None and town.source == Source.OSM and town.source_id != source_id:
+                town = None  # same name, different OSM node: a different place
+        if town is None:
+            town = Town(region=region, name=name, slug=unique_slug(Town, f"{name}-{region.slug}"))
         created = town.pk is None
         values = {
             "name": name if created else None,
@@ -312,8 +329,8 @@ def _ensure_main_campus(
         values.update(lat=point[0], lng=point[1])
     if campus.source == Source.MANUAL and not campus.source_id:
         values.update(provenance(source, source_id, url, confidence))
-    if town and campus.town_id != town.pk and campus.source != Source.MANUAL:
-        values["town"] = town
+    # An existing campus is never moved to another town by an import: the town is set when
+    # the campus is created, and admins correct it by hand (keeps re-runs stable).
     changed = apply_fields(campus, values)
     if save_if_changed(campus, changed):
         summary.inc("campuses_updated")
@@ -323,7 +340,12 @@ def _ensure_main_campus(
 @transaction.atomic
 def import_wikidata_institutions(data: dict, campus_data: dict | None = None) -> Summary:
     summary = Summary("import_wikidata_institutions", Source.WIKIDATA)
-    rows = data.get("results", {}).get("bindings", [])
+    rows, seen_items = [], set()
+    for row in data.get("results", {}).get("bindings", []):
+        item = _value(row, "item")
+        if item not in seen_items:  # the SPARQL result can repeat an item; keep the first row
+            seen_items.add(item)
+            rows.append(row)
     for row in rows:
         uri = _value(row, "item") or ""
         qid = uri.rsplit("/", 1)[-1]
@@ -338,6 +360,8 @@ def import_wikidata_institutions(data: dict, campus_data: dict | None = None) ->
         point = geo.parse_wkt_point(_value(row, "coords"))
         region = region_for_point(*point) if point else None
         match = match_institution(name, qid, region, point)
+        if match.obj is not None and match.obj.wikidata_id not in (None, qid):
+            match = Match(None, "new", 0.5)  # same name, different Wikidata item
         inst = match.obj or Institution(name=name, slug=unique_slug(Institution, name))
         created = inst.pk is None
         url = f"https://www.wikidata.org/wiki/{qid}"
@@ -368,8 +392,12 @@ def import_wikidata_institutions(data: dict, campus_data: dict | None = None) ->
         _ensure_main_campus(inst, point, town, Source.WIKIDATA, qid, url, confidence, summary)
         if point:
             summary.inc("with_coordinates")
+    seen_campus_items = set()
     for row in (campus_data or {}).get("results", {}).get("bindings", []):
         qid = (_value(row, "item") or "").rsplit("/", 1)[-1]
+        if qid in seen_campus_items:  # one campus can be listed under several parents
+            continue
+        seen_campus_items.add(qid)
         parent_qid = (_value(row, "parent") or "").rsplit("/", 1)[-1]
         name = _value(row, "itemLabel")
         parent = Institution.objects.filter(wikidata_id=parent_qid).first()
@@ -409,6 +437,22 @@ def import_wikidata_institutions(data: dict, campus_data: dict | None = None) ->
 # ---------------------------------------------------------------------------
 # OSM campuses
 # ---------------------------------------------------------------------------
+INSTITUTION_HINT = re.compile(
+    r"(universit|college|polytechnic|institute|school|academy|nursing|midwi|seminary|training)",
+    re.I,
+)
+PART_OF_CAMPUS = re.compile(
+    r"\b(department|dept|faculty|hall|library|laborator|lab|annex|block|office|association|council|"
+    r"hostel|clinic|hospital|auditorium|centre for|center for)\b",
+    re.I,
+)
+
+
+def looks_like_institution(name: str) -> bool:
+    """New OSM-only campuses must look like an institution, not a part of one."""
+    return bool(INSTITUTION_HINT.search(name or "")) and not PART_OF_CAMPUS.search(name or "")
+
+
 def _el_point(el):
     if "lat" in el:
         return el["lat"], el["lon"]
@@ -438,6 +482,11 @@ def import_osm_campuses(data: dict) -> Summary:
             region = region_for_point(*point) if point else None
             match = match_campus(name, point, region)
             campus, method, confidence = match.obj, match.method, match.confidence
+        if campus is None and not looks_like_institution(name):
+            # amenity=university is also used for departments, halls and offices inside
+            # campuses; those must not become campuses of their own.
+            summary.inc("skipped_not_an_institution")
+            continue
         if campus is None:
             region = region_for_point(*point) if point else None
             town = nearest_town(*point) if point else None
@@ -745,6 +794,7 @@ def locations_report() -> dict:
         "unverified_campuses": campuses.filter(review_status=ReviewStatus.UNVERIFIED).count(),
         "unverified_areas": Area.objects.filter(review_status=ReviewStatus.UNVERIFIED).count(),
         "possible_duplicates": [(a.name, b.name, round(s, 2)) for a, b, s in dupes[:50]],
+        "points_far_from_town": points_far_from_town(),
         "gtec_flagged": list(
             Institution.objects.filter(
                 gtec_status__in=[GtecStatus.EXPIRED, GtecStatus.UNACCREDITED]
@@ -752,6 +802,18 @@ def locations_report() -> dict:
         ),
         "match_methods": _match_rates(),
     }
+
+
+def points_far_from_town(max_km: float = TOWN_MAX_DISTANCE_M / 1000):
+    """Campuses whose point is far from their town's point: usually a wrong source coordinate."""
+    rows = []
+    for campus in (
+        Campus.objects.with_point().filter(town__lat__isnull=False).select_related("town")
+    ):
+        km = geo.haversine_m(campus.lat, campus.lng, campus.town.lat, campus.town.lng) / 1000
+        if km > max_km:
+            rows.append((campus.name, campus.town.name, round(km), campus.source))
+    return rows
 
 
 def _match_rates():

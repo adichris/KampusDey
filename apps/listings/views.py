@@ -69,14 +69,25 @@ def _home(request, location, landing=None):
     sections = enabled_sections(campus)
     slugs = {s.slug for s in sections}
     feeds = selectors.home_feeds(location, request.user, slugs) if location.is_set else {}
+    counts = selectors.section_counts(location, request.user, slugs) if location.is_set else {}
+    following = (
+        request.user.is_authenticated
+        and campus is not None
+        and request.user.profile.followed_campuses.filter(pk=campus.pk).exists()
+    )
     return render(
         request,
         "listings/home.html",
         {
             "sections": sections,
+            "section_tiles": [(s, counts.get(s.slug, 0)) for s in sections],
+            "total_live": sum(counts.values()),
             "feeds": feeds,
             "page_location": location,
+            # On /<campus>/ and /town/<town>/ the header and sidebar show that place.
+            **({"location": location} if landing is not None else {}),
             "landing": landing,
+            "following": following,
             "spotlight": current_spotlight(campus),
         },
     )

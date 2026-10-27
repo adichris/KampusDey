@@ -5,15 +5,24 @@
       {% icon "school" "size-6" %}<span class="hidden sm:inline">KampusDey</span>
     </a>
     <c-campus-switcher />
-    <div class="ml-auto flex items-center gap-1">
-      <a href="{% url 'listings:search' %}" class="btn btn-ghost btn-circle tap" aria-label="{% translate 'Search' %}">{% icon "search" %}</a>
+    <form action="{% url 'listings:search' %}" method="get" role="search" class="hidden md:flex flex-1 max-w-md mx-auto">
+      <label class="input input-sm input-bordered w-full flex items-center gap-2 bg-base-200 border-base-300">
+        {% icon "search" "size-4 opacity-60" %}
+        <span class="sr-only">{% translate "Search" %}</span>
+        <input type="search" name="q" value="{{ request.GET.q|default:'' }}" class="grow" placeholder="{% if location.is_set %}{% blocktranslate with place=location.label %}Search around {{ place }}{% endblocktranslate %}{% else %}{% translate 'Search KampusDey' %}{% endif %}">
+      </label>
+    </form>
+    <div class="ml-auto md:ml-0 flex items-center gap-1">
+      <a href="{% url 'listings:search' %}" class="btn btn-ghost btn-circle tap md:hidden" aria-label="{% translate 'Search' %}">{% icon "search" %}</a>
       {% if user.is_authenticated %}
       <a href="{% url 'notifications:list' %}" class="btn btn-ghost btn-circle tap indicator" aria-label="{% translate 'Notifications' %}">
         {% icon "bell" %}
         {% if unread_notifications %}<span class="indicator-item badge badge-accent badge-xs">{{ unread_notifications }}</span>{% endif %}
       </a>
+      <a href="{% url 'accounts:profile' %}" class="hidden lg:flex tap" aria-label="{% translate 'Profile' %}"><c-avatar name="{{ user.public_name }}" size="size-9" /></a>
       {% else %}
       <a href="{% url 'account_login' %}" class="btn btn-ghost btn-sm tap">{% translate "Log in" %}</a>
+      <a href="{% url 'account_signup' %}" class="btn btn-primary btn-sm tap hidden sm:inline-flex">{% translate "Sign up free" %}</a>
       {% endif %}
     </div>
   </div>

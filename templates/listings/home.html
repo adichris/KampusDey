@@ -2,46 +2,96 @@
 {% load i18n %}
 {% block title %}{% if landing %}{{ landing }} · {% endif %}KampusDey — {% translate "Whatever you need on campus, e dey." %}{% endblock %}
 {% block content %}
-<section class="mb-4">
-  <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight">
-    {% if page_location.is_set %}{% blocktranslate with place=page_location.label %}Whatever you need around {{ place }}, e dey.{% endblocktranslate %}
-    {% else %}{% translate "Whatever you need on campus, e dey." %}{% endif %}
-  </h1>
-  <form action="{% url 'listings:search' %}" method="get" class="mt-3 join w-full" role="search">
+{% if not page_location.is_set %}
+{# ---------- first visit: no campus chosen yet ---------- #}
+<section class="hero rounded-box bg-primary text-primary-content overflow-hidden">
+  <div class="hero-content flex-col items-start text-left w-full py-10 sm:py-14 px-5 sm:px-10">
+    <span class="badge badge-secondary font-semibold">{% translate "Free for every student in Ghana" %}</span>
+    <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight max-w-2xl">{% translate "Whatever you need on campus, e dey." %}</h1>
+    <p class="max-w-xl opacity-90">{% translate "Hostels and roommates, things to buy and sell, jobs, food, events and notes — all near your campus." %}</p>
+    <button type="button" class="btn btn-secondary btn-lg mt-2 tap" data-open-dialog="location-sheet">{% icon "map-pin" %} {% translate "Choose your campus" %}</button>
+  </div>
+</section>
+<section class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+  <div class="card bg-base-100 border border-base-300"><div class="card-body p-4"><span class="text-primary">{% icon "bed" "size-6" %}</span><h2 class="font-bold">{% translate "Rooms near campus" %}</h2><p class="text-sm opacity-75">{% translate "Hostels, rooms and roommates with approximate locations and walking times." %}</p></div></div>
+  <div class="card bg-base-100 border border-base-300"><div class="card-body p-4"><span class="text-primary">{% icon "message-circle" "size-6" %}</span><h2 class="font-bold">{% translate "Contact directly" %}</h2><p class="text-sm opacity-75">{% translate "WhatsApp, call or chat under an alias. Your number stays hidden until you share it." %}</p></div></div>
+  <div class="card bg-base-100 border border-base-300"><div class="card-body p-4"><span class="text-primary">{% icon "shield-check" "size-6" %}</span><h2 class="font-bold">{% translate "Safer by design" %}</h2><p class="text-sm opacity-75">{% translate "Scam warnings, verified badges and reports reviewed by real people." %}</p></div></div>
+</section>
+{% else %}
+{# ---------- campus hero ---------- #}
+<section class="rounded-box bg-primary text-primary-content p-5 sm:p-7">
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0">
+      <p class="text-sm opacity-85 flex items-center gap-1">{% icon "map-pin" "size-4" %}
+        {% if page_location.campus %}{{ page_location.campus.town.name }}, {{ page_location.campus.town.region.name }}{% else %}{{ page_location.effective_town.region.name }}{% endif %}</p>
+      <h1 class="text-2xl sm:text-4xl font-extrabold leading-tight mt-1">
+        {% blocktranslate with place=page_location.label %}Whatever you need around {{ place }}, e dey.{% endblocktranslate %}</h1>
+      {% if page_location.campus and page_location.campus.short_name %}<p class="opacity-85 mt-1 truncate">{{ page_location.campus.name }}</p>{% endif %}
+    </div>
+    <div class="flex gap-2 shrink-0">
+      {% if page_location.campus and user.is_authenticated %}
+        {% include "locations/partials/follow_button.html" with campus=page_location.campus %}
+      {% endif %}
+      <button type="button" class="btn btn-sm btn-ghost bg-primary-content/15 text-primary-content border-0 tap" data-open-dialog="location-sheet">{% icon "refresh-cw" "size-4" %} {% translate "Change" %}</button>
+    </div>
+  </div>
+  <form action="{% url 'listings:search' %}" method="get" class="mt-4 join w-full" role="search">
     <label for="home-q" class="sr-only">{% translate "Search" %}</label>
-    <input id="home-q" name="q" type="search" class="input input-bordered join-item w-full" placeholder="{% translate 'Search rooms, phones, jobs…' %}">
-    <button class="btn btn-primary join-item tap" aria-label="{% translate 'Search' %}">{% icon "search" %}</button>
+    <input id="home-q" name="q" type="search" class="input join-item w-full text-base-content bg-base-100 border-0" placeholder="{% translate 'Search rooms, phones, jobs…' %}">
+    <button class="btn btn-secondary join-item tap" aria-label="{% translate 'Search' %}">{% icon "search" %}<span class="hidden sm:inline">{% translate "Search" %}</span></button>
   </form>
+  <div class="flex flex-wrap gap-x-5 gap-y-1 mt-3 text-sm opacity-90">
+    <span class="flex items-center gap-1">{% icon "package" "size-4" %} {% if total_live %}{% blocktranslate count n=total_live %}{{ n }} live post{% plural %}{{ n }} live posts{% endblocktranslate %}{% else %}{% translate "New here — be the first to post" %}{% endif %}</span>
+    <span class="flex items-center gap-1">{% icon "layout-grid" "size-4" %} {% blocktranslate count n=sections|length %}{{ n }} section{% plural %}{{ n }} sections{% endblocktranslate %}</span>
+  </div>
 </section>
 
-{% if not page_location.is_set %}
-<c-empty-state icon="map-pin" title="{% translate 'Choose your campus to get started' %}" text="{% translate 'We show what is near you: rooms, food, jobs and more.' %}">
-  <button type="button" class="btn btn-primary" data-open-dialog="location-sheet">{% icon "map-pin" %} {% translate "Where are you?" %}</button>
-</c-empty-state>
-{% else %}
-<nav class="chip-row flex gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0" aria-label="{% translate 'Sections' %}">
-  {% for section in sections %}
-    {% if page_location.campus %}{% url 'listings:section_campus' page_location.campus.slug section.slug as href %}{% else %}{% url 'listings:section_town' page_location.effective_town.slug section.slug as href %}{% endif %}
-    <c-section-chip :section="section" href="{{ href }}" />
-  {% endfor %}
+{# ---------- quick links ---------- #}
+<nav class="grid grid-cols-4 gap-2 mt-3" aria-label="{% translate 'Quick links' %}">
+  <a href="{% url 'listings:nearby' %}" class="flex flex-col items-center gap-1 rounded-box bg-base-100 border border-base-300 p-3 text-xs sm:text-sm font-medium hover:border-primary tap">{% icon "map" "size-5 text-primary" %}{% translate "Nearby" %}</a>
   {% if page_location.campus %}
-  <a href="{% url 'around' page_location.campus.slug %}" class="btn btn-sm rounded-full btn-ghost bg-base-100 border-base-300 whitespace-nowrap tap">{% icon "store" "size-4" %} {% translate "Around campus" %}</a>
-  <a href="{% url 'rent_check' page_location.campus.slug %}" class="btn btn-sm rounded-full btn-ghost bg-base-100 border-base-300 whitespace-nowrap tap">{% icon "chart-column" "size-4" %} {% translate "Rent check" %}</a>
+  <a href="{% url 'around' page_location.campus.slug %}" class="flex flex-col items-center gap-1 rounded-box bg-base-100 border border-base-300 p-3 text-xs sm:text-sm font-medium hover:border-primary tap">{% icon "store" "size-5 text-primary" %}{% translate "Around campus" %}</a>
+  <a href="{% url 'rent_check' page_location.campus.slug %}" class="flex flex-col items-center gap-1 rounded-box bg-base-100 border border-base-300 p-3 text-xs sm:text-sm font-medium hover:border-primary tap">{% icon "chart-column" "size-5 text-primary" %}{% translate "Rent check" %}</a>
+  {% else %}
+  <a href="{% url 'listings:search' %}" class="flex flex-col items-center gap-1 rounded-box bg-base-100 border border-base-300 p-3 text-xs sm:text-sm font-medium hover:border-primary tap">{% icon "search" "size-5 text-primary" %}{% translate "Search" %}</a>
+  <a href="{% url 'engagement:saved' %}" class="flex flex-col items-center gap-1 rounded-box bg-base-100 border border-base-300 p-3 text-xs sm:text-sm font-medium hover:border-primary tap">{% icon "heart" "size-5 text-primary" %}{% translate "Saved" %}</a>
   {% endif %}
+  <a href="{% url 'pages:safety' %}" class="flex flex-col items-center gap-1 rounded-box bg-base-100 border border-base-300 p-3 text-xs sm:text-sm font-medium hover:border-primary tap">{% icon "shield-check" "size-5 text-primary" %}{% translate "Stay safe" %}</a>
 </nav>
 
 {% if spotlight %}
-<section class="card bg-secondary text-secondary-content my-4">
-  <div class="card-body p-4">
-    <p class="text-xs font-bold uppercase tracking-wide">{{ spotlight.blurb }}</p>
-    {% if spotlight.listing %}<a class="text-lg font-bold link" href="{{ spotlight.listing.get_absolute_url }}">{{ spotlight.listing.title }}</a>
-    {% elif spotlight.user %}<a class="text-lg font-bold link" href="{% url 'accounts:public_profile' spotlight.user.pk %}">{{ spotlight.user.public_name }}</a>{% endif %}
+<section class="card bg-secondary text-secondary-content mt-4">
+  <div class="card-body p-4 flex-row items-center gap-3">
+    <span>{% icon "star" "size-6" %}</span>
+    <div class="min-w-0">
+      <p class="text-xs font-bold uppercase tracking-wide">{{ spotlight.blurb }}</p>
+      {% if spotlight.listing %}<a class="text-lg font-bold link truncate block" href="{{ spotlight.listing.get_absolute_url }}">{{ spotlight.listing.title }}</a>
+      {% elif spotlight.user %}<a class="text-lg font-bold link" href="{% url 'accounts:public_profile' spotlight.user.pk %}">{{ spotlight.user.public_name }}</a>{% endif %}
+    </div>
   </div>
 </section>
 {% endif %}
 
+{# ---------- browse sections ---------- #}
+<section class="mt-6" aria-labelledby="browse-heading">
+  <div class="flex items-end justify-between mb-2">
+    <h2 id="browse-heading" class="font-bold text-lg">{% translate "Browse" %}</h2>
+    <a href="{% url 'listings:post' %}" class="link link-primary text-sm font-semibold">{% translate "Post something" %}</a>
+  </div>
+  <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+    {% for section, count in section_tiles %}
+      {% if page_location.campus %}{% url 'listings:section_campus' page_location.campus.slug section.slug as href %}{% else %}{% url 'listings:section_town' page_location.effective_town.slug section.slug as href %}{% endif %}
+      <a href="{{ href }}" class="group flex flex-col items-center justify-center gap-1 rounded-box bg-base-100 border border-base-300 p-3 text-center hover:border-primary hover:shadow-sm transition tap">
+        <span class="rounded-full bg-base-200 p-2 text-primary group-hover:bg-primary group-hover:text-primary-content transition">{% icon section.icon "size-5" %}</span>
+        <span class="text-xs sm:text-sm font-semibold leading-tight">{{ section.label }}</span>
+        <span class="text-[11px] opacity-60">{% if count %}{{ count }} {% translate "live" %}{% else %}{% translate "Be first" %}{% endif %}</span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
 {% if feeds.boosted %}
-<section class="my-5">
+<section class="mt-6">
   <h2 class="font-bold text-lg mb-2 flex items-center gap-2">{% icon "rocket" "size-5 text-secondary" %} {% translate "Boosted" %}</h2>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
     {% for item in feeds.boosted %}<c-listing-card :listing="item" boosted="1" />{% endfor %}
@@ -49,21 +99,28 @@
 </section>
 {% endif %}
 
-<section class="my-5">
+<section class="mt-6">
   <h2 class="font-bold text-lg mb-2">{% translate "Near you" %}</h2>
   {% if feeds.near %}
-  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
     {% for item in feeds.near %}<c-listing-card :listing="item" show_distance="1" />{% endfor %}
   </div>
   {% else %}
-  <c-empty-state icon="package" title="{% translate 'Nothing posted here yet' %}" text="{% translate 'Be the first: post a room, an item, a job or a question.' %}" action_url="{% url 'listings:post' %}" />
+  <div class="rounded-box border border-dashed border-base-300 bg-base-100 p-5 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+    <span class="rounded-full bg-base-200 p-3 text-primary">{% icon "package" "size-7" %}</span>
+    <div class="flex-1">
+      <h3 class="font-bold">{% blocktranslate with place=page_location.label %}Be the first to post around {{ place }}{% endblocktranslate %}</h3>
+      <p class="text-sm opacity-75">{% translate "A room, an item, a job or a question — it takes a minute and it's free." %}</p>
+    </div>
+    <a href="{% url 'listings:post' %}" class="btn btn-primary tap">{% icon "plus" %} {% translate "Post" %}</a>
+  </div>
   {% endif %}
 </section>
 
 {% if feeds.new_today %}
-<section class="my-5">
+<section class="mt-6">
   <h2 class="font-bold text-lg mb-2">{% translate "New today" %}</h2>
-  <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
     {% for item in feeds.new_today %}<c-listing-card :listing="item" />{% endfor %}
   </div>
 </section>
