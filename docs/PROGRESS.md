@@ -2,7 +2,7 @@
 
 ## Status (2026-10-27)
 
-All milestones M0–M14 are implemented in code and covered by tests. **261 tests pass** (offline,
+All milestones M0–M14 are implemented in code and covered by tests. **269 tests pass** (offline,
 recorded sample responses only); `ruff check` and `ruff format --check` are clean;
 `makemigrations --check` reports no changes; `manage.py check --deploy` (prod settings) is clean.
 Coverage: 84% overall; services/selectors ≈ 85% combined (contacts 76%, locations 77%,
@@ -16,7 +16,7 @@ wizard step 2 with Leaflet map and OSM attribution — no console or CSP errors.
 |---|---|---|
 | M0 Foundation & theming | done | venv instead of Docker/uv (user request); brand themes + 11 daisyUI themes; no-flash theme script |
 | M1 Locations | done | picker, campus switcher, follow, campus requests, GeoIP hint, `update_geolite2` |
-| M1.5 Real location data | done (offline-tested) | importers for Wikidata, OSM, HDX, GTEC, MoH, Wikipedia; review queue, duplicates, merge, report. **Real import not yet run** — needs internet + HDX download |
+| M1.5 Real location data | done — real import run 2026-10-27 | see *Real import results* below. Admin review of unverified records still to do |
 | M2 Accounts & verification | done | allauth (mandatory verification), Google optional, staff TOTP, Turnstile, OTP behind runtime switch, encrypted secrets |
 | M3 Listing core | done | wizard with drafts, EXIF stripping, WebP renditions, pHash, snapping, auto-link, phone reveal |
 | M4 All sections | done | 18 sections, per-campus availability matrix, trips off by default |
@@ -31,6 +31,34 @@ wizard step 2 with Leaflet map and OSM attribution — no console or CSP errors.
 | M12 Growth & SEO | done | referrals, digest, rent check, spotlight, sitemaps, OG, JSON-LD |
 | M13 Admin & ops | done | unfold sidebar/dashboard, constance groups, integration test actions, OPERATIONS.md |
 | M14 Hardening | partly | prod settings, Dockerfile, backup script, CI. See known gaps |
+
+## Real import results (2026-10-27, local dev DB)
+Sources: HDX COD-AB (GSS, CC BY-IGO), OSM via overpass-api.de, Wikidata SPARQL, GTEC unaccredited
+and unrecognized lists (saved under `data/raw/`, gitignored).
+
+| Check (DATA_SOURCES §12) | Result |
+|---|---|
+| 16 regions with boundaries | ✓ 16/16, plus 260 districts |
+| Institutions from Wikidata, OSM, reference lists | ✓ 291 Wikidata, 105 OSM, 104 GTEC-only (flags) |
+| Share of campuses with points | ✓ 324 of 335 (96.7%) |
+| Duplicates flagged | ✓ 28 pairs in the Duplicates view |
+| GTEC flags applied | ✓ 106 institutions flagged unaccredited (hidden from users). GTEC's *accredited* page is currently broken (unrendered shortcode), so no institution is marked accredited yet |
+| Sunyani: UENR, STU, Berekum CoE | ✓ matched to seeded records, Wikidata point, OSM id, town and region |
+| Sunyani: Catholic University of Ghana | ⚠ three records (seeded, Wikidata "Catholic University College of Ghana", OSM "…-Fiapre"); flagged as duplicates — an admin should merge them |
+| Sunyani: NMTC Sunyani | ⚠ exists, but its Wikidata point is ~49 km from Sunyani; listed under `points_far_from_town` for admin correction |
+| Provenance on every imported record | ✓ 0 non-manual records missing source/licence/date/status |
+| Re-run changes nothing | ✓ towns, Wikidata, OSM campuses and GTEC re-run with zero field changes |
+| No third-party listings/people | ✓ by design (only the listed sources) |
+| Offline tests, DATA_SOURCES.md, Data sources page | ✓ |
+
+Neighbourhoods: 2,929 areas imported (all `unverified`, hidden until reviewed); 7 campuses still
+failed on Overpass 502s — re-run `manage.py import_osm_areas` (it resumes from today's cache).
+
+Fixes made while running for real: current HDX property names and "Northern East" spelling;
+Overpass `out body` (the spec's `out tags` returns no node coordinates); OSM departments/halls/
+offices skipped; same-name records from different Wikidata items or OSM nodes kept separate;
+imports never move an existing campus between towns; duplicate SPARQL rows de-duplicated; area
+import survives failed campuses and resumes; GTEC table serial numbers stripped.
 
 ## Decisions
 - **No Docker locally** (user request): Python venv + pip (`requirements*.txt`) instead of uv;
@@ -48,11 +76,14 @@ wizard step 2 with Leaflet map and OSM attribution — no console or CSP errors.
 - Remotive category slugs mapped to Remotive's display names (`CATEGORY_ALIASES`).
 - Test fixtures in `tests/fixtures/sources/` are synthetic, shape-only samples (clearly labelled),
   not recorded real responses — no real-world data is invented in the database.
+- Desktop layout uses the full window width beside the sidebar (user request; supersedes the
+  "centred column max ~1200px" in §7.1).
 - Message admin is intentionally not registered: admins read conversations only through reports.
 
 ## Known gaps / next steps
-1. Run the real imports with internet: download HDX COD-AB into `data/raw/hdx/`, save GTEC/MoH
-   lists into `data/raw/`, then `make import-locations`; check the Sunyani acceptance criteria.
+1. Admin review of the imported data: merge the 28 duplicate pairs (incl. Catholic University),
+   fix the NMTC Sunyani point, verify campuses and areas; re-run areas for the 7 failed campuses;
+   save the Ministry of Health PDF and (when GTEC fixes it) the accredited list into `data/raw/`.
 2. Approve the OSM and Remotive sources in the admin after reading the terms, then `make import-external`.
 3. Playwright smoke tests (M14) not written — `playwright` wheels for Python 3.15 were not checked.
 4. Lighthouse mobile audit (M14) not run.

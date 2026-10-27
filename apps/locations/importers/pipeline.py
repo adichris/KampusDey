@@ -595,7 +595,8 @@ def parse_reference_file(path: Path) -> list[dict]:
     else:
         return entries
     for line in lines:
-        text = re.sub(r"^\s*\d+[\.\)]\s*", "", line).strip()
+        # Drop a leading serial number: "1.", "1)", or a "1 |" table cell.
+        text = re.sub(r"^\s*\d+\s*(?:[\.\):|-]\s*|\s+)", "", line).strip()
         if not text or not NAME_HINT.search(text):
             continue
         parts = [p.strip() for p in re.split(r"\s*[|\t;]\s*", text) if p.strip()]
@@ -754,10 +755,19 @@ def import_osm_areas(fetcher=None, radius: int | None = None, sleep_s: float = 2
     summary = Summary("import_osm_areas", Source.OSM)
     for campus in Campus.objects.visible().with_point().select_related("town"):
         if fetcher is None:
-            query = OSM_AREA_QUERY.format(radius=radius, lat=campus.lat, lon=campus.lng)
-            data = http.overpass(query)
-            http.save_raw("osm", f"areas-{campus.slug}", data)
-            time.sleep(sleep_s)
+            data = http.raw_from_today("osm", f"areas-{campus.slug}")  # resume a broken run
+            if data is None:
+                query = OSM_AREA_QUERY.format(radius=radius, lat=campus.lat, lon=campus.lng)
+                try:
+                    data = http.overpass(query)
+                except http.FetchError:
+                    # One overloaded response must not abort the whole import; re-run later.
+                    summary.inc("campuses_failed")
+                    continue
+                http.save_raw("osm", f"areas-{campus.slug}", data)
+                time.sleep(sleep_s)
+            else:
+                summary.inc("campuses_from_cache")
         else:
             data = fetcher(campus)
         with transaction.atomic():

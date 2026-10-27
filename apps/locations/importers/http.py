@@ -106,3 +106,9 @@ def overpass(query: str):
 
 def load_json(path) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def raw_from_today(source: str, name: str):
+    """The raw response saved today for `name`, if any (lets an interrupted import resume)."""
+    path = RAW_DIR / source / f"{name}-{timezone.now():%Y%m%d}.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None

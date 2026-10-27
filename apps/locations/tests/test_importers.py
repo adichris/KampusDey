@@ -343,3 +343,38 @@ def test_same_name_different_sources_stay_separate(regions):
         list(Institution.objects.order_by("pk").values_list("wikidata_id", "retrieved_at"))
         == before
     )
+
+
+def test_area_import_survives_failed_campus_and_resumes(regions, monkeypatch, tmp_path):
+    f.CampusFactory(name="Ok Campus", lat=7.3, lng=-2.3)
+    f.CampusFactory(name="Busy Campus", lat=7.4, lng=-2.4)
+    monkeypatch.setattr(http, "RAW_DIR", tmp_path)
+    calls = []
+
+    def flaky(query):
+        calls.append(query)
+        if len(calls) == 2:
+            raise http.FetchError("504")
+        return load("overpass_areas.json")
+
+    monkeypatch.setattr(http, "overpass", flaky)
+    summary = pipeline.import_osm_areas(sleep_s=0)
+    assert summary.counts["campuses_failed"] == 1 and Area.objects.exists()
+    calls.clear()
+    summary = pipeline.import_osm_areas(sleep_s=0)
+    assert summary.counts["campuses_from_cache"] == 1 and len(calls) == 1
+
+
+def test_reference_html_table_with_serial_numbers(tmp_path):
+    page = tmp_path / "gtec_unaccredited-2026.html"
+    page.write_text(
+        "<table><tr><th>S/N</th><th>Institution</th><th>Location</th></tr>"
+        "<tr><td>1</td><td>Sample Institute of Technology</td><td>Kasoa</td></tr>"
+        "<tr><td>2.</td><td>Example College of Health</td><td>Kumasi</td></tr></table>",
+        encoding="utf-8",
+    )
+    entries = pipeline.parse_reference_file(page)
+    assert [(e["name"], e["town"]) for e in entries] == [
+        ("Sample Institute of Technology", "Kasoa"),
+        ("Example College of Health", "Kumasi"),
+    ]
