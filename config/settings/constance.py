@@ -50,6 +50,11 @@ CONSTANCE_CONFIG = {
     "FIRST_CONTACT_MIN_ACCOUNT_AGE_HOURS": (24, _("Account age to message someone new"), int),
     "CHAT_NEW_ACCOUNT_DAYS": (3, _("Days an account counts as new for chat limits"), int),
     "CHAT_NEW_ACCOUNT_DAILY_LIMIT": (20, _("Messages per day for new accounts"), int),
+    "GUEST_CHAT_MESSAGE_LIMIT": (
+        10,
+        _("Messages a guest can send in one chat before they must sign up"),
+        int,
+    ),
     "MAX_PHOTOS": (8, _("Maximum photos per listing"), int),
     "MAX_UPLOAD_MB": (8, _("Maximum upload size per photo (MB)"), int),
     # Appearance
@@ -111,6 +116,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "FIRST_CONTACT_MIN_ACCOUNT_AGE_HOURS",
         "CHAT_NEW_ACCOUNT_DAYS",
         "CHAT_NEW_ACCOUNT_DAILY_LIMIT",
+        "GUEST_CHAT_MESSAGE_LIMIT",
         "MAX_PHOTOS",
         "MAX_UPLOAD_MB",
     ),

@@ -125,6 +125,10 @@ class ChatHandler(ChannelHandler):
     def action_url(self, listing, viewer):
         # chat:start is POST-only and logs the tap itself; guests log in first.
         if viewer is None or not viewer.is_authenticated:
+            from apps.chat.services import guest_chat_allowed
+
+            if guest_chat_allowed(listing):
+                return reverse("chat:guest_start", args=[listing.pk])
             return f"{reverse('account_login')}?next={quote(listing.get_absolute_url())}"
         return reverse("chat:start", args=[listing.pk])
 

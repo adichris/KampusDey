@@ -19,6 +19,7 @@
     </div>
   </header>
   <p class="text-xs text-center opacity-60 my-2">{% blocktranslate %}You appear as “{{ my_alias }}”. Never pay before viewing.{% endblocktranslate %}</p>
+  {% if conversation.is_guest %}<p class="text-xs text-center opacity-70 -mt-1 mb-2"><span class="badge badge-ghost badge-sm">{% translate "Guest" %}</span> {% translate "This person has no account. Keep the conversation on KampusDey and never share payment details." %}</p>{% endif %}
   <div id="thread" class="flex-1 overflow-y-auto py-2" hx-get="{% url 'chat:poll' conversation.pk %}" hx-trigger="every 5s" hx-swap="innerHTML">
     {% include "chat/partials/messages.html" %}
   </div>

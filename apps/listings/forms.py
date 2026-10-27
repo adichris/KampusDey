@@ -310,6 +310,13 @@ class ContactStepForm(forms.Form):
         label=_("Allow email messages (relayed, your address stays hidden)"), required=False
     )
     chat = forms.BooleanField(label=_("Allow in-app chat"), required=False, initial=True)
+    allow_guest_chat = forms.BooleanField(
+        label=_("Let guests chat without an account"),
+        help_text=_(
+            "More people can reach you. Guests stay anonymous to you and you can block them."
+        ),
+        required=False,
+    )
     preferred_channel = forms.ChoiceField(
         label=_("Main contact button"),
         help_text=_("Shown first and largest on your listing. The others stay available."),

@@ -59,6 +59,7 @@ def apply_contact_step(card: ContactCard, data: dict) -> ContactCard:
             )
     card.preferred_time = data.get("preferred_time") or ""
     card.preferred_channel = data.get("preferred_channel") or ""
+    card.allow_guest_chat = bool(data.get("chat") and data.get("allow_guest_chat"))
     card.save()
     card._prefetched_objects_cache = {}
     return card
@@ -70,6 +71,7 @@ def initial_from_card(card: ContactCard | None) -> dict:
     initial = {
         "preferred_time": card.preferred_time,
         "preferred_channel": card.preferred_channel or "chat",
+        "allow_guest_chat": card.allow_guest_chat,
     }
     for channel in card.channels.all():
         if channel.kind == "email":

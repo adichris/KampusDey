@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Message the seller" %} · {{ listing.title }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block head %}{% if turnstile_site_key %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer nonce="{{ request.csp_nonce }}"></script>{% endif %}{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto">
+  <a href="{{ listing.get_absolute_url }}" class="btn btn-ghost btn-sm mb-2">{% icon "chevron-left" "size-4" %} {% translate "Back to listing" %}</a>
+  <div class="card bg-base-100 border border-base-300">
+    <div class="card-body gap-3">
+      <div class="flex items-center gap-3">
+        <span class="grid size-11 shrink-0 place-items-center rounded-box bg-primary/10 text-primary">{% icon "messages-square" "size-5" %}</span>
+        <div class="min-w-0">
+          <h1 class="text-lg font-bold leading-tight">{% translate "Message the seller" %}</h1>
+          <p class="text-sm opacity-70 truncate">{{ listing.title }}</p>
+        </div>
+      </div>
+      <p class="text-sm opacity-80">{% translate "No account needed. You'll get a private link to this chat so you can come back for replies." %}</p>
+      <form method="post" class="flex flex-col gap-0">{% csrf_token %}
+        {% if form.non_field_errors %}<c-alert kind="error">{{ form.non_field_errors|join:" " }}</c-alert>{% endif %}
+        <c-form-field :field="form.name" />
+        <c-form-field :field="form.email" />
+        <c-form-field :field="form.body" />
+        {% if turnstile_site_key %}<div class="cf-turnstile my-2" data-sitekey="{{ turnstile_site_key }}"></div>{% endif %}
+        <button class="btn btn-primary tap mt-2">{% icon "send" "size-4" %} {% translate "Send message" %}</button>
+      </form>
+      <p class="text-xs opacity-60 flex items-start gap-1">{% icon "shield-check" "size-3 mt-0.5 shrink-0" %}<span>{% translate "Never pay before you see the item or room." %} <a class="link" href="{% url 'account_signup' %}">{% translate "Create a free account" %}</a> {% translate "to keep all your chats in one place." %}</span></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

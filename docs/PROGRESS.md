@@ -88,6 +88,13 @@ import survives failed campuses and resumes; GTEC table serial numbers stripped.
 - Sellers pick a main contact button (`ContactCard.preferred_channel`); it is shown first and
   filled, the others outlined (icon-only in the phone bar). In-app chat is the default. The chat
   button posts straight to `chat:start` (the old tap-redirect hit a POST-only view).
+- **Guest chat** (owner opt-in, `ContactCard.allow_guest_chat`, off by default; extends §6.8 at the
+  user's request): guests give a name, an optional email and a message, then chat through a private
+  link (`/chat/g/<key>/`, remembered in a signed cookie). Guarded by per-IP rate limits, banned-term
+  checks, Turnstile when configured and blocking. After `GUEST_CHAT_MESSAGE_LIMIT` (constance,
+  default 10) messages the guest must sign up or log in; the chat then moves into the account
+  (claim link, or automatically on log-in for chats this browser remembers). The guest's email is
+  only used to send them the link and reply alerts, never shown to the owner.
 - Owners can't save (like) their own listings; they see a read-only saves count instead.
 - CSP stays strict site-wide; only `/admin/` adds `'unsafe-eval'` (scripts) and `'unsafe-inline'`
   (styles), because django-unfold ships the standard Alpine build (`apps/core/csp.py`, user approved).

@@ -10,8 +10,13 @@ class Conversation(TimeStampedModel):
     listing = models.ForeignKey(
         "listings.Listing", on_delete=models.CASCADE, related_name="conversations"
     )
+    # Empty for a guest chat: the guest is identified by `guest_key` (their private link).
     starter = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="started_conversations"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="started_conversations",
+        null=True,
+        blank=True,
     )
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owned_conversations"
@@ -20,6 +25,9 @@ class Conversation(TimeStampedModel):
     owner_alias = models.CharField(max_length=60)
     last_message_at = models.DateTimeField(null=True, blank=True, db_index=True)
     is_blocked = models.BooleanField(default=False)
+    guest_key = models.CharField(max_length=48, blank=True, db_index=True)
+    # Only used to tell the guest about replies; never shown to the owner.
+    guest_email = models.EmailField(blank=True)
 
     class Meta:
         ordering = ["-last_message_at", "-created_at"]
@@ -33,13 +41,28 @@ class Conversation(TimeStampedModel):
     def get_absolute_url(self):
         return reverse("chat:detail", args=[self.pk])
 
+    @property
+    def is_guest(self) -> bool:
+        """Started by a guest and not yet moved into an account."""
+        return bool(self.guest_key) and self.starter_id is None
+
+    def get_guest_url(self):
+        return reverse("chat:guest_thread", args=[self.guest_key])
+
     def other(self, user):
-        return self.owner if user.pk == self.starter_id else self.starter
+        """The other participant; None when that is a guest."""
+        if user is not None and user.pk == self.owner_id:
+            return self.starter
+        return self.owner
 
     def alias_for(self, user):
-        return self.starter_alias if user.pk == self.starter_id else self.owner_alias
+        if user is not None and user.pk == self.owner_id:
+            return self.owner_alias
+        return self.starter_alias
 
     def has_participant(self, user) -> bool:
+        if user is None or not user.is_authenticated:
+            return False
         return user.pk in (self.starter_id, self.owner_id)
 
 
@@ -57,6 +80,7 @@ class Message(TimeStampedModel):
     )
     body = models.TextField(max_length=2000)
     kind = models.CharField(max_length=16, choices=Kind.choices, default=Kind.TEXT)
+    from_guest = models.BooleanField(default=False)
     has_scam_warning = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)
 

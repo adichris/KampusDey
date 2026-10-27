@@ -1,7 +1,23 @@
 {% load i18n %}
 {% for message in chat_messages %}
-<c-chat-bubble :message="message" mine="{% if message.sender_id == me.pk %}1{% endif %}" other_alias="{{ other_alias }}" />
+<c-chat-bubble :message="message" mine="{% if guest_view %}{% if message.from_guest %}1{% endif %}{% elif message.sender_id and message.sender_id == me.pk %}1{% endif %}" other_alias="{{ other_alias }}" />
 {% empty %}
 <p class="text-center text-sm opacity-60 py-8">{% translate "Say hello and ask about the listing." %}</p>
 {% endfor %}
+{% if guest_view and limit_reached %}
+<div id="guest-compose" hx-swap-oob="true"></div>
+<div class="card bg-base-200 border border-primary/40 my-3" role="status">
+  <div class="card-body p-4 gap-2 text-center items-center">
+    {% icon "messages-square" "size-6 text-primary" %}
+    <p class="font-semibold">{% translate "Sign up to keep chatting" %}</p>
+    <p class="text-sm opacity-80">{% translate "Guests can send a few messages. Create a free account (or log in) and this chat moves into it, nothing is lost." %}</p>
+    <div class="flex flex-wrap justify-center gap-2 mt-1">
+      <a class="btn btn-primary btn-sm" href="{% url 'account_signup' %}?next={{ claim_url|urlencode }}">{% translate "Sign up free" %}</a>
+      <a class="btn btn-outline btn-sm" href="{% url 'account_login' %}?next={{ claim_url|urlencode }}">{% translate "Log in" %}</a>
+    </div>
+  </div>
+</div>
+{% elif guest_view and messages_left <= 3 %}
+<p class="text-center text-xs opacity-60 my-2">{% blocktranslate count n=messages_left %}{{ n }} guest message left. Sign up to keep chatting.{% plural %}{{ n }} guest messages left. Sign up to keep chatting.{% endblocktranslate %}</p>
+{% endif %}
 {% if error %}<div class="alert alert-error text-sm my-2" role="alert">{{ error }}</div>{% endif %}

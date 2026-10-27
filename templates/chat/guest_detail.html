@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ other_alias }} · {% translate "Chat" %}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col h-[calc(100vh-11rem)] lg:h-[calc(100vh-6rem)]">
+  <header class="flex items-center gap-2 pb-2 border-b border-base-300">
+    <a href="{{ conversation.listing.get_absolute_url }}" class="btn btn-ghost btn-circle btn-sm" aria-label="{% translate 'Back to listing' %}">{% icon "chevron-left" %}</a>
+    <div class="min-w-0 flex-1">
+      <h1 class="font-bold truncate">{{ other_alias }}</h1>
+      <a class="text-xs link opacity-70 truncate block" href="{{ conversation.listing.get_absolute_url }}">{{ conversation.listing.title }}</a>
+    </div>
+  </header>
+  <div class="alert alert-info text-xs my-2 py-2">
+    {% icon "link" "size-4" %}
+    <span>{% blocktranslate %}You're chatting as “{{ my_alias }}”. Bookmark this page: it's your private link back to this chat.{% endblocktranslate %}{% if not conversation.guest_email %} {% translate "Without an email we can't tell you about replies, so check back here." %}{% endif %}</span>
+  </div>
+  <div id="thread" class="flex-1 overflow-y-auto py-2" hx-get="{% url 'chat:guest_poll' conversation.guest_key %}" hx-trigger="every 5s" hx-swap="innerHTML">
+    {% include "chat/partials/messages.html" %}
+  </div>
+  {% if not blocked and not limit_reached %}
+  <form id="guest-compose" class="flex gap-2 pt-2 border-t border-base-300" hx-post="{% url 'chat:guest_send' conversation.guest_key %}" hx-target="#thread" hx-swap="innerHTML">
+    <label for="msg" class="sr-only">{% translate "Message" %}</label>
+    <input id="msg" name="body" required maxlength="2000" autocomplete="off" class="input input-bordered flex-1" placeholder="{% translate 'Write a message…' %}">
+    <button class="btn btn-primary tap" aria-label="{% translate 'Send' %}">{% icon "send" %}</button>
+  </form>
+  <p class="text-xs text-center opacity-60 pt-2">{% translate "Never pay before viewing." %} <a class="link" href="{% url 'account_signup' %}">{% translate "Create a free account" %}</a></p>
+  {% elif blocked %}
+  <p class="text-center text-sm opacity-70 py-3">{% translate "This conversation is blocked." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

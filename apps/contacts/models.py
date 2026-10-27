@@ -13,6 +13,11 @@ class ContactCard(TimeStampedModel):
     preferred_time = models.CharField(_("best time to contact"), max_length=80, blank=True)
     # The channel shown as the big main button; the others become smaller buttons.
     preferred_channel = models.CharField(_("main contact button"), max_length=10, blank=True)
+    allow_guest_chat = models.BooleanField(
+        _("allow guests to chat"),
+        default=False,
+        help_text=_("People without an account can start an in-app chat."),
+    )
     is_default = models.BooleanField(default=False)
 
     class Meta:

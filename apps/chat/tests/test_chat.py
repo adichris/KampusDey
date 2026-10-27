@@ -80,3 +80,86 @@ def test_unread_badge(client):
     assert b"badge" in client.get(reverse("chat:unread_badge")).content
     client.get(conv.get_absolute_url())
     assert client.get(reverse("chat:unread_badge")).content == b""
+
+
+def _guest_listing():
+    listing = f.ListingFactory()
+    card = listing.contact_card
+    card.allow_guest_chat = True
+    card.save()
+    f.ContactChannelFactory(card=card, kind="chat", value="")
+    return listing
+
+
+def test_guest_chat_needs_owner_opt_in(client):
+    listing = f.ListingFactory()
+    f.ContactChannelFactory(card=listing.contact_card, kind="chat", value="")
+    assert client.get(reverse("chat:guest_start", args=[listing.pk])).status_code == 404
+    from apps.contacts.channels import buttons_for
+
+    assert "/accounts/login/" in buttons_for(listing, None)["buttons"][0]["url"]
+    guest_listing = _guest_listing()
+    url = buttons_for(guest_listing, None)["buttons"][0]["url"]
+    assert url == reverse("chat:guest_start", args=[guest_listing.pk])
+
+
+def test_guest_can_chat_and_owner_replies(client, mailoutbox):
+    listing = _guest_listing()
+    r = client.post(
+        reverse("chat:guest_start", args=[listing.pk]),
+        {"name": "Ama", "email": "ama@example.test", "body": "Is it still available?"},
+    )
+    conv = Conversation.objects.get()
+    assert r.url == conv.get_guest_url() and conv.starter is None and conv.is_guest
+    assert conv.starter_alias == "Ama (guest)"
+    assert listing.owner.notifications.filter(trigger="message").exists()
+    page = client.get(conv.get_guest_url())
+    assert b"Is it still available?" in page.content and page["Cache-Control"].startswith("private")
+    # a second visit to the start page reopens the same chat (signed cookie)
+    again = client.get(reverse("chat:guest_start", args=[listing.pk]))
+    assert again.url == conv.get_guest_url()
+    services.send_message(conv, listing.owner, "Yes, come and see it")
+    assert any("Yes, come and see it" in m.body for m in mailoutbox)
+    assert "ama@example.test" not in client.get(conv.get_absolute_url()).content.decode()
+    # the owner page is not readable by the guest without an account
+    assert client.get(conv.get_absolute_url()).status_code == 302
+
+
+def test_guest_must_sign_up_after_limit_and_chat_moves_into_account(client, settings):
+    from constance.test import override_config
+
+    listing = _guest_listing()
+    with override_config(GUEST_CHAT_MESSAGE_LIMIT=2):
+        client.post(
+            reverse("chat:guest_start", args=[listing.pk]), {"name": "Kofi", "body": "Hello"}
+        )
+        conv = Conversation.objects.get()
+        client.post(reverse("chat:guest_send", args=[conv.guest_key]), {"body": "Price?"})
+        r = client.post(reverse("chat:guest_send", args=[conv.guest_key]), {"body": "Third"})
+        assert b"Sign up to keep chatting" in r.content
+        assert conv.messages.filter(from_guest=True).count() == 2
+    user = f.UserFactory()
+    client.force_login(user)
+    claim = client.get(reverse("chat:guest_claim", args=[conv.guest_key]))
+    conv.refresh_from_db()
+    assert claim.url == conv.get_absolute_url()
+    assert conv.starter == user and not conv.is_guest
+    assert conv.messages.filter(sender=user).count() == 2
+    assert client.get(conv.get_guest_url()).url == conv.get_absolute_url()
+    with pytest.raises(services.ChatError):
+        services.guest_send(conv, "sneaky")
+
+
+def test_login_claims_guest_chats_remembered_by_the_browser(client, rf):
+    from apps.chat.signals import claim_guest_chats
+    from apps.chat.views import GUEST_COOKIE
+
+    listing = _guest_listing()
+    client.post(reverse("chat:guest_start", args=[listing.pk]), {"name": "Esi", "body": "Hi"})
+    conv = Conversation.objects.get()
+    request = rf.get("/")
+    request.COOKIES[GUEST_COOKIE] = client.cookies[GUEST_COOKIE].value
+    user = f.UserFactory()
+    claim_guest_chats(sender=None, request=request, user=user)
+    conv.refresh_from_db()
+    assert conv.starter == user
