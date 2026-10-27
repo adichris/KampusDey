@@ -2,7 +2,7 @@
 
 ## Status (2026-10-27)
 
-All milestones M0–M14 are implemented in code and covered by tests. **269 tests pass** (offline,
+All milestones M0–M14 are implemented in code and covered by tests. **267 tests pass** (offline,
 recorded sample responses only); `ruff check` and `ruff format --check` are clean;
 `makemigrations --check` reports no changes; `manage.py check --deploy` (prod settings) is clean.
 Coverage: 84% overall; services/selectors ≈ 85% combined (contacts 76%, locations 77%,
