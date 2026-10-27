@@ -6,7 +6,7 @@
     </a>
     <c-campus-switcher />
     <form action="{% url 'listings:search' %}" method="get" role="search" class="hidden md:flex flex-1 max-w-md mx-auto">
-      <label class="input input-sm input-bordered rounded-full w-full flex items-center gap-2 bg-base-200 border-base-300 px-4">
+      <label class="input input-sm input-bordered rounded-lg w-full flex items-center gap-2 bg-base-200 border-base-300 px-3">
         {% icon "search" "size-4 opacity-60" %}
         <span class="sr-only">{% translate "Search" %}</span>
         <input type="search" name="q" value="{{ request.GET.q|default:'' }}" class="grow" placeholder="{% if location.is_set %}{% blocktranslate with place=location.label %}Search around {{ place }}{% endblocktranslate %}{% else %}{% translate 'Search KampusDey' %}{% endif %}">
