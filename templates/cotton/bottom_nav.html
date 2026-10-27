@@ -8,7 +8,11 @@
     <li><a href="{% url 'chat:inbox' %}" class="flex flex-col items-center gap-0.5 py-2 tap {% if ns == 'chat' %}text-primary{% endif %}">
       <span class="indicator">{% icon "message-circle" %}{% if user.is_authenticated %}<span hx-get="{% url 'chat:unread_badge' %}" hx-trigger="load, every 30s" hx-swap="innerHTML"></span>{% endif %}</span>
       <span>{% translate "Chats" %}</span></a></li>
+    {% if user.is_authenticated %}
     <li><a href="{% url 'accounts:profile' %}" class="flex flex-col items-center gap-0.5 py-2 tap {% if ns == 'accounts' %}text-primary{% endif %}">{% icon "user" %}<span>{% translate "Profile" %}</span></a></li>
+    {% else %}
+    <li><a href="{% url 'account_signup' %}" class="flex flex-col items-center gap-0.5 py-2 tap {% if name == 'account_signup' or name == 'account_login' %}text-primary{% endif %}">{% icon "user-plus" %}<span>{% translate "Join" %}</span></a></li>
+    {% endif %}
   </ul>
   {% endwith %}
 </nav>

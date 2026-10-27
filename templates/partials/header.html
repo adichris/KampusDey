@@ -21,8 +21,8 @@
       </a>
       <a href="{% url 'accounts:profile' %}" class="hidden lg:flex tap" aria-label="{% translate 'Profile' %}"><c-avatar name="{{ user.public_name }}" size="size-9" /></a>
       {% else %}
-      <a href="{% url 'account_login' %}" class="btn btn-ghost btn-sm tap">{% translate "Log in" %}</a>
-      <a href="{% url 'account_signup' %}" class="btn btn-primary btn-sm tap hidden sm:inline-flex">{% translate "Sign up free" %}</a>
+      <a href="{% url 'account_login' %}" class="btn btn-ghost btn-sm tap px-2 sm:px-3">{% translate "Log in" %}</a>
+      <a href="{% url 'account_signup' %}" class="btn btn-primary btn-sm tap px-3"><span class="sm:hidden">{% translate "Sign up" %}</span><span class="hidden sm:inline">{% translate "Sign up free" %}</span></a>
       {% endif %}
     </div>
   </div>

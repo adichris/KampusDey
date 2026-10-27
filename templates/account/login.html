@@ -1,0 +1,25 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Log in" %}{% endblock head_title %}
+{% block content %}
+<div class="text-center">
+  <span class="inline-flex rounded-box bg-primary text-primary-content p-2 mb-2">{% icon "school" "size-7" %}</span>
+  <h1 class="text-2xl font-extrabold">{% translate "Welcome back" %}</h1>
+  <p class="text-sm opacity-75">{% translate "Log in to post, chat and save listings." %}</p>
+</div>
+
+{% if not SOCIALACCOUNT_ONLY %}
+<form method="post" action="{% url 'account_login' %}" class="space-y-1">{% csrf_token %}
+  {% if form.non_field_errors %}<c-alert kind="error">{{ form.non_field_errors|join:" " }}</c-alert>{% endif %}
+  {% for field in form %}<c-form-field :field="field" />{% endfor %}
+  {{ redirect_field }}
+  {% if turnstile_site_key %}<div class="cf-turnstile my-2" data-sitekey="{{ turnstile_site_key }}"></div>{% endif %}
+  <button type="submit" class="btn btn-primary w-full tap mt-2">{% icon "log-in" "size-5" %} {% translate "Log in" %}</button>
+</form>
+{% endif %}
+
+{% if SOCIALACCOUNT_ENABLED %}{% include "socialaccount/snippets/login.html" with page_layout="entrance" %}{% endif %}
+
+<div class="divider text-xs opacity-70 my-1">{% translate "New to KampusDey?" %}</div>
+<a href="{{ signup_url }}" class="btn btn-outline btn-primary w-full tap">{% icon "user-plus" "size-5" %} {% translate "Create a free account" %}</a>
+{% endblock content %}

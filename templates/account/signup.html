@@ -1,0 +1,34 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Sign up" %}{% endblock head_title %}
+{% block content %}
+<div class="text-center">
+  <span class="inline-flex rounded-box bg-primary text-primary-content p-2 mb-2">{% icon "school" "size-7" %}</span>
+  <h1 class="text-2xl font-extrabold">{% translate "Join KampusDey" %}</h1>
+  <p class="text-sm opacity-75">{% translate "Free for every student. It takes a minute." %}</p>
+</div>
+
+<ul class="grid gap-1.5 text-sm bg-base-200 rounded-box p-3">
+  <li class="flex items-center gap-2">{% icon "circle-check" "size-4 text-success shrink-0" %} {% translate "Post rooms, items, jobs and questions for free" %}</li>
+  <li class="flex items-center gap-2">{% icon "circle-check" "size-4 text-success shrink-0" %} {% translate "Chat with owners — your number stays private" %}</li>
+  <li class="flex items-center gap-2">{% icon "circle-check" "size-4 text-success shrink-0" %} {% translate "Save listings and get alerts for new matches" %}</li>
+</ul>
+
+{% if not SOCIALACCOUNT_ONLY %}
+<form method="post" action="{% url 'account_signup' %}" class="space-y-1">{% csrf_token %}
+  {% if form.non_field_errors %}<c-alert kind="error">{{ form.non_field_errors|join:" " }}</c-alert>{% endif %}
+  {% for field in form %}<c-form-field :field="field" />{% endfor %}
+  {{ redirect_field }}
+  {% if turnstile_site_key %}<div class="cf-turnstile my-2" data-sitekey="{{ turnstile_site_key }}"></div>{% endif %}
+  <button type="submit" class="btn btn-primary w-full tap mt-2">{% icon "user-plus" "size-5" %} {% translate "Create my free account" %}</button>
+  <p class="text-xs opacity-70 text-center pt-1">{% translate "We'll email you a link to confirm your address." %}
+    {% url 'pages:terms' as terms_url %}{% url 'pages:privacy' as privacy_url %}
+    {% blocktranslate %}By joining you agree to the <a class="link" href="{{ terms_url }}">terms</a> and <a class="link" href="{{ privacy_url }}">privacy notice</a>.{% endblocktranslate %}</p>
+</form>
+{% endif %}
+
+{% if SOCIALACCOUNT_ENABLED %}{% include "socialaccount/snippets/login.html" with page_layout="entrance" %}{% endif %}
+
+<div class="divider text-xs opacity-70 my-1">{% translate "Already have an account?" %}</div>
+<a href="{{ login_url }}" class="btn btn-outline btn-primary w-full tap">{% icon "log-in" "size-5" %} {% translate "Log in instead" %}</a>
+{% endblock content %}

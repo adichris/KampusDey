@@ -17,6 +17,15 @@
   {% endwith %}
   <a href="{% url 'listings:post' %}" class="btn btn-primary mt-4 shadow-sm">{% icon "plus" %} {% translate "Post for free" %}</a>
 
+  {% if not user.is_authenticated %}
+  <div class="mt-4 rounded-box border border-base-300 p-3 text-sm">
+    <p class="font-semibold flex items-center gap-1.5">{% icon "sparkles" "size-4 text-secondary" %} {% translate "Join KampusDey" %}</p>
+    <p class="text-xs opacity-75 mt-1">{% translate "Free account to post, chat and save listings." %}</p>
+    <a href="{% url 'account_signup' %}" class="btn btn-primary btn-sm w-full mt-2">{% translate "Sign up free" %}</a>
+    <a href="{% url 'account_login' %}" class="btn btn-ghost btn-sm w-full mt-1">{% translate "Log in" %}</a>
+  </div>
+  {% endif %}
+
   {% if location.is_set %}
   <div class="mt-5 rounded-box bg-base-200 p-3 text-sm">
     <p class="text-xs uppercase tracking-wide opacity-60 font-semibold">{% translate "Your campus" %}</p>
