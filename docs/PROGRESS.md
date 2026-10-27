@@ -85,6 +85,8 @@ import survives failed campuses and resumes; GTEC table serial numbers stripped.
 - Listing photo gallery uses a fixed-height frame (4:3 on phones, `min(68vh, 34rem)` on desktop);
   photos are `object-contain` over a blurred copy, so mixed portrait/landscape photos never
   change the page height. Tap a photo for full screen; arrows, thumbnails, swipe and keys work.
+- CSP stays strict site-wide; only `/admin/` adds `'unsafe-eval'` (scripts) and `'unsafe-inline'`
+  (styles), because django-unfold ships the standard Alpine build (`apps/core/csp.py`, user approved).
 - `/s/<section>/` keeps its query string when redirecting to the campus/town section page.
 
 ## Known gaps / next steps

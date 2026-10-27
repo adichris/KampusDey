@@ -147,3 +147,10 @@ def test_is_bot():
     assert is_bot("Googlebot/2.1")
     assert is_bot("")
     assert not is_bot("Mozilla/5.0 (Linux; Android 13) Chrome/120 Mobile")
+
+
+def test_csp_relaxed_only_on_admin(client, admin_client, db):
+    public = client.get("/")["Content-Security-Policy"]
+    assert "unsafe-eval" not in public and "unsafe-inline" not in public
+    admin = admin_client.get("/admin/")["Content-Security-Policy"]
+    assert "'unsafe-eval'" in admin and "'unsafe-inline'" in admin
