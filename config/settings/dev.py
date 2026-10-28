@@ -18,3 +18,9 @@ TEMPLATES[0]["OPTIONS"]["loaders"] = [
     "django.template.loaders.filesystem.Loader",
     "django.template.loaders.app_directories.Loader",
 ]
+
+
+try:
+    from .local import *  # noqa: F403
+except ImportError:
+    pass

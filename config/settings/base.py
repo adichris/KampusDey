@@ -453,3 +453,9 @@ GEOIP_DOWNLOAD_URL = (
     "https://download.maxmind.com/geoip/databases/GeoLite2-City/download?suffix=tar.gz"
 )
 REMOTIVE_HARD_MAX_FETCHES_PER_DAY = 4
+
+
+try:
+    from .local import *  # noqa: F403
+except ImportError:
+    pass
