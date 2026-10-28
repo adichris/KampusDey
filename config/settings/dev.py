@@ -2,7 +2,9 @@ from .base import *  # noqa: F403
 
 DEBUG = env.bool("DJANGO_DEBUG", default=True)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["*"])
-EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_FALLBACK_BACKEND = env(
+    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+)
 
 if env.bool("DEBUG_TOOLBAR", default=False):
     INSTALLED_APPS += ["debug_toolbar"]

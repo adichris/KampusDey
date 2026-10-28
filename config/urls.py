@@ -1,9 +1,10 @@
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 
+from apps.core import views as core_views
+from apps.dashboard import settings_overview
 from apps.external import views as external_views
 from apps.growth import views as growth_views
 from apps.growth.sitemaps import SITEMAPS
@@ -15,7 +16,14 @@ handler500 = "apps.core.views.server_error"
 
 urlpatterns = [
     path("", listing_views.home, name="home"),
+    path(
+        f"{settings.ADMIN_URL}overview/",
+        admin.site.admin_view(settings_overview.overview),
+        name="settings_overview",
+    ),
     path(settings.ADMIN_URL, admin.site.urls),
+    # Local uploads (no S3). On alwaysdata a static mapping of /media/ can serve them instead.
+    path(f"{settings.MEDIA_URL.strip('/')}/<path:path>", core_views.media, name="media"),
     path("accounts/", include("allauth.urls")),
     path("accounts/", include("apps.accounts.urls")),
     path("location/", include("apps.locations.urls")),
@@ -42,6 +50,5 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + urlpatterns
     if "debug_toolbar" in settings.INSTALLED_APPS:
         urlpatterns = [path("__debug__/", include("debug_toolbar.urls"))] + urlpatterns

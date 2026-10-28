@@ -38,6 +38,51 @@ class IntegrationSettings(TimeStampedModel):
     umami_script_url = models.URLField(blank=True, default="")
     umami_website_id = models.CharField(max_length=64, blank=True, default="")
 
+    # Outgoing email. When `smtp_host` is empty the EMAIL_* environment variables are used.
+    smtp_host = models.CharField(_("SMTP host"), max_length=200, blank=True, default="")
+    smtp_port = models.PositiveIntegerField(_("SMTP port"), default=587)
+    smtp_username = models.CharField(_("SMTP username"), max_length=200, blank=True, default="")
+    smtp_password = EncryptedTextField(_("SMTP password"), blank=True, default="")
+    smtp_use_tls = models.BooleanField(_("use STARTTLS"), default=True, help_text=_("Port 587"))
+    smtp_use_ssl = models.BooleanField(_("use SSL"), default=False, help_text=_("Port 465"))
+    email_from = models.CharField(
+        _("from address"),
+        max_length=200,
+        blank=True,
+        default="",
+        help_text=_('e.g. "KampusDey <no-reply@example.com>". Empty: DEFAULT_FROM_EMAIL.'),
+    )
+
+    # S3-compatible storage (AWS S3, Cloudflare R2, …). When `s3_bucket` is empty the AWS_*
+    # environment variables are used; when neither is set, files stay on the server's disk.
+    s3_bucket = models.CharField(_("bucket (public files)"), max_length=200, blank=True, default="")
+    s3_access_key_id = models.CharField(_("access key ID"), max_length=200, blank=True, default="")
+    s3_secret_access_key = EncryptedTextField(_("secret access key"), blank=True, default="")
+    s3_endpoint_url = models.URLField(
+        _("endpoint URL"), blank=True, default="", help_text=_("Needed for R2 and other non-AWS")
+    )
+    s3_region = models.CharField(_("region"), max_length=40, blank=True, default="auto")
+    s3_custom_domain = models.CharField(
+        _("public domain"),
+        max_length=200,
+        blank=True,
+        default="",
+        help_text=_("e.g. media.example.com (no https://)"),
+    )
+    s3_private_bucket = models.CharField(
+        _("private bucket"),
+        max_length=200,
+        blank=True,
+        default="",
+        help_text=_("For ID documents and claim proofs. Empty: kept on the server's disk."),
+    )
+
+    # Google sign-in. Environment variables win when both are set.
+    google_client_id = models.CharField(
+        _("Google client ID"), max_length=200, blank=True, default=""
+    )
+    google_client_secret = EncryptedTextField(_("Google client secret"), blank=True, default="")
+
     class Meta:
         verbose_name = _("integration settings")
         verbose_name_plural = _("integration settings")

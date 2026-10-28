@@ -9,9 +9,17 @@ from apps.listings.sections import SECTIONS
 from apps.locations.models import Campus
 
 from .models import IntegrationSettings, SectionAvailability
-from .services import send_test_email, send_test_sms, smtp_status
+from .services import send_test_email, send_test_sms, smtp_status, sync_google_app
 
-SECRET_FIELDS = ["sms_api_key", "sms_api_secret", "turnstile_secret", "geolite2_license_key"]
+SECRET_FIELDS = [
+    "sms_api_key",
+    "sms_api_secret",
+    "turnstile_secret",
+    "geolite2_license_key",
+    "smtp_password",
+    "s3_secret_access_key",
+    "google_client_secret",
+]
 
 
 class IntegrationSettingsForm(forms.ModelForm):
@@ -63,6 +71,52 @@ class IntegrationSettingsAdmin(KDModelAdmin):
     readonly_fields = ["geolite2_last_updated"]
     fieldsets = (
         (
+            _("Email (SMTP)"),
+            {
+                "description": _(
+                    "Leave the host empty to use the EMAIL_* environment variables. "
+                    "Use “Send test email” above after saving."
+                ),
+                "fields": (
+                    "smtp_host",
+                    "smtp_port",
+                    "smtp_username",
+                    "smtp_password",
+                    "smtp_use_tls",
+                    "smtp_use_ssl",
+                    "email_from",
+                ),
+            },
+        ),
+        (
+            _("File storage (S3 / Cloudflare R2)"),
+            {
+                "description": _(
+                    "Leave the bucket empty to keep uploads on this server's disk. Switching "
+                    "does not copy existing files; copy MEDIA_ROOT to the bucket first."
+                ),
+                "fields": (
+                    "s3_bucket",
+                    "s3_access_key_id",
+                    "s3_secret_access_key",
+                    "s3_endpoint_url",
+                    "s3_region",
+                    "s3_custom_domain",
+                    "s3_private_bucket",
+                ),
+            },
+        ),
+        (
+            _("Google sign-in"),
+            {
+                "description": _(
+                    "OAuth client from Google Cloud Console. Redirect URI: "
+                    "<SITE_URL>/accounts/google/login/callback/"
+                ),
+                "fields": ("google_client_id", "google_client_secret"),
+            },
+        ),
+        (
             _("SMS"),
             {
                 "fields": (
@@ -98,6 +152,10 @@ class IntegrationSettingsAdmin(KDModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        sync_google_app(obj)
 
     def changelist_view(self, request, extra_context=None):
         obj = IntegrationSettings.load()

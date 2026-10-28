@@ -88,6 +88,15 @@ import survives failed campuses and resumes; GTEC table serial numbers stripped.
 - Sellers pick a main contact button (`ContactCard.preferred_channel`); it is shown first and
   filled, the others outlined (icon-only in the phone bar). In-app chat is the default. The chat
   button posts straight to `chat:start` (the old tap-redirect hit a POST-only view).
+- **Settings in the admin** (user request; extends §3, which had SMTP/S3 in env only): SMTP,
+  S3/R2 storage and Google sign-in can be set in Integrations (secrets encrypted); env values
+  are the fallback. **Settings overview** (`/<ADMIN_URL>overview/`, superusers) shows what is
+  active and links to each place to change it. Bootstrapping values (secret key, encryption key,
+  database, hosts, SITE_URL, Sentry, VAPID) stay in `.env`.
+- **Uploads without S3**: `SwitchingStorage` (`apps/core/storage.py`) uses S3 when a bucket is
+  configured, else `MEDIA_ROOT` on disk; production serves `/media/` through
+  `apps.core.views.media` (sandboxed CSP, nosniff, long cache) unless `SERVE_MEDIA=False`.
+  Private documents never get a public URL. Deployment: `docs/DEPLOY_ALWAYSDATA.md`.
 - **Guest chat** (owner opt-in, `ContactCard.allow_guest_chat`, off by default; extends §6.8 at the
   user's request): guests give a name, an optional email and a message, then chat through a private
   link (`/chat/g/<key>/`, remembered in a signed cookie). Guarded by per-IP rate limits, banned-term

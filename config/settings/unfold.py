@@ -174,6 +174,12 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
+                        "title": _("Settings overview"),
+                        "icon": "dashboard_customize",
+                        "link": reverse_lazy("settings_overview"),
+                        "permission": lambda request: request.user.is_superuser,
+                    },
+                    {
                         "title": _("Site settings"),
                         "icon": "tune",
                         "link": reverse_lazy("admin:constance_config_changelist"),

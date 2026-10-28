@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Settings overview" %} | KampusDey admin{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-4">
+  <p class="text-sm opacity-80">{% translate "What is switched on right now, and where to change it. Values set in the admin take effect within a minute; environment variables need a restart." %}</p>
+  <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    {% for card in cards %}
+    <section class="border border-base-200 dark:border-base-800 rounded-default p-4 flex flex-col gap-3">
+      <header class="flex items-center gap-2">
+        <span class="material-symbols-outlined">{{ card.icon }}</span>
+        <h2 class="font-semibold text-important grow">{{ card.title }}</h2>
+        {% if card.status == "ok" %}<span class="text-xs px-2 py-0.5 rounded-default bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400">{% translate "OK" %}</span>
+        {% elif card.status == "warn" %}<span class="text-xs px-2 py-0.5 rounded-default bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400">{% translate "Check" %}</span>
+        {% else %}<span class="text-xs px-2 py-0.5 rounded-default bg-base-100 text-base-500 dark:bg-base-800">{% translate "Off" %}</span>{% endif %}
+      </header>
+      <dl class="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+        {% for label, value in card.rows %}<dt class="opacity-70">{{ label }}</dt><dd class="break-all">{{ value }}</dd>{% endfor %}
+      </dl>
+      {% if card.note %}<p class="text-xs opacity-70">{{ card.note }}</p>{% endif %}
+      {% if card.edit_url %}<a class="text-primary-600 dark:text-primary-500 text-sm font-medium mt-auto" href="{{ card.edit_url }}">{{ card.edit_label }} →</a>{% endif %}
+    </section>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -293,41 +293,29 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
-PRIVATE_MEDIA_ROOT = BASE_DIR / "private_media"
+# Keep uploads outside the code folder in production (e.g. on alwaysdata:
+# /home/<account>/kampusdey-data/media) so deploys never touch them.
+MEDIA_ROOT = Path(env("MEDIA_ROOT", default="") or BASE_DIR / "media")
+PRIVATE_MEDIA_ROOT = Path(env("PRIVATE_MEDIA_ROOT", default="") or BASE_DIR / "private_media")
+# Serve local media through Django when no web-server mapping exists (alwaysdata can map
+# /media/ to MEDIA_ROOT itself, which is faster; then set SERVE_MEDIA=False).
+SERVE_MEDIA = env.bool("SERVE_MEDIA", default=True)
 
-STORAGE_BACKEND = env("STORAGE_BACKEND", default="local")
-if STORAGE_BACKEND == "s3":
-    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", default="")
-    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", default="")
-    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="")
-    AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", default=None)
-    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="auto")
-    AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", default=None)
-    AWS_QUERYSTRING_AUTH = False
-    AWS_DEFAULT_ACL = None
-    STORAGES = {
-        "default": {"BACKEND": "storages.backends.s3.S3Storage"},
-        "private": {
-            "BACKEND": "storages.backends.s3.S3Storage",
-            "OPTIONS": {
-                "bucket_name": env("PRIVATE_STORAGE_BUCKET", default=""),
-                "querystring_auth": True,
-                "querystring_expire": 300,
-                "custom_domain": None,
-            },
-        },
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-    }
-else:
-    STORAGES = {
-        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "private": {
-            "BACKEND": "django.core.files.storage.FileSystemStorage",
-            "OPTIONS": {"location": str(PRIVATE_MEDIA_ROOT), "base_url": "/private/"},
-        },
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-    }
+# auto: S3 when a bucket is configured (admin → Integrations, or AWS_* below), else local disk.
+# local: always the server's disk, ignoring AWS_* (admin S3 settings still win).
+STORAGE_BACKEND = env("STORAGE_BACKEND", default="auto")
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", default="")
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", default="")
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default="")
+AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", default="")
+AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="auto")
+AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", default="")
+PRIVATE_STORAGE_BUCKET = env("PRIVATE_STORAGE_BUCKET", default="")
+STORAGES = {
+    "default": {"BACKEND": "apps.core.storage.SwitchingStorage"},
+    "private": {"BACKEND": "apps.core.storage.SwitchingStorage", "OPTIONS": {"private": True}},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 12 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
@@ -337,7 +325,9 @@ IMAGEKIT_DEFAULT_CACHEFILE_STRATEGY = "imagekit.cachefiles.strategies.Optimistic
 # ---------------------------------------------------------------------------
 # Email
 # ---------------------------------------------------------------------------
-EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+# SMTP set in the admin (Integrations) wins; otherwise EMAIL_FALLBACK_BACKEND + EMAIL_* below.
+EMAIL_BACKEND = "apps.core.mail.ConfiguredEmailBackend"
+EMAIL_FALLBACK_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = env("EMAIL_HOST", default="localhost")
 EMAIL_PORT = env.int("EMAIL_PORT", default=1025)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
