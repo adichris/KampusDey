@@ -44,7 +44,7 @@ DJANGO_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
+    "apps.core.staticfiles.KampusStaticFilesConfig",  # django.contrib.staticfiles
     "django.contrib.sites",
     "django.contrib.sitemaps",
     "django.contrib.humanize",
@@ -159,6 +159,8 @@ TEMPLATES = [
 DATABASES = {"default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
 DATABASES["default"]["ATOMIC_REQUESTS"] = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# django-webpush never shipped the migration for its current model; keep a complete set here.
+MIGRATION_MODULES = {"webpush": "apps.notifications.webpush_migrations"}
 
 REDIS_URL = env("REDIS_URL", default="")
 if REDIS_URL:

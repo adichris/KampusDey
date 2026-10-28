@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = ["node_modules", "static", "media", ".venv", "data"]
+extend-exclude = ["node_modules", "static", "media", ".venv", "data", "apps/notifications/webpush_migrations"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "DJ", "C4", "SIM"]

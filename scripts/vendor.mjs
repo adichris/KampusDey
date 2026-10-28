@@ -8,6 +8,8 @@ const copies = [
   ["node_modules/htmx.org/dist/htmx.min.js", `${out}/htmx.min.js`],
   ["node_modules/@alpinejs/csp/dist/cdn.min.js", `${out}/alpine-csp.min.js`],
   ["node_modules/leaflet/dist/leaflet.js", `${out}/leaflet/leaflet.js`],
+  // leaflet.js ends with a sourceMappingURL; WhiteNoise's manifest storage fails without it.
+  ["node_modules/leaflet/dist/leaflet.js.map", `${out}/leaflet/leaflet.js.map`],
   ["node_modules/leaflet/dist/leaflet.css", `${out}/leaflet/leaflet.css`],
   ["node_modules/leaflet/dist/images", `${out}/leaflet/images`],
   ["node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2", `${out}/fonts/inter-latin-wght-normal.woff2`],

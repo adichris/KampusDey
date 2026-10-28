@@ -15,7 +15,9 @@ SESSION_COOKIE_SAMESITE = "Lax"
 CONN_MAX_AGE = env.int("CONN_MAX_AGE", default=60)
 DATABASES["default"]["CONN_MAX_AGE"] = CONN_MAX_AGE
 SECURE_SSL_REDIRECT = True
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["kampusdey.digitalquotienttechnologies.com"])
+ALLOWED_HOSTS = env.list(
+    "DJANGO_ALLOWED_HOSTS", default=["kampusdey.digitalquotienttechnologies.com"]
+)
 ADMINS = [
     ("Addai Christopher", "adichriz@gmail.com"),
 ]
