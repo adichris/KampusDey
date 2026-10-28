@@ -23,6 +23,9 @@ DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 SITE_URL = env("SITE_URL", default="http://localhost:8000").rstrip("/")
+# production | staging | development. Staging is kept out of search engines and labelled.
+SITE_ENVIRONMENT = env("SITE_ENVIRONMENT", default="production")
+IS_STAGING = SITE_ENVIRONMENT == "staging"
 ADMIN_URL = env("ADMIN_URL", default="admin/").strip("/") + "/"
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default="")
 MAP_USER_AGENT = env("MAP_USER_AGENT", default=f"KampusDey/1.0 (+{SITE_URL}/contact)")
@@ -102,6 +105,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "apps.core.csp.KampusCSPMiddleware",  # strict CSP; admin-only relaxations for unfold
+    "apps.core.middleware.StagingNoIndexMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "waffle.middleware.WaffleMiddleware",
@@ -248,7 +252,7 @@ ACCOUNT_FORMS = {
     "login": "apps.accounts.forms.KDLoginForm",
 }
 ACCOUNT_ADAPTER = "apps.accounts.adapters.AccountAdapter"
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[KampusDey] "
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[KampusDey staging] " if IS_STAGING else "[KampusDey] "
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_PROVIDERS = {}
 GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
@@ -396,7 +400,12 @@ SENTRY_DSN = env("SENTRY_DSN", default="")
 if SENTRY_DSN:
     import sentry_sdk
 
-    sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=0.05, send_default_pii=False)
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        traces_sample_rate=0.05,
+        send_default_pii=False,
+        environment=SITE_ENVIRONMENT,
+    )
 
 # ---------------------------------------------------------------------------
 # Logging

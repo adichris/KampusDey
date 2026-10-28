@@ -4,6 +4,23 @@ This guide runs KampusDey on an alwaysdata account with uploads kept on the acco
 (no S3 needed). Menu names follow the alwaysdata admin panel; if one looks different, check
 alwaysdata's own documentation for "Python WSGI sites".
 
+## Staging first
+
+Run a staging copy before production, ideally on its own alwaysdata account (or at least its own
+site, database and folders). Add `SITE_ENVIRONMENT=staging` to its `.env`: staging then
+disallows all crawlers (`robots.txt` and `X-Robots-Tag`), shows a yellow "Staging site" bar,
+prefixes account emails with `[KampusDey staging]` and reports to Sentry as `staging`.
+
+Updating any copy later is one command over SSH, then a site restart:
+
+```bash
+cd ~/kampusdey && scripts/deploy.sh main
+```
+
+It pulls the branch, installs Python and npm packages, builds the CSS and vendored JS (they are
+not in git), migrates, collects static files and runs `check --deploy`. Node.js must be
+available on the account (alwaysdata: Environment → Node.js, any current LTS).
+
 ## 1. Folders
 
 Keep code and uploads apart so a redeploy never touches user files:
@@ -19,8 +36,6 @@ Over SSH:
 
 ```bash
 git clone <repo-url> ~/kampusdey && cd ~/kampusdey
-python3 -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
 mkdir -p ~/kampusdey-data/media ~/kampusdey-data/private_media
 ```
 
@@ -52,12 +67,11 @@ SERVE_MEDIA=True
 Keep a copy of `FIELD_ENCRYPTION_KEY` somewhere safe: without it the secrets saved in the
 admin cannot be read.
 
-Then:
+Then (the deploy script creates the virtualenv, builds assets, migrates and collects static):
 
 ```bash
-cd ~/kampusdey && . .venv/bin/activate
-python manage.py migrate
-python manage.py collectstatic --noinput
+cd ~/kampusdey && scripts/deploy.sh main
+. .venv/bin/activate
 python manage.py seed_locations
 python manage.py createsuperuser
 ```

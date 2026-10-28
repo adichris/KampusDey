@@ -154,3 +154,12 @@ def test_csp_relaxed_only_on_admin(client, admin_client, db):
     assert "unsafe-eval" not in public and "unsafe-inline" not in public
     admin = admin_client.get("/admin/")["Content-Security-Policy"]
     assert "'unsafe-eval'" in admin and "'unsafe-inline'" in admin
+
+
+def test_staging_is_hidden_from_search_engines(client, settings, db):
+    settings.IS_STAGING = True
+    assert client.get("/robots.txt").content == b"User-agent: *\nDisallow: /\n"
+    page = client.get("/")
+    assert page["X-Robots-Tag"] == "noindex, nofollow" and b"Staging site" in page.content
+    settings.IS_STAGING = False
+    assert "X-Robots-Tag" not in client.get("/")

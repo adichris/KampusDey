@@ -35,6 +35,7 @@ def site(request):
         unread = unread_count(user)
     return {
         "SITE_URL": settings.SITE_URL,
+        "IS_STAGING": settings.IS_STAGING,
         "ASSET_VERSION": asset_version(),
         "THEMES_OFFERED": themes,
         "user_theme": theme,

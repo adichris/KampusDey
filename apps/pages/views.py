@@ -95,6 +95,8 @@ def service_worker(request):
 
 
 def robots(request):
+    if settings.IS_STAGING:
+        return HttpResponse("User-agent: *\nDisallow: /\n", content_type="text/plain")
     lines = [
         "User-agent: *",
         "Disallow: /" + settings.ADMIN_URL,
