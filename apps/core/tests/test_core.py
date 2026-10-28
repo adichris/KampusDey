@@ -163,3 +163,27 @@ def test_staging_is_hidden_from_search_engines(client, settings, db):
     assert page["X-Robots-Tag"] == "noindex, nofollow" and b"Staging site" in page.content
     settings.IS_STAGING = False
     assert "X-Robots-Tag" not in client.get("/")
+
+
+def test_sentry_strips_personal_data():
+    from config.sentry import strip_personal_data
+
+    event = {
+        "request": {
+            "cookies": {"sessionid": "x"},
+            "env": {"REMOTE_ADDR": "203.0.113.9"},
+            "headers": {"X-Forwarded-For": "203.0.113.9", "User-Agent": "UA"},
+        },
+        "user": {"id": 7, "email": "a@example.test", "ip_address": "203.0.113.9"},
+    }
+    out = strip_personal_data(event, {})
+    assert "203.0.113.9" not in str(out) and "a@example.test" not in str(out)
+    assert out["user"] == {"id": 7} and out["request"]["headers"] == {"User-Agent": "UA"}
+
+
+def test_sentry_check_needs_a_dsn(settings):
+    from django.core.management import CommandError, call_command
+
+    settings.SENTRY_DSN = ""
+    with pytest.raises(CommandError):
+        call_command("sentry_check")

@@ -397,14 +397,17 @@ CONTENT_SECURITY_POLICY["DIRECTIVES"]["connect-src"] += CSP_EXTRA_SCRIPT_HOSTS
 # Sentry
 # ---------------------------------------------------------------------------
 SENTRY_DSN = env("SENTRY_DSN", default="")
+SENTRY_RELEASE = env("SENTRY_RELEASE", default="")  # default: git commit of the checkout
+SENTRY_TRACES_SAMPLE_RATE = env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.05)
 if SENTRY_DSN:
-    import sentry_sdk
+    from config import sentry
 
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        traces_sample_rate=0.05,
-        send_default_pii=False,
+    sentry.init(
+        SENTRY_DSN,
         environment=SITE_ENVIRONMENT,
+        base_dir=BASE_DIR,
+        release=SENTRY_RELEASE,
+        traces=SENTRY_TRACES_SAMPLE_RATE,
     )
 
 # ---------------------------------------------------------------------------

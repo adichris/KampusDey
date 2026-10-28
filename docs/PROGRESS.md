@@ -88,6 +88,9 @@ import survives failed campuses and resumes; GTEC table serial numbers stripped.
 - Sellers pick a main contact button (`ContactCard.preferred_channel`); it is shown first and
   filled, the others outlined (icon-only in the phone bar). In-app chat is the default. The chat
   button posts straight to `chat:start` (the old tap-redirect hit a POST-only view).
+- **Sentry** (`config/sentry.py`): env-only (must start before Django); environment from
+  `SITE_ENVIRONMENT`, release = deployed git commit; privacy-first (no PII, IPs, cookies, bodies
+  or local variables; extra denylist for contact fields). `manage.py sentry_check` sends a test.
 - **Settings in the admin** (user request; extends §3, which had SMTP/S3 in env only): SMTP,
   S3/R2 storage and Google sign-in can be set in Integrations (secrets encrypted); env values
   are the fallback. **Settings overview** (`/<ADMIN_URL>overview/`, superusers) shows what is

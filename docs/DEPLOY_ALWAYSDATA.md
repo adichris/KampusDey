@@ -118,7 +118,23 @@ is active and links to each place to change it:
 - **Integrations → Google sign-in, Turnstile, SMS, GeoLite2, Umami** as needed.
 - **Site settings**: marketplace rules (expiry, boosts, guest chat limit, themes, map tiles).
 
-## 7. Backups
+## 7. Error tracking (Sentry)
+
+Add the project's DSN to `.env` and restart the site:
+
+```
+SENTRY_DSN=https://<key>@o<org>.ingest.sentry.io/<project>
+```
+
+Events are tagged with `SITE_ENVIRONMENT` (staging/production) and the deployed git commit as
+the release. No IP addresses, cookies, request bodies, local variables or contact details are
+sent. Check that events arrive:
+
+```bash
+cd ~/kampusdey && .venv/bin/python manage.py sentry_check
+```
+
+## 8. Backups
 
 Back up the database (alwaysdata keeps daily database backups) **and**
 `~/kampusdey-data/`, which holds every uploaded photo and document.
