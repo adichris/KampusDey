@@ -3,9 +3,7 @@
 from django.core.management.base import BaseCommand
 
 from apps.sitesettings.fields import PREFIX, encrypt
-from apps.sitesettings.models import IntegrationSettings
-
-SECRET_FIELDS = ["sms_api_key", "sms_api_secret", "turnstile_secret", "geolite2_license_key"]
+from apps.sitesettings.models import IntegrationSettings, secret_field_names
 
 
 class Command(BaseCommand):
@@ -14,7 +12,7 @@ class Command(BaseCommand):
     def handle(self, *args, **opts):
         obj = IntegrationSettings.load()
         updates = {}
-        for name in SECRET_FIELDS:
+        for name in secret_field_names():
             value = getattr(obj, name)
             if value:
                 updates[name] = encrypt(value)

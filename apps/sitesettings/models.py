@@ -112,6 +112,11 @@ class IntegrationSettings(TimeStampedModel):
         return obj
 
 
+def secret_field_names() -> list[str]:
+    """Every encrypted field on IntegrationSettings: never logged, shown or exported in clear."""
+    return [f.name for f in IntegrationSettings._meta.fields if isinstance(f, EncryptedTextField)]
+
+
 class SectionAvailability(TimeStampedModel):
     """Per-campus (or global when campus is null) section switch (§5.12)."""
 

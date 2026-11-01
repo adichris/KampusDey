@@ -129,3 +129,34 @@ def test_settings_overview_page(admin_client, client_user):
     for text in (b"File storage", b"Email", b"Sign-in", b"Server"):
         assert text in page.content
     assert client_user.get("/admin/overview/").status_code in (302, 403)
+
+
+def test_secrets_never_reach_the_audit_log():
+    from auditlog.models import LogEntry
+
+    from apps.sitesettings.models import secret_field_names
+
+    assert {"smtp_password", "s3_secret_access_key", "google_client_secret"} <= set(
+        secret_field_names()
+    )
+    integ = IntegrationSettings.load()
+    integ.smtp_host = "smtp.example.test"
+    integ.smtp_password = "pw-should-not-be-logged"
+    integ.google_client_secret = "gs-should-not-be-logged"
+    integ.save()
+    assert "should-not-be-logged" not in str(list(LogEntry.objects.values()))
+
+
+def test_scrub_migration_removes_logged_secrets():
+    import importlib
+
+    scrub = importlib.import_module("apps.sitesettings.migrations.0003_scrub_secrets_from_auditlog")
+    cleaned, changed = scrub._clean(
+        {
+            "smtp_password": ["", "pw"],
+            "smtp_host": ["", "h"],
+            "nested": {"s3_secret_access_key": "x"},
+        }
+    )
+    assert changed and cleaned == {"smtp_host": ["", "h"], "nested": {}}
+    assert scrub._clean('{"google_client_secret": ["a", "b"]}') == ("{}", True)

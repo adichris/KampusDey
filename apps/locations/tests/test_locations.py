@@ -70,3 +70,39 @@ def test_follow_toggle(client_user, user, campus):
     assert campus in user.profile.followed_campuses.all()
     client_user.post(reverse("locations:follow", args=[campus.pk]))
     assert campus not in user.profile.followed_campuses.all()
+
+
+def _fake_maxmind(status=200):
+    import io
+    import tarfile
+    from unittest import mock
+
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w:gz") as tar:
+        data = b"fake-mmdb"
+        info = tarfile.TarInfo("GeoLite2-City_20261028/GeoLite2-City.mmdb")
+        info.size = len(data)
+        tar.addfile(info, io.BytesIO(data))
+    resp = mock.MagicMock(status_code=status)
+    resp.iter_content.return_value = [buf.getvalue()]
+    resp.__enter__.return_value = resp
+    return mock.patch("apps.locations.geoip.requests.get", return_value=resp)
+
+
+def test_update_geolite2_streams_and_swaps_in(settings, tmp_path, db):
+    from apps.locations.geoip import update_geolite2
+    from apps.sitesettings.models import IntegrationSettings
+
+    settings.GEOIP_PATH = str(tmp_path)
+    integ = IntegrationSettings.load()
+    integ.geolite2_account_id, integ.geolite2_license_key = "123", "key"
+    integ.save()
+    with _fake_maxmind() as get:
+        path = update_geolite2()
+    assert path.read_bytes() == b"fake-mmdb"
+    assert get.call_args.kwargs["auth"] == ("123", "key") and get.call_args.kwargs["stream"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["GeoLite2-City.mmdb"]
+    assert IntegrationSettings.load().geolite2_last_updated
+    with _fake_maxmind(status=401), pytest.raises(RuntimeError, match="401"):
+        update_geolite2()
+    assert path.read_bytes() == b"fake-mmdb"  # a failed download keeps the old database

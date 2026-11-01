@@ -25,14 +25,10 @@ class CoreConfig(AppConfig):
         auditlog.register(get("accounts", "Profile"))
         auditlog.register(get("accounts", "VerificationRequest"), exclude_fields=["document"])
         # Secrets are excluded so the audit log never stores them.
+        from apps.sitesettings.models import secret_field_names
+
         auditlog.register(
-            get("sitesettings", "IntegrationSettings"),
-            exclude_fields=[
-                "sms_api_key",
-                "sms_api_secret",
-                "turnstile_secret",
-                "geolite2_license_key",
-            ],
+            get("sitesettings", "IntegrationSettings"), exclude_fields=secret_field_names()
         )
         auditlog.register(get("boosts", "Boost"))
         auditlog.register(get("engagement", "Report"))

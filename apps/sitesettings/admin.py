@@ -8,18 +8,10 @@ from apps.core.admin_base import KDModelAdmin
 from apps.listings.sections import SECTIONS
 from apps.locations.models import Campus
 
-from .models import IntegrationSettings, SectionAvailability
+from .models import IntegrationSettings, SectionAvailability, secret_field_names
 from .services import send_test_email, send_test_sms, smtp_status, sync_google_app
 
-SECRET_FIELDS = [
-    "sms_api_key",
-    "sms_api_secret",
-    "turnstile_secret",
-    "geolite2_license_key",
-    "smtp_password",
-    "s3_secret_access_key",
-    "google_client_secret",
-]
+SECRET_FIELDS = secret_field_names()
 
 
 class IntegrationSettingsForm(forms.ModelForm):
